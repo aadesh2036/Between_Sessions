@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  between-sessions-backend
+  Serverless backend for Between Sessions with Cedar Auth and DynamoDB Single Table Design.
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 128
+    Runtime: nodejs20.x
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref MainTable
+        MAILTRAP_USER: "demo"
+        MAILTRAP_PASS: "demo"
+        JWT_SECRET: "between-sessions-secret-key-2026"
+
+Resources:
+  MainTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: BetweenSessionsTable
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+
+  AuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: auth.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        VerifyEmail:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/verify
+            Method: post
+
+  PracticeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: practice.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        LogPractice:
+          Type: Api
+          Properties:
+            Path: /api/v1/practice
+            Method: post
+            
+  PractitionerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: practitioner.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        GetPatientSummary:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioner/patients/{userId}/summary
+            Method: get
+
+Outputs:
+  ApiEndpoint:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/api/v1/"

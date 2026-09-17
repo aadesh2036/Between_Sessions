@@ -38,7 +38,11 @@ export default function LoginPage() {
         navigate(from, { replace: true });
       }, 500);
     } catch (err) {
-      setError(err.message || 'Error connecting to sanctuary. Please try again.');
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Unable to connect to the server. Please check your connection.');
+      } else {
+        setError(err.message || 'Error connecting to sanctuary. Please try again.');
+      }
       setIsLoading(false);
     }
   };
@@ -53,12 +57,16 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      await login(email); // using the mock auth context login
+      await login(email);
       setTimeout(() => {
         navigate('/onboarding', { replace: true });
       }, 500);
     } catch (err) {
-      setError(err.message || 'Error creating sanctuary.');
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Unable to connect to the server. Please check your connection.');
+      } else {
+        setError(err.message || 'Error creating sanctuary. Please try again.');
+      }
       setIsLoading(false);
     }
   };

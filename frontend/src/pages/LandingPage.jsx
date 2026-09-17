@@ -358,7 +358,7 @@ export default function LandingPage() {
         BS
       </div>
 <span className="font-semibold text-brand-ink">Between Sessions Health Inc.</span>
-<span>© 2025 All rights reserved.</span>
+<span>© 2026 All rights reserved.</span>
 </div>
 <div className="flex flex-wrap items-center gap-6 font-medium text-brand-ink/80">
 <Link className="hover:text-brand-teal transition-colors" to="/login">For Individuals</Link>
