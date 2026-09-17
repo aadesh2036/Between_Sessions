@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import StackedFeatureCards from '../components/StackedFeatureCards';
+import Logo from '../components/Logo';
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -10,34 +12,24 @@ export default function LandingPage() {
 <header className="fixed top-3 sm:top-5 inset-x-0 z-50 flex flex-col items-center px-3 sm:px-4">
   <nav className="flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/90 backdrop-blur-xl shadow-card-lift max-w-5xl w-full border border-white/60">
     {/* Logo Mark */}
-    <a className="flex items-center gap-2 sm:gap-2.5 group" href="#">
-      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-teal flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
-        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-          <path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9 2.03 0 3.9-.67 5.4-1.8L12 13V2z" strokeLinecap="round" strokeLinejoin="round" />
-          <circle cx="12" cy="12" r="3" />
-        </svg>
-      </div>
-      <span className="font-bold tracking-tight text-brand-ink text-sm sm:text-base">Between<span className="text-brand-coral">Sessions</span></span>
-    </a>
+    <Logo className="sm:gap-2.5" />
 
     {/* Desktop Navigation Links */}
     <div className="hidden lg:flex items-center gap-7 text-xs font-semibold text-brand-ink/80 tracking-normal">
       <a className="hover:text-brand-teal transition-colors" href="#architecture">Continuity Layers</a>
-      <a className="hover:text-brand-teal transition-colors" href="#trial">For Individuals</a>
-      <a className="hover:text-brand-teal transition-colors" href="#practitioners">For Practitioners</a>
       <a className="hover:text-brand-teal transition-colors" href="#safety-boundary">Clinical Safety</a>
     </div>
 
     {/* Action Buttons & Mobile Hamburger */}
     <div className="flex items-center gap-2 sm:gap-2.5">
-      <a className="text-xs font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-brand-ink hover:bg-brand-sand transition-all hidden md:inline-block" href="#trial">
-        For You
-      </a>
-      <a className="text-xs font-semibold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-brand-teal text-white hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center gap-1.5" href="#practitioners">
-        <span className="hidden sm:inline">Clinician Access</span>
+      <Link className="text-xs font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-brand-ink hover:bg-brand-sand transition-all hidden md:inline-block" to="/login">
+        Login
+      </Link>
+      <Link className="text-xs font-semibold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-brand-teal text-white hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center gap-1.5" to="/login">
+        <span className="hidden sm:inline">Get Started</span>
         <span className="sm:hidden">Access</span>
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-      </a>
+      </Link>
 
       {/* Mobile Menu Toggle Button */}
       <button 
@@ -67,20 +59,8 @@ export default function LandingPage() {
         >
           Continuity Layers
         </a>
-        <a 
-          onClick={() => setMobileMenuOpen(false)}
-          className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" 
-          href="#trial"
-        >
-          For Individuals
-        </a>
-        <a 
-          onClick={() => setMobileMenuOpen(false)}
-          className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" 
-          href="#practitioners"
-        >
-          For Practitioners
-        </a>
+        <Link className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" to="/login" onClick={() => setMobileMenuOpen(false)}>For Individuals</Link>
+<Link className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" to="/login" onClick={() => setMobileMenuOpen(false)}>For Practitioners</Link>
         <a 
           onClick={() => setMobileMenuOpen(false)}
           className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" 
@@ -90,20 +70,8 @@ export default function LandingPage() {
         </a>
       </div>
       <div className="pt-2 border-t border-brand-border flex items-center justify-between gap-3">
-        <a 
-          onClick={() => setMobileMenuOpen(false)}
-          className="text-xs font-semibold px-4 py-2 rounded-full text-brand-ink bg-brand-sand flex-1 text-center" 
-          href="#trial"
-        >
-          For You
-        </a>
-        <a 
-          onClick={() => setMobileMenuOpen(false)}
-          className="text-xs font-semibold px-4 py-2 rounded-full bg-brand-teal text-white flex-1 text-center" 
-          href="tel:14416"
-        >
-          Tele-MANAS: 14416
-        </a>
+        <Link className="text-xs font-semibold px-4 py-2 rounded-full text-brand-ink bg-brand-sand flex-1 text-center" to="/login" onClick={() => setMobileMenuOpen(false)}>For You</Link>
+        <a className="text-xs font-semibold px-4 py-2 rounded-full bg-brand-teal text-white flex-1 text-center" href="tel:14416" onClick={() => setMobileMenuOpen(false)}>Tele-MANAS: 14416</a>
       </div>
     </div>
   )}
@@ -128,15 +96,15 @@ export default function LandingPage() {
       </p>
 {/* Pathway selector buttons */}
 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 w-full sm:w-auto">
-<a className="px-6 py-3.5 rounded-full bg-brand-ink text-white font-semibold text-sm hover:bg-brand-teal transition-all shadow-md hover:shadow-lg flex items-center gap-2" href="#architecture">
-<span className="w-2 h-2 rounded-full bg-brand-amber"></span>
-<span>For Individuals Navigating Loops</span>
-</a>
-<a className="px-6 py-3.5 rounded-full bg-white text-brand-ink font-semibold text-sm hover:bg-[#F0F5F4] transition-all shadow-sm flex items-center gap-2" href="#practitioners">
-<span className="w-2 h-2 rounded-full bg-brand-teal"></span>
-<span>For Medical Practitioners</span>
-<svg className="w-4 h-4 text-brand-teal" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-</a>
+<Link className="px-6 py-3.5 rounded-full bg-brand-ink text-white font-semibold text-sm hover:bg-brand-teal transition-all shadow-md hover:shadow-lg flex items-center gap-2" to="/login">
+            <span>Enter Your Sanctuary</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </Link>
+          
+          <Link className="px-6 py-3.5 rounded-full bg-white text-brand-ink font-semibold text-sm hover:bg-[#F0F5F4] transition-all shadow-sm flex items-center gap-2" to="/login">
+            <span>Clinician Access</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+          </Link>
 </div>
 {/* Trust Badges with refined SVG iconography */}
 <div className="pt-6 flex flex-wrap items-center gap-6 text-xs text-brand-ink/70">
@@ -315,10 +283,10 @@ export default function LandingPage() {
         </p>
 </div>
 <div>
-<a className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-brand-ink text-white text-xs font-bold hover:bg-brand-teal transition-colors shadow-sm" href="#personal-dashboard">
-<span>Explore Personal Companion</span>
-<svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" /></svg>
-</a>
+<Link className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-brand-ink text-white text-xs font-bold hover:bg-brand-teal transition-colors shadow-sm" to="/login">
+                  <span>Enter Individual Sanctuary</span>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </Link>
 <p className="text-[10px] text-center text-brand-ink/50 font-mono mt-2">Available for iOS, Android &amp; Web</p>
 </div>
 </div>
@@ -334,9 +302,9 @@ export default function LandingPage() {
 <div className="space-y-2">
 <div className="flex flex-col sm:flex-row gap-2">
 <input className="px-4 py-3 rounded-full text-xs text-brand-ink bg-white w-full focus:outline-none focus:ring-2 focus:ring-brand-teal border-none" placeholder="practitioner@clinic.org" type="email" />
-<button className="px-5 py-3 rounded-full bg-brand-teal text-white text-xs font-bold hover:bg-brand-coral transition-colors shadow-md whitespace-nowrap">
+<Link to="/login" className="px-5 py-3 rounded-full bg-brand-teal text-white text-xs font-bold hover:bg-brand-coral transition-colors shadow-md whitespace-nowrap flex items-center justify-center">
             Request Sandbox
-          </button>
+          </Link>
 </div>
 <p className="text-[10px] text-gray-400 font-mono">Granular consent • Client-side privacy controls</p>
 </div>
@@ -393,8 +361,8 @@ export default function LandingPage() {
 <span>© 2025 All rights reserved.</span>
 </div>
 <div className="flex flex-wrap items-center gap-6 font-medium text-brand-ink/80">
-<a className="hover:text-brand-teal transition-colors" href="#trial">For Individuals</a>
-<a className="hover:text-brand-teal transition-colors" href="#practitioners">For Practitioners</a>
+<Link className="hover:text-brand-teal transition-colors" to="/login">For Individuals</Link>
+<Link className="hover:text-brand-teal transition-colors" to="/login">For Practitioners</Link>
 <a className="hover:text-brand-teal transition-colors" href="#architecture">Continuity Layers</a>
 <a className="hover:text-brand-teal transition-colors" href="#safety-boundary">Clinical Boundaries</a>
 <a className="hover:text-brand-teal transition-colors" href="tel:14416">Tele-MANAS (14416)</a>
