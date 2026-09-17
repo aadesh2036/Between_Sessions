@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background: #F7F8F7; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+</style>
+</head>
+<body>
+  <div style="width: 460px; height: 480px;">
+    <svg height="100%" viewBox="0 0 460 480" width="100%" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter height="140%" id="mascotGlow" width="140%" x="-20%" y="-20%">
+          <feDropShadow dx="0" dy="12" flood-color="#17323A" flood-opacity="0.10" stdDeviation="16"></feDropShadow>
+        </filter>
+        <filter height="140%" id="puzzleShadow" width="140%" x="-20%" y="-20%">
+          <feDropShadow dx="0" dy="6" flood-color="#17323A" flood-opacity="0.12" stdDeviation="8"></feDropShadow>
+        </filter>
+        <linearGradient id="bodyBase" x1="0%" x2="0%" y1="0%" y2="100%">
+          <stop offset="0%" stop-color="#9ADBE8"></stop>
+          <stop offset="100%" stop-color="#6DC4D6"></stop>
+        </linearGradient>
+        <linearGradient id="puzDark" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="#1E3A4B"></stop><stop offset="100%" stop-color="#142732"></stop></linearGradient>
+        <linearGradient id="puzSage" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="#8DBFA4"></stop><stop offset="100%" stop-color="#6EA98D"></stop></linearGradient>
+        <linearGradient id="puzYellow" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="#F6BC36"></stop><stop offset="100%" stop-color="#EAA620"></stop></linearGradient>
+        <linearGradient id="puzCoral" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="#F0715D"></stop><stop offset="100%" stop-color="#DE5A46"></stop></linearGradient>
+      </defs>
+
+      <!-- 4 Puzzles -->
+      <g filter="url(#puzzleShadow)">
+        <path d="M 140 50 L 195 50 A 15 15 0 0 1 214 64 A 15 15 0 0 1 202 82 L 202 100 A 10 10 0 0 1 192 110 L 140 110 A 12 12 0 0 1 128 98 L 128 62 A 12 12 0 0 1 140 50 Z" fill="url(#puzDark)"></path>
+        <path d="M 245 50 L 305 50 A 12 12 0 0 1 317 62 L 317 105 A 12 12 0 0 1 305 117 L 285 117 A 14 14 0 0 1 271 103 A 14 14 0 0 1 283 87 L 283 72 A 8 8 0 0 0 275 64 L 245 64 A 8 8 0 0 1 237 56 A 8 8 0 0 1 245 50 Z" fill="url(#puzSage)"></path>
+        <path d="M 145 135 L 172 135 A 14 14 0 0 1 186 149 A 14 14 0 0 1 174 165 L 200 165 A 8 8 0 0 1 208 173 L 208 208 A 14 14 0 0 1 194 222 L 145 222 A 12 12 0 0 1 133 210 L 133 147 A 12 12 0 0 1 145 135 Z" fill="url(#puzYellow)"></path>
+        <path d="M 250 130 L 305 130 A 12 12 0 0 1 317 142 L 317 202 A 12 12 0 0 1 305 214 L 255 214 A 12 12 0 0 1 243 202 L 243 184 A 14 14 0 0 1 229 170 A 14 14 0 0 1 243 156 L 243 142 A 12 12 0 0 1 250 130 Z" fill="url(#puzCoral)"></path>
+      </g>
+
+      <!-- Torso Base -->
+      <path d="M 100 460 C 100 380 150 330 225 330 C 300 330 350 380 350 460 C 350 480 100 480 100 460 Z" fill="url(#bodyBase)" filter="url(#mascotGlow)"></path>
+
+      <!-- Left Arm + Hand (Complete unified shape) -->
+      <g>
+        <path d="M 118 432 C 76 395 58 318 88 256 C 98 236 118 220 142 222 C 156 223 170 232 176 245 C 180 254 177 265 168 271 C 159 277 150 274 144 268 C 138 262 132 268 130 276 C 122 308 118 360 144 422 C 136 430 126 434 118 432 Z" fill="url(#bodyBase)" filter="url(#mascotGlow)"></path>
+      </g>
+
+      <!-- Right Arm + Hand (Complete unified shape) -->
+      <g>
+        <path d="M 332 432 C 374 395 392 318 362 256 C 352 236 332 220 308 222 C 294 223 280 232 274 245 C 270 254 273 265 282 271 C 291 277 300 274 306 268 C 312 262 318 268 320 276 C 328 308 332 360 306 422 C 314 430 324 434 332 432 Z" fill="url(#bodyBase)" filter="url(#mascotGlow)"></path>
+      </g>
+
+      <!-- Modern Face Shape (Soft organic squircle/pebble, wider at chubby cheeks) -->
+      <g>
+        <path d="M 225 234 C 278 234, 316 268, 319 312 C 322 352, 296 400, 252 402 C 238 403, 212 403, 198 402 C 154 400, 128 352, 131 312 C 134 268, 172 234, 225 234 Z" fill="url(#bodyBase)" filter="url(#mascotGlow)"></path>
+        
+        <!-- Cheek Blush -->
+        <ellipse cx="178" cy="330" fill="#E8856C" opacity="0.35" rx="11" ry="7"></ellipse>
+        <ellipse cx="272" cy="330" fill="#E8856C" opacity="0.35" rx="11" ry="7"></ellipse>
+        
+        <!-- Eyes & Smile -->
+        <path d="M 186 304 C 192 294 206 294 212 304" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="5"></path>
+        <path d="M 238 304 C 244 294 258 294 264 304" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="5"></path>
+        <path d="M 210 332 Q 225 350 240 332" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="5"></path>
+        <path d="M 213 334 Q 225 347 237 334 Z" fill="#E8856C" opacity="0.6"></path>
+        <path d="M 188 288 Q 199 282 210 288" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="3"></path>
+        <path d="M 240 288 Q 251 282 262 288" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="3"></path>
+      </g>
+    </svg>
+  </div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+/* Between Sessions Design System Tokens
+ * Theme: Organic Strategic Editorial
+ * Infused with Between Sessions Behavioral Health Architecture
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Brand Core Foundations */
+  --color-brand-ink: #17323A;
+  --color-brand-primary: #176B67;
+  --color-brand-primary-strong: #195E5A;
+  --color-brand-primary-soft: #DCEFED;
+  --color-brand-primary-softer: #EDF7F6;
+  --color-brand-teal-dark: #195E5A;
+
+  /* Warm Neutrals */
+  --color-brand-sand: #F7F4EC;
+  --color-brand-cream: #FAF8F3;
+
+  /* Surfaces & Canvas */
+  --color-surface-canvas: #F7F8F7;
+  --color-surface-base: #FFFFFF;
+  --color-surface-warm: #F0F5F4;
+  --color-surface-dim: #D1DCE2;
+  --color-surface-bright: #F4FAFF;
+  --color-surface-container: #E5EFF6;
+  --color-surface-container-low: #EAF5FC;
+  --color-surface-container-high: #DFEAF1;
+  --color-surface-container-highest: #D9E4EB;
+
+  /* Text & Inks */
+  --color-text-primary: #172126;
+  --color-text-secondary: #5B6570;
+  --color-text-muted: #7A868F;
+  --color-on-primary: #FFFFFF;
+  --color-on-surface: #131D22;
+
+  /* Borders & Focus */
+  --color-border-subtle: #D8DFDE;
+  --color-border-outline: #6F7978;
+  --color-border-focus: #176B67;
+
+  /* Accent Tonal Scale */
+  --color-accent-coral: #E8856C;
+  --color-accent-coral-soft: #FFF0EC;
+  --color-accent-lavender: #8B7EC8;
+  --color-accent-lavender-soft: #F0EDFB;
+  --color-accent-amber: #D4943A;
+  --color-accent-amber-soft: #FFF6E8;
+
+  /* Clinical Status Tones (Calm, Non-Punitive) */
+  --color-success: #2E7D62;
+  --color-success-soft: #E8F3EE;
+  --color-info: #1E4D63;
+  --color-info-soft: #E3F0F6;
+  --color-warning: #8A5A12;
+  --color-warning-soft: #FEF7EC;
+  --color-danger: #B54747;
+  --color-danger-soft: #FDF2F2;
+
+  /* Typography */
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', Menlo, monospace;
+
+  /* Radii */
+  --radius-sm: 0.125rem; /* 2px */
+  --radius-md: 0.25rem;  /* 4px */
+  --radius-lg: 0.5rem;   /* 8px */
+  --radius-xl: 0.75rem;  /* 12px */
+  --radius-2xl: 1rem;    /* 16px */
+  --radius-full: 9999px; /* Badges & Pills */
+
+  /* Shadows (Diffuse Ambient Micro-Elevation) */
+  --shadow-card-lift: 0 12px 36px -4px rgba(23, 50, 58, 0.07), 0 4px 16px -2px rgba(23, 50, 58, 0.04);
+  --shadow-pill: 0 10px 30px -5px rgba(23, 107, 103, 0.08);
+  --shadow-soft: 0 8px 30px rgba(23, 50, 58, 0.06);
+  --shadow-dashboard: 0 25px 60px -15px rgba(23, 50, 58, 0.12), 0 4px 20px rgba(23, 50, 58, 0.04);
+}
+
+/* Base Body Styles */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-surface-canvas);
+  color: var(--color-brand-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Editorial Serif Utility */
+.font-editorial {
+  font-family: var(--font-serif);
+}
+
+/* Hairline Low-Contrast Border */
+.border-subtle {
+  border: 1px solid var(--color-border-subtle);
+}
+
+/* Soft Elevation Lift */
+.card-elevated {
+  background: var(--color-surface-base);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-card-lift);
+}
+
+/* Bridge Motif Line (Session Continuity) */
+.bridge-node {
+  position: relative;
+}
+.bridge-node::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 2px;
+  height: 24px;
+  background-color: var(--color-border-subtle);
+  transform: translateX(-50%);
+}

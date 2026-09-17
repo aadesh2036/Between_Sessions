@@ -1,0 +1,1390 @@
+<!DOCTYPE html><html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Between Sessions — Tame the Loops. Master the Moments.</title>
+<!-- Tailwind CSS v3 CDN with forms & container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              ink: '#17323A',
+              teal: '#176B67',
+              tealDark: '#0f4845',
+              coral: '#E8856C',
+              coralSoft: '#FFF0EC',
+              lavender: '#8B7EC8',
+              lavenderSoft: '#F0EDFB',
+              amber: '#D4943A',
+              amberSoft: '#FFF6E8',
+              sand: '#F7F4EC',
+              cream: '#FAF8F3',
+              paper: '#FFFFFF',
+              canvas: '#F7F8F7',
+              border: '#E8E2D2',
+              softPink: '#F9D1DC',
+              softYellow: '#F7DC78',
+              softGreen: '#A6BE86',
+              softBlue: '#B0C9E8',
+              softerTeal: '#EDF7F6',
+              softSuccess: '#E8F3EE'
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            editorial: ['Newsreader', 'Georgia', 'serif'],
+            mono: ['JetBrains Mono', 'Menlo', 'monospace']
+          },
+          boxShadow: {
+            'dashboard': '0 25px 60px -15px rgba(23, 50, 58, 0.12), 0 4px 20px rgba(23, 50, 58, 0.04)',
+            'pill': '0 10px 30px -5px rgba(23, 107, 103, 0.08)',
+            'card-lift': '0 12px 36px -4px rgba(23, 50, 58, 0.07), 0 4px 16px -2px rgba(23, 50, 58, 0.04)',
+            'soft': '0 8px 30px rgba(23, 50, 58, 0.06)'
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Fonts: Plus Jakarta Sans, Newsreader & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..600&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F7F8F7;
+      color: #17323A;
+      overflow-x: hidden;
+    }
+    .font-editorial {
+      font-family: 'Newsreader', Georgia, serif;
+    }
+    /* Soft diffuse shadows and border-free cards */
+    .soft-card {
+      border: none !important;
+      box-shadow: 0 12px 36px -4px rgba(23, 50, 58, 0.07), 0 4px 16px -2px rgba(23, 50, 58, 0.04);
+    }
+    .pulse-indicator {
+      animation: pulse-subtle 2.5s infinite ease-in-out;
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.15); }
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .animate-marquee {
+      display: flex;
+      width: 200%;
+      animation: marquee 35s linear infinite;
+    }
+    .animate-marquee:hover {
+      animation-play-state: paused;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-brand-coral selection:text-white bg-[#F7F8F7]">
+<!-- BEGIN: FloatingNavbar -->
+<header class="fixed top-5 inset-x-0 z-50 flex justify-center px-4">
+<nav class="flex items-center justify-between px-6 py-3 rounded-full bg-white/85 backdrop-blur-xl shadow-card-lift max-w-5xl w-full">
+<!-- Logo Mark -->
+<a class="flex items-center gap-2.5 group" href="#">
+<div class="w-8 h-8 rounded-full bg-brand-teal flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+<path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9 2.03 0 3.9-.67 5.4-1.8L12 13V2z" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+</div>
+<span class="font-bold tracking-tight text-brand-ink text-base">Between<span class="text-brand-coral">Sessions</span></span>
+</a>
+<!-- Navigation Links -->
+<div class="hidden lg:flex items-center gap-7 text-xs font-semibold text-brand-ink/80 tracking-normal">
+<a class="hover:text-brand-teal transition-colors" href="#pathways-overview">Choose Pathway</a>
+<a class="hover:text-brand-teal transition-colors" href="#personal-dashboard">Personal App</a>
+<a class="hover:text-brand-teal transition-colors" href="#dashboard-showcase">Clinician Terminal</a>
+<a class="hover:text-brand-teal transition-colors" href="#clinical-scale">10-Point Scale</a>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2.5">
+<a class="text-xs font-semibold px-4 py-2 rounded-full text-brand-ink hover:bg-brand-sand transition-all hidden sm:inline-block" href="#for-individuals">
+        For You
+      </a>
+<a class="text-xs font-semibold px-4 py-2 rounded-full bg-brand-teal text-white hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center gap-1.5" href="#dashboard-showcase">
+<span>Clinician Access</span>
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</a>
+</div>
+</nav>
+</header>
+<!-- END: FloatingNavbar -->
+<!-- BEGIN: Open Canvas HeroSection (Free canvas, no box frame wrapper) -->
+<section class="pt-36 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<!-- Hero Copy on Pure Open Canvas -->
+<div class="lg:col-span-7 space-y-6">
+<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF0EC] text-brand-coral text-xs font-semibold uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-brand-coral animate-ping"></span>
+        Non-Stigmatizing ERP Companion
+      </div>
+<h1 class="font-editorial text-4xl sm:text-5xl lg:text-6xl font-normal tracking-tight text-brand-ink leading-[1.12]">
+        Tame the loops.<br>
+<span class="italic font-light text-brand-teal">Master the moments</span><br>
+        between sessions.
+      </h1>
+<p class="text-lg text-brand-ink/75 max-w-xl font-normal leading-relaxed">
+        The continuous bio-behavioral bridge for Exposure and Response Prevention (ERP). Track compulsions without shame, surf visceral urge spikes, and sync live somatic biomarkers directly to Dr. Olivia’s EHR dashboard.
+      </p>
+<!-- Pathway selector buttons -->
+<div class="flex flex-wrap items-center gap-3 pt-2">
+<a class="px-6 py-3.5 rounded-full bg-brand-ink text-white font-semibold text-sm hover:bg-brand-teal transition-all shadow-md hover:shadow-lg flex items-center gap-2" href="#personal-dashboard">
+<span class="w-2 h-2 rounded-full bg-brand-amber"></span>
+<span>For Individuals Navigating Loops</span>
+</a>
+<a class="px-6 py-3.5 rounded-full bg-white text-brand-ink font-semibold text-sm hover:bg-[#F0F5F4] transition-all shadow-sm flex items-center gap-2" href="#dashboard-showcase">
+<span class="w-2 h-2 rounded-full bg-brand-teal"></span>
+<span>For Medical Practitioners</span>
+<svg class="w-4 h-4 text-brand-teal" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</a>
+</div>
+<!-- Trust Badges with refined SVG iconography -->
+<div class="pt-6 flex flex-wrap items-center gap-6 text-xs text-brand-ink/70">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-lg bg-brand-softerTeal flex items-center justify-center text-brand-teal">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<span>HIPAA Tier-4 Compliant</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-lg bg-brand-amberSoft flex items-center justify-center text-brand-amber">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<span>Sub-second EHR Webhook</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-lg bg-brand-coralSoft flex items-center justify-center text-brand-coral">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg>
+</div>
+<span>Zero Shame Cognitive Anchoring</span>
+</div>
+</div>
+</div>
+<!-- Right: Open Canvas Mascot SVG (Strictly without outer container box or scribbles) -->
+<div class="lg:col-span-5 flex flex-col items-center justify-center">
+<!-- STITCH_SVG_START:ANIMATION_15 class="w-[340px] h-[360px] mx-auto" --><div class="w-[340px] h-[360px] mx-auto" id="animated-svg-ANIMATION_15" style="display:block;"><svg height="100%" viewBox="0 0 460 480" width="100%" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<!-- Calming, tactile drop shadows -->
+<filter height="140%" id="mascotGlow" width="140%" x="-20%" y="-20%">
+<feDropShadow dx="0" dy="12" flood-color="#17323A" flood-opacity="0.12" stdDeviation="16"></feDropShadow>
+</filter>
+<filter height="140%" id="puzzleShadow" width="140%" x="-20%" y="-20%">
+<feDropShadow dx="0" dy="6" flood-color="#17323A" flood-opacity="0.15" stdDeviation="8"></feDropShadow>
+</filter>
+<!-- Mascot Gradient Colors -->
+<linearGradient id="bodyBase" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#9ADBE8"></stop>
+<stop offset="100%" stop-color="#6DC4D6"></stop>
+</linearGradient>
+<!-- 4 Mind Puzzle Colors (matching the user's reference image exactly: Dark Slate, Sage, Warm Yellow, Somatic Coral) -->
+<linearGradient id="puzDark" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#1E3A4B"></stop>
+<stop offset="100%" stop-color="#142732"></stop>
+</linearGradient>
+<linearGradient id="puzSage" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#8DBFA4"></stop>
+<stop offset="100%" stop-color="#6EA98D"></stop>
+</linearGradient>
+<linearGradient id="puzYellow" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#F6BC36"></stop>
+<stop offset="100%" stop-color="#EAA620"></stop>
+</linearGradient>
+<linearGradient id="puzCoral" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#F0715D"></stop>
+<stop offset="100%" stop-color="#DE5A46"></stop>
+</linearGradient>
+</defs>
+<style>
+    /* Full emotional cycle: Struggling with intrusive loops -&gt; Pausing / Breathing -&gt; Relieved &amp; Happy Smile */
+    /* Total cycle: 10s loop */
+    
+    /* Puzzle Pieces: Jitter and scatter during struggle (0s-4s), align smoothly during calm &amp; happy (5s-9s) */
+    @keyframes puzzleScatter1 {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+      15% { transform: translate(-8px, -12px) rotate(-8deg); }
+      30% { transform: translate(-14px, -6px) rotate(5deg); }
+      45% { transform: translate(-6px, -2px) rotate(-3deg); }
+      60%, 90% { transform: translate(0px, 0px) rotate(0deg); }
+    }
+    @keyframes puzzleScatter2 {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+      18% { transform: translate(10px, -14px) rotate(10deg); }
+      32% { transform: translate(16px, -4px) rotate(-6deg); }
+      48% { transform: translate(4px, -2px) rotate(2deg); }
+      62%, 90% { transform: translate(0px, 0px) rotate(0deg); }
+    }
+    @keyframes puzzleScatter3 {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+      20% { transform: translate(-10px, 8px) rotate(-6deg); }
+      35% { transform: translate(-6px, 12px) rotate(8deg); }
+      50% { transform: translate(-2px, 2px) rotate(-2deg); }
+      65%, 90% { transform: translate(0px, 0px) rotate(0deg); }
+    }
+    @keyframes puzzleScatter4 {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+      16% { transform: translate(12px, 10px) rotate(8deg); }
+      34% { transform: translate(8px, 14px) rotate(-7deg); }
+      52% { transform: translate(2px, 3px) rotate(3deg); }
+      65%, 90% { transform: translate(0px, 0px) rotate(0deg); }
+    }
+
+    /* Head Breathing and Wobble during struggle vs upright joy */
+    @keyframes headState {
+      0% { transform: translateY(0px) rotate(0deg); }
+      15% { transform: translateY(3px) rotate(-2.5deg); } /* tense struggle */
+      25% { transform: translateY(5px) rotate(2deg); }
+      35% { transform: translateY(2px) rotate(-1.5deg); }
+      50% { transform: translateY(0px) rotate(0deg); } /* deep somatic exhale */
+      65% { transform: translateY(-8px) rotate(0deg); } /* buoyant relief &amp; happiness */
+      85% { transform: translateY(-8px) rotate(0deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    /* Arms and Pointing Hands: Tense inward clasping during struggle -&gt; gently pointing in relaxed flow */
+    @keyframes leftArmState {
+      0% { transform: rotate(0deg); }
+      15%, 35% { transform: rotate(5deg) translate(4px, 6px); } /* struggle, closer to head */
+      50% { transform: rotate(-2deg) translate(-2px, 0px); }
+      65%, 85% { transform: rotate(-5deg) translate(-6px, -10px); } /* open happy celebration */
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes rightArmState {
+      0% { transform: rotate(0deg); }
+      15%, 35% { transform: rotate(-5deg) translate(-4px, 6px); }
+      50% { transform: rotate(2deg) translate(2px, 0px); }
+      65%, 85% { transform: rotate(5deg) translate(6px, -10px); }
+      100% { transform: rotate(0deg); }
+    }
+
+    /* Eyes: Struggling (tight squeezed / worry brows) -&gt; Soft closed mindfulness -&gt; Warm smiling happy eyes */
+    @keyframes struggleFaceOpacity {
+      0%, 45% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    @keyframes happyFaceOpacity {
+      0%, 45% { opacity: 0; }
+      52%, 95% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Somatic Sweat droplet during struggle */
+    @keyframes sweatDrop {
+      0%, 42% { opacity: 0; transform: translateY(-5px) scale(0.6); }
+      10% { opacity: 0.9; }
+      30% { opacity: 0.9; transform: translateY(14px) scale(1); }
+      40% { opacity: 0; transform: translateY(22px) scale(0.8); }
+      45%, 100% { opacity: 0; }
+    }
+
+    /* Happy Cheek Blush */
+    @keyframes blushWarmth {
+      0%, 45% { fill: #E8856C; opacity: 0.2; transform: scale(0.8); }
+      60%, 90% { fill: #F0715D; opacity: 0.55; transform: scale(1.2); }
+      100% { opacity: 0.2; }
+    }
+
+    /* Sparkles appearing during happy breakthrough */
+    @keyframes breakthroughSparkle {
+      0%, 55% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+      65%, 88% { opacity: 1; transform: scale(1) rotate(45deg); }
+      100% { opacity: 0; transform: scale(0.3) rotate(90deg); }
+    }
+
+    .anim-puzzle-1 { animation: puzzleScatter1 10s ease-in-out infinite; transform-origin: 175px 85px; }
+    .anim-puzzle-2 { animation: puzzleScatter2 10s ease-in-out infinite; transform-origin: 275px 85px; }
+    .anim-puzzle-3 { animation: puzzleScatter3 10s ease-in-out infinite; transform-origin: 175px 175px; }
+    .anim-puzzle-4 { animation: puzzleScatter4 10s ease-in-out infinite; transform-origin: 275px 175px; }
+    .anim-head-group { animation: headState 10s ease-in-out infinite; transform-origin: 225px 330px; }
+    .anim-arm-left { animation: leftArmState 10s ease-in-out infinite; transform-origin: 120px 400px; }
+    .anim-arm-right { animation: rightArmState 10s ease-in-out infinite; transform-origin: 330px 400px; }
+    .face-struggle { animation: struggleFaceOpacity 10s ease-in-out infinite; }
+    .face-happy { animation: happyFaceOpacity 10s ease-in-out infinite; }
+    .sweat-tear { animation: sweatDrop 10s ease-in-out infinite; }
+    .sparkle-joy { animation: breakthroughSparkle 10s ease-in-out infinite; }
+  </style>
+<!-- 4 THOUGHT PUZZLE PIECES FLOATING ABOVE (From Reference) -->
+<!-- Piece 1: Dark Slate (Top-Left) -->
+<g class="anim-puzzle-1" filter="url(#puzzleShadow)">
+<path d="M 140 50 L 195 50 A 15 15 0 0 1 214 64 A 15 15 0 0 1 202 82 L 202 100 A 10 10 0 0 1 192 110 L 140 110 A 12 12 0 0 1 128 98 L 128 62 A 12 12 0 0 1 140 50 Z" fill="url(#puzDark)"></path>
+</g>
+<!-- Piece 2: Sage / Mint (Top-Right) -->
+<g class="anim-puzzle-2" filter="url(#puzzleShadow)">
+<path d="M 245 50 L 305 50 A 12 12 0 0 1 317 62 L 317 105 A 12 12 0 0 1 305 117 L 285 117 A 14 14 0 0 1 271 103 A 14 14 0 0 1 283 87 L 283 72 A 8 8 0 0 0 275 64 L 245 64 A 8 8 0 0 1 237 56 A 8 8 0 0 1 245 50 Z" fill="url(#puzSage)"></path>
+</g>
+<!-- Piece 3: Warm Mustard / Amber (Bottom-Left) -->
+<g class="anim-puzzle-3" filter="url(#puzzleShadow)">
+<path d="M 145 135 L 172 135 A 14 14 0 0 1 186 149 A 14 14 0 0 1 174 165 L 200 165 A 8 8 0 0 1 208 173 L 208 208 A 14 14 0 0 1 194 222 L 145 222 A 12 12 0 0 1 133 210 L 133 147 A 12 12 0 0 1 145 135 Z" fill="url(#puzYellow)"></path>
+</g>
+<!-- Piece 4: Somatic Terracotta / Coral (Bottom-Right) -->
+<g class="anim-puzzle-4" filter="url(#puzzleShadow)">
+<path d="M 250 130 L 305 130 A 12 12 0 0 1 317 142 L 317 202 A 12 12 0 0 1 305 214 L 255 214 A 12 12 0 0 1 243 202 L 243 184 A 14 14 0 0 1 229 170 A 14 14 0 0 1 243 156 L 243 142 A 12 12 0 0 1 250 130 Z" fill="url(#puzCoral)"></path>
+</g>
+<!-- CELEBRATION SPARKLES (Radiates during happy breakthrough state) -->
+<g class="sparkle-joy" style="transform-origin: 90px 180px;">
+<path d="M 90 165 Q 90 180 105 180 Q 90 180 90 195 Q 90 180 75 180 Q 90 180 90 165 Z" fill="#D4943A"></path>
+</g>
+<g class="sparkle-joy" style="transform-origin: 360px 170px;">
+<path d="M 360 155 Q 360 170 375 170 Q 360 170 360 185 Q 360 170 345 170 Q 360 170 360 155 Z" fill="#E8856C"></path>
+</g>
+<!-- MASCOT HEAD & BODY (Strictly circular face as requested) -->
+<!-- Torso Base / Grounded Body -->
+<path d="M 100 460 C 100 380 150 330 225 330 C 300 330 350 380 350 460 C 350 480 100 480 100 460 Z" fill="url(#bodyBase)" filter="url(#mascotGlow)"></path>
+<!-- Left Arm pointing up to thoughts -->
+<g class="anim-arm-left">
+<path d="M 115 425 C 75 390 60 310 92 255 C 106 230 140 228 162 244 C 168 248 167 259 158 264 C 140 273 118 285 112 312 C 102 346 122 392 146 418 Z" fill="url(#bodyBase)"></path>
+<!-- Left Hand Thumb & Index gestures -->
+<path d="M 148 238 C 166 236 182 245 186 250" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="4.5"></path>
+<path d="M 142 249 C 156 251 165 260 167 267" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="4"></path>
+</g>
+<!-- Right Arm pointing up to thoughts -->
+<g class="anim-arm-right">
+<path d="M 335 425 C 375 390 390 310 358 255 C 344 230 310 228 288 244 C 282 248 283 259 292 264 C 310 273 332 285 338 312 C 348 346 328 392 304 418 Z" fill="url(#bodyBase)"></path>
+<!-- Right Hand Thumb & Index gestures -->
+<path d="M 302 238 C 284 236 268 245 264 250" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="4.5"></path>
+<path d="M 308 249 C 294 251 285 260 283 267" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="4"></path>
+</g>
+<!-- CIRCULAR HEAD & FACIAL EXPRESSIONS -->
+<g class="anim-head-group">
+<!-- Perfectly Circular Face -->
+<circle cx="225" cy="315" fill="url(#bodyBase)" filter="url(#mascotGlow)" r="82"></circle>
+<!-- Cheek Blush (reacts to emotion) -->
+<ellipse cx="180" cy="326" fill="#E8856C" opacity="0.35" rx="10" ry="6"></ellipse>
+<ellipse cx="270" cy="326" fill="#E8856C" opacity="0.35" rx="10" ry="6"></ellipse>
+<!-- ================= STATE A: STRUGGLING WITH INTRUSIVE THOUGHTS ================= -->
+<g class="face-struggle">
+<!-- Squeezed, Overwhelmed Eyes / Focused inward effort -->
+<!-- Left tight brow/eye -->
+<path d="M 186 298 Q 198 308 210 299" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="4.5"></path>
+<line stroke="#17323A" stroke-linecap="round" stroke-width="3" x1="184" x2="204" y1="290" y2="295"></line>
+<!-- Right tight brow/eye -->
+<path d="M 240 299 Q 252 308 264 298" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="4.5"></path>
+<line stroke="#17323A" stroke-linecap="round" stroke-width="3" x1="266" x2="246" y1="290" y2="295"></line>
+<!-- Struggling / Tight, slightly wavy mouth holding tension -->
+<path d="M 213 336 Q 220 332 225 336 Q 230 340 237 335" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="4.5"></path>
+<!-- Somatic Sweat Drop on brow -->
+<path class="sweat-tear" d="M 268 270 C 268 264 274 256 274 256 C 274 256 280 264 280 270 C 280 274 277 277 274 277 C 271 277 268 274 268 270 Z" fill="#6EA98D"></path>
+</g>
+<!-- ================= STATE B: HAPPY, GROUNDED & RELIEVED IN BETWEEN ================= -->
+<g class="face-happy">
+<!-- Cheerful Inverted Arc Eyes (Smiling happily) -->
+<path d="M 186 304 C 192 294 206 294 212 304" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="5"></path>
+<path d="M 238 304 C 244 294 258 294 264 304" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="5"></path>
+<!-- Wide, Happy, Reassuring Warm Smile -->
+<path d="M 210 330 Q 225 348 240 330" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="5"></path>
+<!-- Soft open mouth depth -->
+<path d="M 213 332 Q 225 345 237 332 Z" fill="#E8856C" opacity="0.6"></path>
+<!-- Joyful eyebrow lifts -->
+<path d="M 188 288 Q 199 282 210 288" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="3"></path>
+<path d="M 240 288 Q 251 282 262 288" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="3"></path>
+</g>
+</g>
+</svg></div><!-- STITCH_SVG_END:ANIMATION_15 -->
+<p class="text-xs text-brand-ink/65 text-center mt-3 font-medium">
+        Meet <span class="font-bold text-brand-teal">Pip</span>: Your steady companion for grounding and urge-surfing.
+      </p>
+</div>
+</div>
+</section>
+<!-- END: HeroSection -->
+<!-- BEGIN: MarqueePartners -->
+<section class="py-6 bg-white/60 overflow-hidden">
+<div class="max-w-7xl mx-auto px-4 mb-2">
+<p class="text-[11px] font-mono tracking-widest text-center text-brand-ink/50 uppercase">Aligned with protocols from leading obsessive-compulsive research consortia</p>
+</div>
+<div class="relative overflow-hidden w-full flex">
+<div class="animate-marquee whitespace-nowrap flex items-center gap-16 text-brand-ink/75 font-semibold text-sm">
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-teal"></span>NOCD Clinical Network</span>
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-coral"></span>McLean OCD Institute</span>
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-lavender"></span>Stanford Neuro-Psychiatry</span>
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-amber"></span>Mayo Clinic Behavioral Health</span>
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-teal"></span>NHS Foundation Trust</span>
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-coral"></span>IOCDF Scientific Advisory</span>
+<!-- Duplicate for infinite loop -->
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-teal"></span>NOCD Clinical Network</span>
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-coral"></span>McLean OCD Institute</span>
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-lavender"></span>Stanford Neuro-Psychiatry</span>
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-amber"></span>Mayo Clinic Behavioral Health</span>
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-teal"></span>NHS Foundation Trust</span>
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-coral"></span>IOCDF Scientific Advisory</span>
+</div>
+</div>
+</section>
+<!-- END: MarqueePartners -->
+<!-- BEGIN: Dual Audience Pathways Overview (Cards with solid color fills and diffuse shadows, no borders) -->
+<section class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto" id="pathways-overview">
+<div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-teal/10 text-brand-teal text-xs font-mono font-bold uppercase tracking-wider">
+      Two Dedicated Environments
+    </div>
+<h2 class="font-editorial text-3xl sm:text-5xl text-brand-ink tracking-tight font-normal">
+      Are you a Medical Practitioner or a Person navigating OCD?
+    </h2>
+<p class="text-brand-ink/75 text-base max-w-2xl mx-auto">
+      Between Sessions is crafted with dedicated environments: a gentle, shame-free sanctuary for people doing the brave daily work, and a sub-second EHR telemetry cockpit for certified ERP practitioners.
+    </p>
+</div>
+<!-- Dual Pathway Solid Cards -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+<!-- PATHWAY A: For Individuals Navigating Loops -->
+<article class="bg-[#FFF9EE] rounded-[34px] p-8 sm:p-10 soft-card flex flex-col justify-between" id="for-individuals">
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-amberSoft text-brand-ink text-xs font-mono font-bold">
+            FOR INDIVIDUALS
+          </span>
+<span class="text-xs font-mono text-brand-ink/60">Zero Shame • Graded Freedom</span>
+</div>
+<div class="space-y-3">
+<h3 class="font-editorial text-3xl sm:text-4xl text-brand-ink">
+            Navigating the Loops with Dignity &amp; Ease
+          </h3>
+<p class="text-sm text-brand-ink/80 leading-relaxed">
+            Living with intrusive thoughts isn't a lack of willpower; it’s an overprotective alarm loop. We provide gentle micro-exposures you actually want to do, somatic urge resets, and tactile anchors so you can reclaim the other 167 hours of the week without intimidation.
+          </p>
+</div>
+<!-- Solid Tool Cards Inside -->
+<div class="space-y-3 pt-2">
+<!-- Tool 1: Urge Surfing Timer -->
+<div class="bg-white rounded-2xl p-4 soft-card flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-brand-coralSoft text-brand-coral flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M2 12c.6-2.5 3-4 6-4 4 0 6 4 8 4s3.5-1.5 4-4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2 18c.6-2.5 3-4 6-4 4 0 6 4 8 4s3.5-1.5 4-4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-ink">90-Second Urge Surfer</h4>
+<p class="text-[11px] text-brand-ink/70">Ride the crest without performing the ritual; guided tactile haptics.</p>
+</div>
+</div>
+<span class="text-xs font-mono font-bold bg-[#F0F5F4] px-2.5 py-1 rounded-full text-brand-ink">01:30</span>
+</div>
+<!-- Tool 2: Digital Worry Stone & Vagus Reset -->
+<div class="bg-white rounded-2xl p-4 soft-card flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-brand-softerTeal text-brand-teal flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9" stroke-linecap="round"></path><circle cx="12" cy="12" r="4"></circle></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-ink">Digital Worry Stone &amp; Vagus Reset</h4>
+<p class="text-[11px] text-brand-ink/70">Smooth haptic resonance calibrated to lower acute autonomic arousal.</p>
+</div>
+</div>
+<span class="text-[10px] font-mono font-semibold text-brand-teal bg-brand-softerTeal px-2 py-0.5 rounded-full">Parasympathetic</span>
+</div>
+<!-- Tool 3: Habit Extinction Milestones -->
+<div class="bg-white rounded-2xl p-4 soft-card flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-brand-amberSoft text-brand-amber flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 2v8M4.93 10.93a10 10 0 0 0 14.14 0" stroke-linecap="round"></path><path d="M12 18a4 4 0 0 0 4-4H8a4 4 0 0 0 4 4z"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-ink">Gentle Habit Extinction Milestones</h4>
+<p class="text-[11px] text-brand-ink/70">Celebrate delayed compulsions: +15m, +30m, and full drop milestones.</p>
+</div>
+</div>
+<span class="text-xs font-bold text-brand-ink">14 Days Clean</span>
+</div>
+</div>
+</div>
+<div class="pt-8">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-brand-ink text-white text-sm font-bold hover:bg-brand-teal transition-all shadow-md" href="#personal-dashboard">
+<span>Explore Personal Companion</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</a>
+<span class="block sm:inline-block sm:ml-4 mt-2 sm:mt-0 text-[11px] text-brand-ink/60 font-mono">100% private • No clinical jargon</span>
+</div>
+</article>
+<!-- PATHWAY B: For Medical Practitioners & ERP Specialists -->
+<article class="bg-[#EEF6F8] rounded-[34px] p-8 sm:p-10 soft-card flex flex-col justify-between" id="for-practitioners">
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-teal/20 text-brand-tealDark text-xs font-mono font-bold">
+            FOR MEDICAL PRACTITIONERS &amp; CLINICIANS
+          </span>
+<span class="text-xs font-mono text-brand-ink/60">Sub-second EHR Webhook</span>
+</div>
+<div class="space-y-3">
+<h3 class="font-editorial text-3xl sm:text-4xl text-brand-ink">
+            Continuous Telemetry for ERP Specialists &amp; Psychiatrists
+          </h3>
+<p class="text-sm text-brand-ink/80 leading-relaxed">
+            Therapy happens in a 50-minute room; compulsion rituals happen in the remaining 167 hours. Eliminate retrospective recall bias with continuous bio-behavioral telemetry, objective ritual friction durations, and automated Y-BOCS &amp; SUDS tracking.
+          </p>
+</div>
+<!-- Clinician Feature Previews -->
+<div class="space-y-3 pt-2">
+<!-- Intelly Cockpit -->
+<div class="bg-white rounded-2xl p-4 soft-card flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-brand-ink text-white flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect height="18" rx="2" width="18" x="3" y="3"></rect><path d="M3 9h18M9 21V9"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-ink">Intelly™ Clinician Cockpit</h4>
+<p class="text-[11px] text-brand-ink/70">Dr. Olivia’s live desk: surge timeline, 08:12 live sync nodes, &amp; case notes.</p>
+</div>
+</div>
+<span class="text-xs font-mono font-semibold text-brand-teal bg-brand-softerTeal px-2.5 py-1 rounded-full">Live Sync</span>
+</div>
+<!-- SUDS & Y-BOCS -->
+<div class="bg-white rounded-2xl p-4 soft-card flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-brand-lavenderSoft text-brand-lavender flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="M18 17V9M13 17V5M8 17v-3"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-ink">10-Point Calibrated SUDS &amp; Y-BOCS</h4>
+<p class="text-[11px] text-brand-ink/70">Standardized subjective distress metrics without clinical shaming or alarm fatigue.</p>
+</div>
+</div>
+<span class="text-xs font-mono font-bold text-brand-ink">ICD-11 / DSM-5</span>
+</div>
+<!-- Care routing -->
+<div class="bg-white rounded-2xl p-4 soft-card flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-brand-softSuccess text-brand-teal flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-ink">Multi-Disciplinary Care Routing</h4>
+<p class="text-[11px] text-brand-ink/70">Coordinate psychiatrists, psychologists, and ERP coaches in unified schedules.</p>
+</div>
+</div>
+<span class="text-[10px] font-mono text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">HIPAA Tier-4</span>
+</div>
+</div>
+</div>
+<div class="pt-8">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-brand-teal text-white text-sm font-bold hover:bg-brand-tealDark transition-all shadow-md" href="#dashboard-showcase">
+<span>Request Clinician Sandbox (Intelly™)</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</a>
+<span class="block sm:inline-block sm:ml-4 mt-2 sm:mt-0 text-[11px] text-brand-ink/60 font-mono">BAA signed in 1-click</span>
+</div>
+</article>
+</div>
+</section>
+<!-- END: Dual Audience Pathways -->
+<!-- BEGIN: DASHBOARD 1 — The Personal Companion Dashboard (For You / A Person Navigating Loops) -->
+<section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto" id="personal-dashboard">
+<div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-amberSoft text-brand-amber text-xs font-mono font-bold uppercase tracking-wider">
+      PERSONAL SANCTUARY
+    </div>
+<h2 class="font-editorial text-3xl sm:text-5xl text-brand-ink font-normal">
+      The Personal Companion App
+    </h2>
+<p class="text-brand-ink/75 text-sm sm:text-base max-w-2xl mx-auto">
+      Designed exclusively for individuals navigating OCD and repetitive thought loops: frictionless check-ins, haptic urge surfing, and calibrated distress tracking without judgment.
+    </p>
+</div>
+<!-- Outer Solid Card with Diffuse Shadow (No Borders) -->
+<div class="w-full bg-[#FAF8F3] rounded-[38px] p-6 sm:p-10 soft-card">
+<!-- Header of Personal Dashboard -->
+<div class="flex flex-wrap items-center justify-between gap-4 pb-6">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-2xl bg-brand-teal flex items-center justify-center text-white">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9 2.03 0 3.9-.67 5.4-1.8L12 13V2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</div>
+<div>
+<h3 class="text-xl font-bold text-brand-ink">Welcome back, Alex</h3>
+<p class="text-xs text-brand-ink/60">Today's intention: Observing thoughts as clouds, not commands.</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-3.5 py-1.5 rounded-full bg-brand-amberSoft text-brand-amber text-xs font-bold font-mono flex items-center gap-1.5">
+<svg class="w-4 h-4 text-brand-amber" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 2v8M4.93 10.93a10 10 0 0 0 14.14 0" stroke-linecap="round"></path></svg>
+          14 Days Ritual-Free Streak
+        </span>
+<span class="px-3 py-1.5 rounded-full bg-white text-brand-ink/70 text-xs font-medium soft-card">
+          Encrypted &amp; Private
+        </span>
+</div>
+</div>
+<!-- 3-Column Personal Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
+<!-- Col 1: Daily Urge Surfer & Tactile Stone (5 cols) -->
+<div class="lg:col-span-5 space-y-6">
+<!-- Urge Surfing Active Card (Coral Solid) -->
+<div class="bg-[#FFF0EC] rounded-3xl p-6 soft-card space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-mono font-bold text-brand-coral uppercase tracking-wider">Active Urge Surfer</span>
+<span class="w-2.5 h-2.5 rounded-full bg-brand-coral pulse-indicator"></span>
+</div>
+<div>
+<h4 class="text-lg font-bold text-brand-ink">Riding the 90-Second Wave</h4>
+<p class="text-xs text-brand-ink/70 mt-1">
+              Intrusive spike triggered: "Did I lock the back door three times?"
+            </p>
+</div>
+<!-- Dynamic Wave SVG Graphic -->
+<div class="bg-white/80 rounded-2xl p-4 soft-card">
+<div class="flex justify-between items-baseline mb-2">
+<span class="text-xs font-mono font-bold text-brand-ink">Crest at 01:14</span>
+<span class="text-xs font-mono font-bold text-brand-coral">00:46 remaining</span>
+</div>
+<div class="w-full h-16">
+<svg class="w-full h-full" fill="none" viewBox="0 0 240 50">
+<path d="M 0 38 Q 30 38 60 28 T 120 10 T 170 32 T 240 38" fill="none" stroke="#E8856C" stroke-linecap="round" stroke-width="2.5"></path>
+<circle cx="120" cy="10" fill="#E8856C" r="4"></circle>
+</svg>
+</div>
+<div class="flex justify-between text-[10px] font-mono text-brand-ink/50 pt-1">
+<span>00:00</span>
+<span>PEAK SPIKE</span>
+<span>01:30 SURF</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-3 pt-1">
+<button class="flex-1 py-3 rounded-full bg-brand-coral text-white text-xs font-bold hover:opacity-90 transition-all shadow-sm">
+              I am Breathing Through It
+            </button>
+<button class="px-4 py-3 rounded-full bg-white text-brand-ink text-xs font-bold soft-card hover:bg-brand-sand transition-all">
+              Delay 15m
+            </button>
+</div>
+</div>
+<!-- Tactile Grounding Stone (Lavender Solid) -->
+<div class="bg-[#F0EDFB] rounded-3xl p-6 soft-card space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-xs font-mono font-bold text-brand-lavender uppercase tracking-wider">Tactile Grounding</span>
+<span class="text-[11px] font-mono bg-white px-2 py-0.5 rounded-full text-brand-lavender font-bold">Vagus Reset</span>
+</div>
+<h4 class="text-base font-bold text-brand-ink">Digital Worry Stone &amp; Pacing</h4>
+<p class="text-xs text-brand-ink/70">
+            Hold your thumb against the screen. Gentle 4-7-8 haptic resonance calms the autonomic sympathetic spike.
+          </p>
+<div class="pt-2 flex items-center justify-center">
+<div class="w-20 h-20 rounded-full bg-white flex items-center justify-center soft-card cursor-pointer hover:scale-105 transition-transform text-brand-lavender">
+<svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</div>
+</div>
+<p class="text-[11px] text-center font-mono text-brand-ink/60">Press and hold to synchronize heart rate variability</p>
+</div>
+</div>
+<!-- Col 2: Calibrated Mood / SUDS Log & Micro-Exposures (7 cols) -->
+<div class="lg:col-span-7 space-y-6">
+<!-- 10-Point Non-Stigmatizing Mood & Distress Continuum (Strictly Lucide SVG icons, NO emojis) -->
+<div class="bg-white rounded-3xl p-6 soft-card space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-base font-bold text-brand-ink">Non-Stigmatizing Daily Check-In</h4>
+<p class="text-xs text-brand-ink/60">Subjective Units of Distress Scale (SUDS) — 10 calibrated states</p>
+</div>
+<span class="text-[10px] font-mono bg-brand-sand px-2.5 py-1 rounded-full text-brand-ink font-semibold">Today 10:45 AM</span>
+</div>
+<!-- Calibrated 10 Points Scale with clean SVG icons from document specification -->
+<div class="grid grid-cols-5 sm:grid-cols-10 gap-2 pt-2 text-center">
+<!-- 1 -->
+<div class="p-2 rounded-2xl bg-[#F0F5F4] flex flex-col items-center gap-1 cursor-pointer hover:bg-brand-softerTeal transition-colors">
+<svg class="w-5 h-5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+<span class="text-[11px] font-bold text-brand-ink font-mono">1</span>
+</div>
+<!-- 2 -->
+<div class="p-2 rounded-2xl bg-[#F0F5F4] flex flex-col items-center gap-1 cursor-pointer hover:bg-brand-softerTeal transition-colors">
+<svg class="w-5 h-5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+<span class="text-[11px] font-bold text-brand-ink font-mono">2</span>
+</div>
+<!-- 3 -->
+<div class="p-2 rounded-2xl bg-[#F0F5F4] flex flex-col items-center gap-1 cursor-pointer hover:bg-brand-softerTeal transition-colors">
+<svg class="w-5 h-5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="8" x2="16" y1="15" y2="15"></line><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+<span class="text-[11px] font-bold text-brand-ink font-mono">3</span>
+</div>
+<!-- 4 -->
+<div class="p-2 rounded-2xl bg-[#FFF6E8] flex flex-col items-center gap-1 cursor-pointer hover:bg-amber-100 transition-colors">
+<svg class="w-5 h-5 text-brand-amber" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="8" x2="16" y1="15" y2="15"></line><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+<span class="text-[11px] font-bold text-brand-ink font-mono">4</span>
+</div>
+<!-- 5 -->
+<div class="p-2 rounded-2xl bg-[#FFF6E8] flex flex-col items-center gap-1 cursor-pointer hover:bg-amber-100 transition-colors">
+<svg class="w-5 h-5 text-brand-amber" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="8" x2="16" y1="15" y2="15"></line><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+<span class="text-[11px] font-bold text-brand-ink font-mono">5</span>
+</div>
+<!-- 6 (Selected / Current) -->
+<div class="p-2 rounded-2xl bg-brand-coralSoft flex flex-col items-center gap-1 ring-2 ring-brand-coral">
+<svg class="w-5 h-5 text-brand-coral" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+<span class="text-[11px] font-bold text-brand-coral font-mono">6</span>
+</div>
+<!-- 7 -->
+<div class="p-2 rounded-2xl bg-[#FFF0EC] flex flex-col items-center gap-1 cursor-pointer hover:bg-rose-100 transition-colors">
+<svg class="w-5 h-5 text-brand-coral" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+<span class="text-[11px] font-bold text-brand-ink font-mono">7</span>
+</div>
+<!-- 8 -->
+<div class="p-2 rounded-2xl bg-[#FFF0EC] flex flex-col items-center gap-1 cursor-pointer hover:bg-rose-100 transition-colors">
+<svg class="w-5 h-5 text-brand-coral" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+<span class="text-[11px] font-bold text-brand-ink font-mono">8</span>
+</div>
+<!-- 9 -->
+<div class="p-2 rounded-2xl bg-[#F0EDFB] flex flex-col items-center gap-1 cursor-pointer hover:bg-purple-100 transition-colors">
+<svg class="w-5 h-5 text-brand-lavender" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+<span class="text-[11px] font-bold text-brand-ink font-mono">9</span>
+</div>
+<!-- 10 -->
+<div class="p-2 rounded-2xl bg-[#F0EDFB] flex flex-col items-center gap-1 cursor-pointer hover:bg-purple-100 transition-colors">
+<svg class="w-5 h-5 text-brand-lavender" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M16 16s-1.5-2-4-2-4 2-4 2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+<span class="text-[11px] font-bold text-brand-ink font-mono">10</span>
+</div>
+</div>
+<div class="flex justify-between items-center text-[11px] text-brand-ink/60 font-mono pt-1">
+<span>SUDS 1-3: Grounded &amp; Clear</span>
+<span class="font-bold text-brand-coral">SUDS 6: Manageable Tension</span>
+<span>SUDS 9-10: Peak Overload</span>
+</div>
+</div>
+<!-- Micro-Exposures & Audio Practice Shelf -->
+<div class="bg-white rounded-3xl p-6 soft-card space-y-4">
+<div class="flex items-center justify-between">
+<h4 class="text-base font-bold text-brand-ink">Prescribed Micro-Exposures</h4>
+<span class="text-xs font-mono text-brand-teal font-semibold">In Sync with Dr. Olivia</span>
+</div>
+<div class="space-y-3">
+<!-- Item 1 -->
+<div class="p-3.5 rounded-2xl bg-[#EDF7F6] flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-brand-teal text-white flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+</div>
+<div>
+<h5 class="text-xs font-bold text-brand-ink">Unfinished Ritual Delay #3</h5>
+<p class="text-[11px] text-brand-ink/70">Touch faucet handle once, wait 2 minutes without washing.</p>
+</div>
+</div>
+<span class="text-xs font-mono font-bold bg-white px-2.5 py-1 rounded-full text-brand-teal">2 min</span>
+</div>
+<!-- Item 2 -->
+<div class="p-3.5 rounded-2xl bg-[#FFF6E8] flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-brand-amber text-white flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="23"></line></svg>
+</div>
+<div>
+<h5 class="text-xs font-bold text-brand-ink">Audio Loop: Radical Uncertainty Acceptance</h5>
+<p class="text-[11px] text-brand-ink/70">"It may happen, it may not. I can exist with maybe."</p>
+</div>
+</div>
+<span class="text-xs font-mono font-bold bg-white px-2.5 py-1 rounded-full text-brand-amber">4 min</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: DASHBOARD 1 (Personal) -->
+<!-- BEGIN: DASHBOARD 2 — The Intelly™ Clinician Terminal (For Medical Practitioners) -->
+<!-- Exact high-density telemetry recreation from reference image DATA:IMAGE:IMAGE_6 -->
+<section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto" id="dashboard-showcase">
+<div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-teal/10 text-brand-teal text-xs font-mono font-bold uppercase tracking-wider">
+      EHR INTEGRATED DASHBOARD
+    </div>
+<h2 class="font-editorial text-3xl sm:text-5xl text-brand-ink font-normal">
+      The Intelly™ Clinician Terminal
+    </h2>
+<p class="text-brand-ink/75 text-sm sm:text-base max-w-2xl mx-auto">
+      Directly recreating Dr. Olivia's real-time morning command center: continuous EHR webhooks, patient cohort surge maps, 12:00 urge spline curves, and multi-clinician daily scheduling.
+    </p>
+</div>
+<!-- Outer Dashboard Frame: Solid Card with Warm Diffuse Shadow, No Rigid Borders -->
+<div class="w-full bg-[#FAF8F3] rounded-[38px] p-5 sm:p-7 soft-card text-brand-ink">
+<!-- Top Search & Controls Bar -->
+<div class="flex flex-wrap items-center justify-between gap-4 pb-5">
+<div class="flex items-center gap-3 w-full sm:w-auto">
+<div class="flex items-center gap-2 bg-[#F2EDE2] rounded-full px-4 py-2 text-xs w-full sm:w-80">
+<div class="w-5 h-5 rounded-full bg-brand-softPink flex items-center justify-center text-brand-coral">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
+</div>
+<span class="font-mono text-brand-ink font-semibold">Lis|</span>
+<span class="text-brand-ink/40 ml-auto text-[11px]">In: <span class="bg-brand-ink text-white px-2 py-0.5 rounded-full text-[9px]">Directory</span> <span class="text-brand-ink/40">Prescriptions</span></span>
+</div>
+</div>
+<!-- Top Right Clinician Action Icons (No generic emojis, pure SVG) -->
+<div class="flex items-center gap-2 ml-auto">
+<button class="w-8 h-8 rounded-full bg-brand-ink text-white flex items-center justify-center hover:opacity-90 transition-opacity">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+</button>
+<button class="w-8 h-8 rounded-full bg-brand-ink text-white flex items-center justify-center hover:opacity-90 transition-opacity">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+</button>
+<button class="w-8 h-8 rounded-full bg-brand-ink text-white flex items-center justify-center hover:opacity-90 transition-opacity">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+</button>
+</div>
+</div>
+<!-- Main Terminal Body: 3-column architecture matching Reference Image 6 -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+<!-- LEFT RAIL: Deep Dark Charcoal Sidebar -->
+<aside class="lg:col-span-2 bg-[#141517] text-gray-300 rounded-3xl p-5 flex flex-col justify-between hidden md:flex soft-card">
+<div class="space-y-6">
+<div class="flex items-center justify-between text-white font-bold text-xl tracking-tight pb-3">
+<span>intelly</span>
+<span class="w-5 h-5 rounded-full bg-brand-softPink flex items-center justify-center text-brand-ink text-[10px] font-bold">‹</span>
+</div>
+<div>
+<p class="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-2.5">General</p>
+<nav class="space-y-1.5 text-xs">
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/10 text-white font-semibold" href="#dashboard-showcase">
+<svg class="w-4 h-4 text-brand-coral" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect height="7" width="7" x="3" y="3"></rect><rect height="7" width="7" x="14" y="3"></rect><rect height="7" width="7" x="14" y="14"></rect><rect height="7" width="7" x="3" y="14"></rect></svg>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors" href="#dashboard-showcase">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect height="18" rx="2" width="18" x="3" y="4"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+<span>Schedule</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors" href="#dashboard-showcase">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+<span>Care Cohort</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors" href="#dashboard-showcase">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></svg>
+<span>Telemetry</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors" href="#dashboard-showcase">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+<span>Protocols</span>
+</a>
+</nav>
+</div>
+<div>
+<p class="text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-2.5">Tools</p>
+<nav class="space-y-1.5 text-xs">
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors" href="#dashboard-showcase">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+<span>Secure Chat</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors" href="#dashboard-showcase">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle></svg>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+</div>
+<div class="pt-6">
+<a class="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors" href="#dashboard-showcase">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+<span>Log out</span>
+</a>
+</div>
+</aside>
+<!-- CENTER WORKSPACE: 4 Solid Cards + Active Individual List & Profile (7 cols) -->
+<main class="lg:col-span-7 space-y-6">
+<div>
+<h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-brand-ink">Good morning, Dr. Olivia</h2>
+<p class="text-xs text-brand-ink/70 mt-1">
+            Intelly wishes you a good and productive day. 45 individuals are actively logging loops in your cohort today. You also have one live team event in your schedule.
+          </p>
+</div>
+<!-- 4 Metric Cards (Exact Solid Fills from image: Citron, Rose, Sage, Soft Sky) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<!-- Card 1: Warm Citron Cohort Distribution -->
+<div class="bg-[#F7DC78] rounded-3xl p-5 soft-card flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-sm text-brand-ink">Active Cohort Distribution:</h3>
+<div class="grid grid-cols-3 gap-1 mt-2 text-left">
+<div>
+<div class="text-xs font-bold text-brand-ink">14 pers</div>
+<div class="text-[8px] opacity-75">22-32 Y.O</div>
+</div>
+<div>
+<div class="text-xs font-bold text-brand-ink">5 pers</div>
+<div class="text-[8px] opacity-75">32-45 Y.O</div>
+</div>
+<div>
+<div class="text-xs font-bold text-brand-ink">2 pers</div>
+<div class="text-[8px] opacity-75">45+ Y.O</div>
+</div>
+</div>
+</div>
+<!-- Vertical pill distribution chart -->
+<div class="h-20 flex items-end justify-between px-2 pt-3">
+<div class="w-2.5 bg-brand-ink/20 rounded-full h-8"></div>
+<div class="w-2.5 bg-brand-ink rounded-full h-14"></div>
+<div class="w-2.5 bg-brand-amber rounded-full h-10"></div>
+<div class="w-2.5 bg-brand-ink rounded-full h-18"></div>
+<div class="w-2.5 bg-brand-ink rounded-full h-11"></div>
+<div class="w-2.5 bg-brand-ink/30 rounded-full h-7"></div>
+</div>
+<div class="flex justify-between text-[8px] font-mono opacity-75 mt-2">
+<span>07:30 p.m</span>
+<span>12:00 p.m</span>
+</div>
+</div>
+<!-- Card 2: Rose Visits Summary with 12:00 Urge Spline Wave -->
+<div class="bg-[#F9D1DC] rounded-3xl p-5 soft-card flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-sm text-brand-ink">Visits summary:</h3>
+<div class="flex gap-4 mt-2">
+<div>
+<div class="text-xs font-bold text-brand-ink">24 min</div>
+<div class="text-[8px] opacity-75">AVERAGE</div>
+</div>
+<div>
+<div class="text-xs font-bold text-brand-ink">15 min</div>
+<div class="text-[8px] opacity-75">MINIMUM</div>
+</div>
+<div>
+<div class="text-xs font-bold text-brand-ink">01:30 h</div>
+<div class="text-[8px] opacity-75">MAXIMUM</div>
+</div>
+</div>
+</div>
+<!-- The 12:00 Peak Spline Wave -->
+<div class="relative w-full h-16 my-1">
+<svg class="w-full h-full" fill="none" viewBox="0 0 200 60">
+<line stroke="#17323A" stroke-dasharray="2 2" stroke-width="1.2" x1="115" x2="115" y1="12" y2="55"></line>
+<path d="M 5 45 Q 25 45 40 38 T 80 32 T 115 12 Q 130 35 150 42 T 195 40" fill="none" stroke="#17323A" stroke-linecap="round" stroke-width="1.8"></path>
+<circle cx="115" cy="12" fill="#17323A" r="3"></circle>
+</svg>
+</div>
+<div class="flex justify-between text-[7.5px] font-mono opacity-75">
+<span>10:30</span>
+<span>11:00</span>
+<span>11:30</span>
+<span class="font-bold text-brand-ink">12:00</span>
+<span>12:30</span>
+<span>13:00</span>
+<span>13:30</span>
+</div>
+</div>
+<!-- Card 3: Sage Green Condition Distribution -->
+<div class="bg-[#A6BE86] rounded-3xl p-5 soft-card flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-sm text-brand-ink">By condition:</h3>
+<div class="flex gap-4 mt-3">
+<div>
+<div class="text-xs font-bold text-brand-ink">14 pers</div>
+<div class="text-[8px] opacity-75 uppercase">STABLE</div>
+</div>
+<div>
+<div class="text-xs font-bold text-brand-ink">5 pers</div>
+<div class="text-[8px] opacity-75 uppercase">FAIR</div>
+</div>
+<div>
+<div class="text-xs font-bold text-brand-ink">1 pers</div>
+<div class="text-[8px] opacity-75 uppercase">CRITICAL</div>
+</div>
+</div>
+</div>
+<div class="pt-6">
+<span class="text-[9px] font-mono bg-white/40 px-2 py-0.5 rounded-full text-emerald-950 font-semibold">
+                ERP Adherence: High (88%)
+              </span>
+</div>
+</div>
+<!-- Card 4: Soft Blue Sessions Breakdown -->
+<div class="bg-[#B0C9E8] rounded-3xl p-5 soft-card flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-sm text-brand-ink">Sessions:</h3>
+<div class="grid grid-cols-3 gap-2 mt-3">
+<div>
+<div class="text-xs font-bold text-brand-ink">03:45 h</div>
+<div class="text-[8px] opacity-75 uppercase">IN CLINIC</div>
+</div>
+<div>
+<div class="text-xs font-bold text-brand-ink">02:00 min</div>
+<div class="text-[8px] opacity-75 uppercase">VIDEO CALLS</div>
+</div>
+<div>
+<div class="text-xs font-bold text-brand-ink">00:24 min</div>
+<div class="text-[8px] opacity-75 uppercase">IN CHAT</div>
+</div>
+</div>
+</div>
+<div class="pt-6">
+<span class="text-[9px] font-mono bg-white/40 px-2 py-0.5 rounded-full text-sky-950 font-semibold">
+                Active Between-Session Sync
+              </span>
+</div>
+</div>
+</div>
+<!-- Lower Section: Active Individual List & Detailed Profile -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+<!-- Cohort Roster (5 cols) -->
+<div class="md:col-span-5 space-y-2">
+<div class="flex justify-between items-center px-1">
+<h3 class="font-bold text-xs">Active individuals</h3>
+<span class="bg-brand-ink text-white text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1 font-mono">
+                Today ▾
+              </span>
+</div>
+<!-- Taigo Wilkinson -->
+<div class="bg-[#F9D1DC] p-2.5 rounded-2xl flex items-center justify-between soft-card">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-white flex items-center justify-center text-brand-ink text-xs font-bold">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+</div>
+<div>
+<p class="text-xs font-bold text-brand-ink">Taigo Wilkinson</p>
+<p class="text-[9px] text-brand-coral font-medium">Urgent Check-in</p>
+</div>
+</div>
+<span class="text-[9px] font-mono bg-white px-2 py-0.5 rounded-full font-bold">09:15 AM</span>
+</div>
+<!-- Samantha Williams -->
+<div class="bg-[#EBE7DC] p-2.5 rounded-2xl flex items-center justify-between soft-card">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-brand-softBlue flex items-center justify-center text-sky-800">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+</div>
+<div>
+<p class="text-xs font-bold">Samantha Williams</p>
+<p class="text-[9px] text-brand-ink/60">Routine Check-Up</p>
+</div>
+</div>
+<span class="text-[9px] font-mono bg-white px-2 py-0.5 rounded-full">09:15 AM</span>
+</div>
+<!-- Amy White -->
+<div class="bg-[#EBE7DC] p-2.5 rounded-2xl flex items-center justify-between soft-card">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-brand-softPink flex items-center justify-center text-rose-800">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect height="14" rx="2" ry="2" width="14" x="1" y="5"></rect></svg>
+</div>
+<div>
+<p class="text-xs font-bold">Amy White</p>
+<p class="text-[9px] text-brand-ink/60">Video Consultation</p>
+</div>
+</div>
+<span class="text-[9px] font-mono bg-white px-2 py-0.5 rounded-full">09:15 AM</span>
+</div>
+<!-- Tyler Young -->
+<div class="bg-[#EBE7DC] p-2.5 rounded-2xl flex items-center justify-between soft-card">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-brand-softGreen flex items-center justify-center text-emerald-800">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="7"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+</div>
+<div>
+<p class="text-xs font-bold">Tyler Young</p>
+<p class="text-[9px] text-brand-ink/60">Report Sync</p>
+</div>
+</div>
+<span class="text-[9px] font-mono bg-white px-2 py-0.5 rounded-full">09:45 AM</span>
+</div>
+</div>
+<!-- Visit Details Card for Taigo Wilkinson (7 cols) -->
+<div class="md:col-span-7 bg-[#F9D1DC] rounded-3xl p-5 soft-card flex flex-col justify-between space-y-4">
+<div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="text-sm font-bold text-brand-ink">Visit details</h4>
+<p class="text-xs font-extrabold text-brand-ink mt-0.5">Taigo Wilkinson</p>
+<p class="text-[10px] text-brand-ink/70">Male • 38 Years 5 Months</p>
+</div>
+<span class="text-[9px] font-mono bg-white px-2.5 py-1 rounded-full text-brand-ink font-semibold">
+                  1EG4-TE5-MK72
+                </span>
+</div>
+<!-- Tags -->
+<div class="flex gap-1.5 mt-3">
+<span class="bg-white/60 text-brand-ink text-[9px] font-semibold px-2 py-0.5 rounded-full">Intrusive Spike</span>
+<span class="bg-white/60 text-brand-ink text-[9px] font-semibold px-2 py-0.5 rounded-full">Contamination</span>
+<span class="bg-white/60 text-brand-ink text-[9px] font-semibold px-2 py-0.5 rounded-full">Heart Burn</span>
+</div>
+<!-- Rows -->
+<div class="mt-4 pt-3 border-t border-brand-ink/10 space-y-2 text-[10px]">
+<div class="grid grid-cols-3 gap-2">
+<span class="text-brand-ink/60">Last Checked</span>
+<span class="col-span-2 font-medium">Dr Everly on 21 April 2024<br><span class="text-brand-teal font-mono">Prescription #2J983KTO</span></span>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<span class="text-brand-ink/60">Observation</span>
+<span class="col-span-2">Response prevention friction sustained. Somatic spike subsided in 18 minutes.</span>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<span class="text-brand-ink/60">Protocol</span>
+<span class="col-span-2">90-sec Urge Delay Ladder<br>Vagus Grounding &amp; Somatic Reset</span>
+</div>
+</div>
+</div>
+<div class="flex justify-end pt-1">
+<span class="text-[10px] font-bold text-brand-ink underline cursor-pointer hover:text-brand-teal">View full EHR telemetry history →</span>
+</div>
+</div>
+</div>
+</main>
+<!-- RIGHT RAIL: CALENDAR & TIMELINE (3 cols) -->
+<aside class="lg:col-span-3 space-y-5 bg-[#F2EDE2] rounded-3xl p-4 soft-card">
+<div>
+<div class="flex justify-between items-center text-xs pb-3">
+<span class="cursor-pointer text-brand-ink/60 hover:text-brand-ink">←</span>
+<span class="bg-brand-softPink text-brand-ink px-3 py-0.5 rounded-full font-bold text-[11px]">May 2024</span>
+<span class="cursor-pointer text-brand-ink/60 hover:text-brand-ink">→</span>
+</div>
+<!-- Mini Days Grid -->
+<div class="grid grid-cols-8 text-[9px] text-center font-mono text-brand-ink/60 gap-y-1.5 items-center">
+<span>MO</span><span>TU</span><span>WE</span><span>TH</span><span>FR</span><span>SA</span><span>SU</span><span class="text-[8px] text-brand-ink/30">WK</span>
+<span></span><span></span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span class="text-[7.5px] text-brand-ink/30">W23</span>
+<span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span class="text-[7.5px] text-brand-ink/30">W24</span>
+<span>13</span><span>14</span>
+<span class="w-5 h-5 rounded-full bg-brand-softPink font-bold text-brand-ink flex items-center justify-center mx-auto">15</span>
+<span>16</span><span>17</span><span>18</span><span>19</span><span class="text-[7.5px] text-brand-ink/30">W25</span>
+<span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span class="text-[7.5px] text-brand-ink/30">W26</span>
+<span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span></span><span></span><span class="text-[7.5px] text-brand-ink/30">W27</span>
+</div>
+<div class="flex gap-2 mt-4">
+<button class="flex-1 bg-brand-ink text-white text-xs font-semibold py-2 rounded-xl hover:bg-brand-teal transition-all">
+              Add event
+            </button>
+<button class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-xs">
+<svg class="w-3.5 h-3.5 text-brand-ink" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+</button>
+</div>
+</div>
+<!-- Timeline Section -->
+<div class="pt-4 border-t border-brand-ink/10 space-y-3">
+<div class="flex justify-between items-center">
+<div>
+<h4 class="text-sm font-bold">May 15</h4>
+<p class="text-[10px] text-brand-ink/60">Today's timeline</p>
+</div>
+<span class="text-[9px] bg-brand-ink text-white px-2 py-0.5 rounded-full font-mono">All ▾</span>
+</div>
+<div class="space-y-3 text-[11px]">
+<!-- Emergency Visit 07:00 -->
+<div class="flex items-start gap-2">
+<span class="text-[9px] font-mono text-brand-ink/50 w-8 pt-1">07:00</span>
+<div class="flex-1 bg-brand-softPink p-2 rounded-xl flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-white flex items-center justify-center text-xs text-brand-coral">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+</div>
+<div>
+<p class="font-bold text-[10px]">Urgent visit</p>
+<p class="text-[8.5px] text-brand-ink/60">West camp, Room 312</p>
+</div>
+</div>
+</div>
+<!-- Diagnostic baseline 07:30 -->
+<div class="flex items-start gap-2">
+<span class="text-[9px] font-mono text-brand-ink/50 w-8 pt-1">07:30</span>
+<div class="flex-1 bg-brand-softBlue p-2 rounded-xl flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-white flex items-center justify-center text-xs text-sky-800">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+</div>
+<div>
+<p class="font-bold text-[10px]">Diagnostic baseline</p>
+<p class="text-[8.5px] text-brand-ink/60">East camp, Floor 5</p>
+</div>
+</div>
+</div>
+<!-- 08:12 Node Sync -->
+<div class="flex items-center gap-2 py-0.5">
+<span class="text-[9px] font-mono font-bold text-brand-coral bg-brand-softPink px-1.5 py-0.5 rounded w-8 text-center">08:12</span>
+<div class="flex-1 border-t border-dashed border-brand-coral relative">
+<span class="absolute -top-1 left-4 w-2 h-2 rounded-full bg-brand-coral pulse-indicator"></span>
+</div>
+</div>
+<!-- Team Daily Planning 08:30 -->
+<div class="flex items-start gap-2">
+<span class="text-[9px] font-mono text-brand-ink/50 w-8 pt-1">08:30</span>
+<div class="flex-1 bg-brand-softYellow p-2.5 rounded-xl">
+<div class="flex items-center gap-1.5 mb-1">
+<div class="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[10px] text-amber-900">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+</div>
+<div>
+<p class="font-bold text-[10px]">Team daily planning</p>
+<p class="text-[8.5px] text-brand-ink/60">East camp, Room 200</p>
+</div>
+</div>
+<div class="mt-2 pt-1 border-t border-brand-ink/10 flex items-center gap-1">
+<span class="w-4 h-4 rounded-full bg-brand-softBlue text-[7px] flex items-center justify-center font-bold">TY</span>
+<span class="w-4 h-4 rounded-full bg-brand-softPink text-[7px] flex items-center justify-center font-bold">AB</span>
+<span class="w-4 h-4 rounded-full bg-brand-softGreen text-[7px] flex items-center justify-center font-bold">NR</span>
+<span class="text-[8px] font-mono text-brand-ink/50">+3</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full bg-brand-ink text-white text-xs font-semibold py-2 rounded-xl hover:bg-brand-teal transition-all mt-2">
+            View all details
+          </button>
+</div>
+</aside>
+</div>
+</div>
+</section>
+<!-- END: DASHBOARD 2 (Intelly Clinician) -->
+<!-- BEGIN: SemanticColorMatrix & Scale Section (Solid cards, diffuse shadow, pure SVG) -->
+<section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto" id="clinical-scale">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+<!-- Left: Scientific Neuro-Visual System Explanation -->
+<div class="lg:col-span-5 space-y-6">
+<span class="text-xs font-mono tracking-widest text-brand-teal uppercase font-semibold">Scientific Neuro-Visual System</span>
+<h3 class="font-editorial text-3xl sm:text-4xl text-brand-ink font-normal">Color as a Calibrated Bio-Signal</h3>
+<p class="text-sm text-brand-ink/80 leading-relaxed">
+        Traditional clinical interfaces rely on panic-inducing neon reds and warning triangles. "Between Sessions" implements a parasympathetic pastel architecture designed by somatic psychologists to lower autonomic arousal during active OCD flare-ups.
+      </p>
+<!-- Color Architecture Cards (Solid fills with soft diffuse drop shadows) -->
+<div class="space-y-3 pt-2">
+<div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white soft-card">
+<div class="w-10 h-10 rounded-xl bg-brand-teal text-white flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-ink">#176B67 Primary Quiet Teal</h4>
+<p class="text-[11px] text-brand-ink/70">Executive anchoring, ritual pause delays, and intentional choices.</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white soft-card">
+<div class="w-10 h-10 rounded-xl bg-brand-coralSoft text-brand-coral flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-ink">#E8856C Somatic Coral &amp; Rose</h4>
+<p class="text-[11px] text-brand-ink/70">Distress peaks, 12:00 urge surfing, and sympathetic activation without shame.</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white soft-card">
+<div class="w-10 h-10 rounded-xl bg-brand-amberSoft text-brand-amber flex items-center justify-center">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-brand-ink">#D4943A Warm Amber &amp; Citron</h4>
+<p class="text-[11px] text-brand-ink/70">Habit extinction progress, exposure ladders, and positive friction milestone.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: 10-Point Non-Stigmatizing Assessment Scale Container -->
+<div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 soft-card">
+<div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-brand-ink/5">
+<div>
+<h4 class="text-base font-bold text-brand-ink">10-Point Non-Stigmatizing SUDS Continuum</h4>
+<p class="text-xs text-brand-ink/60">Subjective Units of Distress Scale calibrated for intrusive OCD thought loops</p>
+</div>
+<span class="text-[10px] font-mono bg-brand-sand px-2.5 py-1 rounded-full font-semibold">
+          CLINICAL SPEC V4
+        </span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+<!-- SUDS 1-2 -->
+<div class="p-3.5 rounded-2xl bg-[#F0F5F4] soft-card">
+<div class="flex justify-between items-center">
+<span class="text-xs font-mono font-bold text-emerald-800">SUDS 01 — 02</span>
+<span class="w-2.5 h-2.5 rounded-full bg-brand-softGreen"></span>
+</div>
+<p class="text-xs font-bold text-brand-ink mt-1">Quiet Neutral Baseline</p>
+<p class="text-[11px] text-brand-ink/70">Vagus nerve relaxed. Zero intrusive adhesive thoughts.</p>
+</div>
+<!-- SUDS 3-4 -->
+<div class="p-3.5 rounded-2xl bg-[#FFF6E8] soft-card">
+<div class="flex justify-between items-center">
+<span class="text-xs font-mono font-bold text-amber-800">SUDS 03 — 04</span>
+<span class="w-2.5 h-2.5 rounded-full bg-brand-amber"></span>
+</div>
+<p class="text-xs font-bold text-brand-ink mt-1">Mild Cognitive Whisper</p>
+<p class="text-[11px] text-brand-ink/70">"What if?" thought arises. Urge friction delay: &gt; 15 min.</p>
+</div>
+<!-- SUDS 5-6 -->
+<div class="p-3.5 rounded-2xl bg-[#FFF0EC] soft-card">
+<div class="flex justify-between items-center">
+<span class="text-xs font-mono font-bold text-rose-800">SUDS 05 — 06</span>
+<span class="w-2.5 h-2.5 rounded-full bg-brand-coral"></span>
+</div>
+<p class="text-xs font-bold text-brand-ink mt-1">Active Compulsion Pull</p>
+<p class="text-[11px] text-brand-ink/70">Visceral somatic tension in chest/throat. Urge surfer engaged.</p>
+</div>
+<!-- SUDS 7-8 -->
+<div class="p-3.5 rounded-2xl bg-[#FDF0F4] soft-card">
+<div class="flex justify-between items-center">
+<span class="text-xs font-mono font-bold text-pink-800">SUDS 07 — 08</span>
+<span class="w-2.5 h-2.5 rounded-full bg-brand-softPink"></span>
+</div>
+<p class="text-xs font-bold text-brand-ink mt-1">High Urge Crest (12:00 Peak)</p>
+<p class="text-[11px] text-brand-ink/70">Strong anxiety spike. Response prevention lock active; zero shame.</p>
+</div>
+<!-- SUDS 9-10 (Span 2) -->
+<div class="sm:col-span-2 p-4 rounded-2xl bg-[#F0EDFB] soft-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-mono font-bold text-brand-lavender">SUDS 09 — 10</span>
+<span class="text-[9px] bg-brand-ink text-white px-2 py-0.5 rounded-full font-mono">SAFETY PROTOCOL</span>
+</div>
+<p class="text-xs font-bold text-brand-ink mt-0.5">Somatic Grounding Override &amp; Webhook Auto-Sync</p>
+<p class="text-[11px] text-brand-ink/70">Immediate tactile vagus pacing and automated update to Dr. Olivia’s terminal.</p>
+</div>
+<button class="px-4 py-2 rounded-xl bg-brand-ink text-white text-xs font-semibold hover:bg-brand-teal transition-all whitespace-nowrap">
+            Test Tactile Reset
+          </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: SemanticColorMatrix & Scale -->
+<!-- BEGIN: Dual Callout Banners (Solid Cards, Diffuse Drop Shadows) -->
+<section class="py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto" id="trial">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Personal Callout Card -->
+<div class="bg-white rounded-[32px] p-8 sm:p-10 flex flex-col justify-between space-y-6 soft-card">
+<div class="space-y-4">
+<span class="text-xs font-mono tracking-widest text-brand-coral uppercase font-bold">For You As A Person</span>
+<h3 class="font-editorial text-2xl sm:text-3xl text-brand-ink">Take control of your quiet hours.</h3>
+<p class="text-xs sm:text-sm text-brand-ink/75 leading-relaxed">
+          No clinical pressure, no rigid checklists. Just you, Pip, and micro-tools engineered to dissolve repetitive thinking loops step by step.
+        </p>
+</div>
+<div>
+<a class="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-brand-ink text-white text-xs font-bold hover:bg-brand-teal transition-colors shadow-sm" href="#personal-dashboard">
+<span>Explore Personal Companion</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</a>
+<p class="text-[10px] text-center text-brand-ink/50 font-mono mt-2">Available for iOS, Android &amp; Web</p>
+</div>
+</div>
+<!-- Practitioner Callout Card -->
+<div class="bg-brand-ink text-white rounded-[32px] p-8 sm:p-10 flex flex-col justify-between space-y-6 soft-card">
+<div class="space-y-4">
+<span class="text-xs font-mono tracking-widest text-brand-coral uppercase font-bold">For Medical Practitioners</span>
+<h3 class="font-editorial text-2xl sm:text-3xl text-white">Bring the 167 hours into your clinic.</h3>
+<p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+          Sync your practice on Between Sessions. Eliminate appointment recollection amnesia with Dr. Olivia's Intelly terminal.
+        </p>
+</div>
+<div class="space-y-2">
+<div class="flex flex-col sm:flex-row gap-2">
+<input class="px-4 py-3 rounded-full text-xs text-brand-ink bg-white w-full focus:outline-none focus:ring-2 focus:ring-brand-teal border-none" placeholder="practitioner@clinic.org" type="email">
+<button class="px-5 py-3 rounded-full bg-brand-teal text-white text-xs font-bold hover:bg-brand-coral transition-colors shadow-md whitespace-nowrap">
+            Request Sandbox
+          </button>
+</div>
+<p class="text-[10px] text-gray-400 font-mono">SOC-2 Type II • HIPAA BAA Signed Onboarding</p>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Dual Callout Banners -->
+<!-- BEGIN: Footer -->
+<footer class="py-12 px-4 sm:px-6 lg:px-8 bg-white/50">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-brand-ink/60">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded-full bg-brand-teal text-white flex items-center justify-center font-bold text-[10px]">
+        BS
+      </div>
+<span class="font-semibold text-brand-ink">Between Sessions Health Inc.</span>
+<span>© 2025 All rights reserved.</span>
+</div>
+<div class="flex flex-wrap items-center gap-6 font-medium text-brand-ink/80">
+<a class="hover:text-brand-teal transition-colors" href="#personal-dashboard">For Individuals</a>
+<a class="hover:text-brand-teal transition-colors" href="#dashboard-showcase">For Practitioners</a>
+<a class="hover:text-brand-teal transition-colors" href="#clinical-scale">10-Point SUDS Scale</a>
+<a class="hover:text-brand-teal transition-colors" href="#">HIPAA &amp; Privacy</a>
+<a class="hover:text-brand-teal transition-colors" href="#">Crisis Helpline (988)</a>
+</div>
+</div>
+</footer>
+<!-- END: Footer -->
+</body></html>

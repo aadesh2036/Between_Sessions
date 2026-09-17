@@ -1,0 +1,32 @@
+{
+  "project": {
+    "resourceName": "projects/3467580472824619901",
+    "projectId": "3467580472824619901",
+    "title": "BS_FINAL",
+    "shareToken": "AQ.Ab8RN6Kqharpue_qBoqS37-tNRpOuH-uC17es4PHZMIV0hs4ig",
+    "projectType": "TEXT_TO_UI_PRO",
+    "deviceType": "DESKTOP",
+    "visibility": "PRIVATE"
+  },
+  "designSystem": {
+    "name": "Organic Strategic Editorial",
+    "assetId": "assets/5b983aea382c4d5fbfdfe4f98f906e7e",
+    "colorMode": "LIGHT",
+    "roundness": "ROUND_FOUR",
+    "customColor": "#176b67",
+    "headlineFont": "NEWSREADER",
+    "bodyFont": "PLUS_JAKARTA_SANS",
+    "labelFont": "PLUS_JAKARTA_SANS"
+  },
+  "pagesWorkflow": {
+    "landingPage": {
+      "strategy": "direct_export",
+      "sourcePath": "LANDING_PAGE_&_DESIGN_SYS/code.html",
+      "notes": "Directly use current export from LANDING_PAGE_&_DESIGN_SYS folder."
+    },
+    "otherPages": {
+      "strategy": "stitch_mcp",
+      "notes": "Generate and iterate new pages using Stitch MCP with project 3467580472824619901 and the Organic Strategic Editorial design system."
+    }
+  }
+}
