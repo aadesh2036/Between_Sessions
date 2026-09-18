@@ -103,7 +103,7 @@ export default function PracticePage() {
               setSelectedPlan(null);
               setShowLogModal(true);
             }}
-            className="self-start sm:self-auto px-4 py-2.5 rounded bg-brand-ink hover:bg-brand-coral text-white text-xs font-medium transition-colors shadow-xs flex items-center gap-2"
+            className="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-brand-ink hover:bg-brand-coral text-white text-xs font-medium transition-colors shadow-xs flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-[16px]">add_task</span>
             <span>Record Exposure</span>
@@ -111,9 +111,9 @@ export default function PracticePage() {
         </header>
 
         {/* ── Longitudinal Summary Banner (Anti-Gamified) ──────────────────── */}
-        <div className="p-4 sm:p-5 rounded bg-brand-softerTeal border border-brand-teal/20 shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-2 py-0.5 rounded-full bg-white/80 border border-brand-teal/20">
+        <div className="p-6 rounded-3xl bg-brand-softerTeal border border-brand-teal/20 shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-3 py-1 rounded-full bg-white/80 border border-brand-teal/20">
               Longitudinal Observation
             </span>
             <p className="text-xs sm:text-sm font-medium text-brand-ink">
@@ -133,41 +133,41 @@ export default function PracticePage() {
           </div>
 
           <div className="flex items-center gap-4 text-xs font-mono text-brand-ink/80 shrink-0">
-            <div className="text-center px-3 py-1.5 rounded bg-white border border-brand-teal/20">
+            <div className="text-center px-4 py-2 rounded-2xl bg-white border border-brand-teal/20 shadow-xs">
               <span className="block text-[10px] text-brand-ink/50 uppercase font-sans">Pre Avg</span>
-              <span className="font-bold text-brand-coral">{avgPre}</span>
+              <span className="font-bold text-brand-coral text-sm">{avgPre}</span>
             </div>
             <span className="text-brand-ink/30 font-sans">→</span>
-            <div className="text-center px-3 py-1.5 rounded bg-white border border-brand-teal/20">
+            <div className="text-center px-4 py-2 rounded-2xl bg-white border border-brand-teal/20 shadow-xs">
               <span className="block text-[10px] text-brand-ink/50 uppercase font-sans">Post Avg</span>
-              <span className="font-bold text-brand-teal">{avgPost}</span>
+              <span className="font-bold text-brand-teal text-sm">{avgPost}</span>
             </div>
           </div>
         </div>
 
         {/* ── Active Practice Plans Grid ───────────────────────────────────── */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-editorial text-2xl text-brand-ink font-medium">Curated Practice Plans</h2>
             <span className="text-xs text-brand-ink/50 font-mono">{allPlans.length} Available</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {allPlans.map((plan) => {
               const isClinician = plan.type === 'clinician-assigned';
               return (
                 <div
                   key={plan.id}
-                  className={`p-5 rounded border flex flex-col justify-between transition-all shadow-card-lift ${
+                  className={`p-6 rounded-3xl border flex flex-col justify-between transition-all shadow-card-lift ${
                     isClinician
                       ? 'bg-brand-coralSoft/50 border-brand-coral/30'
-                      : 'bg-brand-paper border-brand-border'
+                      : 'bg-brand-paper border-brand-border/70'
                   }`}
                 >
-                  <div className="space-y-2.5">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span
-                        className={`text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full border ${
+                        className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full border ${
                           isClinician
                             ? 'bg-brand-coral text-white border-brand-coral'
                             : 'bg-brand-softerTeal text-brand-teal border-brand-teal/20'
@@ -176,13 +176,13 @@ export default function PracticePage() {
                         {isClinician ? 'Clinician-Assigned' : plan.category || 'Self-Guided'}
                       </span>
                       {plan.practitionerName && (
-                        <span className="text-[10px] font-medium text-brand-teal">
+                        <span className="text-[10px] font-semibold text-brand-teal">
                           {plan.practitionerName}
                         </span>
                       )}
                     </div>
 
-                    <h3 className="font-editorial text-lg text-brand-ink font-medium leading-snug">
+                    <h3 className="font-editorial text-xl text-brand-ink font-medium leading-snug">
                       {plan.title}
                     </h3>
 
@@ -191,7 +191,7 @@ export default function PracticePage() {
                     </p>
 
                     {plan.targetObsession && (
-                      <div className="p-2 rounded bg-brand-canvas/60 border border-brand-border/40 text-[11px] text-brand-ink/70">
+                      <div className="p-3 rounded-2xl bg-brand-canvas/70 border border-brand-border/60 text-[11px] text-brand-ink/70">
                         <span className="font-semibold text-brand-ink">Target:</span> {plan.targetObsession}
                       </div>
                     )}
@@ -203,7 +203,7 @@ export default function PracticePage() {
                         setSelectedPlan(plan);
                         setShowLogModal(true);
                       }}
-                      className="w-full py-2 px-3 rounded bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                      className="w-full py-2.5 px-3.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                     >
                       <span className="material-symbols-outlined text-[16px]">play_circle</span>
                       <span>Begin Exposure</span>
@@ -224,7 +224,7 @@ export default function PracticePage() {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex gap-1.5 p-1 rounded bg-brand-canvas border border-brand-border text-xs">
+            <div className="flex gap-1.5 p-1 rounded-2xl bg-brand-canvas border border-brand-border text-xs">
               {[
                 { id: 'all', label: 'All' },
                 { id: 'prevented', label: 'Prevented' },
@@ -235,7 +235,7 @@ export default function PracticePage() {
                 <button
                   key={t.id}
                   onClick={() => setFilter(t.id)}
-                  className={`px-3 py-1 rounded transition-colors text-[11px] font-medium ${
+                  className={`px-3.5 py-1.5 rounded-xl transition-colors text-[11px] font-medium ${
                     filter === t.id
                       ? 'bg-white text-brand-ink shadow-xs font-semibold'
                       : 'text-brand-ink/60 hover:text-brand-ink'
@@ -248,46 +248,46 @@ export default function PracticePage() {
           </div>
 
           {filteredLogs.length === 0 ? (
-            <div className="p-10 rounded border border-brand-border/80 bg-brand-paper text-center space-y-2">
-              <span className="material-symbols-outlined text-[32px] text-brand-ink/30">inventory_2</span>
+            <div className="p-12 rounded-3xl border border-brand-border/80 bg-brand-paper text-center space-y-2">
+              <span className="material-symbols-outlined text-[36px] text-brand-ink/30">inventory_2</span>
               <p className="text-xs text-brand-ink/60">No practice sessions found for this filter.</p>
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {filteredLogs.map((log) => {
                 const meta = RESPONSE_TYPE_META[log.responseType] || RESPONSE_TYPE_META.no_response;
                 const d = new Date(log.createdAt || log.completedAt);
                 return (
                   <div
                     key={log.SK || log.eventId || log.practiceId}
-                    className="p-4 rounded border border-brand-border bg-brand-paper shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs"
+                    className="p-5 rounded-2xl border border-brand-border/70 bg-brand-paper shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs"
                   >
                     <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                      <div className={`p-2 rounded border ${meta.bg} ${meta.border} ${meta.color} shrink-0 mt-0.5`}>
-                        <span className="material-symbols-outlined text-[18px] block">{meta.icon}</span>
+                      <div className={`p-2.5 rounded-xl border ${meta.bg} ${meta.border} ${meta.color} shrink-0 mt-0.5`}>
+                        <span className="material-symbols-outlined text-[19px] block">{meta.icon}</span>
                       </div>
-                      <div className="space-y-1 flex-1 min-w-0">
+                      <div className="space-y-1.5 flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${meta.bg} ${meta.color}`}>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${meta.bg} ${meta.color}`}>
                             {meta.label}
                           </span>
                           <span className="font-semibold text-brand-ink truncate">
                             {log.targetObsession || log.exerciseId || 'Exposure Practice'}
                           </span>
                           {log.context && (
-                            <span className="text-[10px] text-brand-ink/50 bg-brand-canvas px-1.5 py-0.5 rounded border border-brand-border/40">
+                            <span className="text-[10px] text-brand-ink/60 bg-brand-canvas px-2 py-0.5 rounded-full border border-brand-border/60 font-medium">
                               {log.context}
                             </span>
                           )}
                         </div>
 
                         {log.notes && (
-                          <p className="text-brand-ink/70 italic text-[11px] leading-relaxed">
+                          <p className="text-brand-ink/75 italic text-[11px] leading-relaxed">
                             "{log.notes}"
                           </p>
                         )}
 
-                        <div className="text-[10px] text-brand-ink/40 font-mono">
+                        <div className="text-[10px] text-brand-ink/45 font-mono">
                           {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at{' '}
                           {d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                           {log.durationSeconds && ` • ${Math.round(log.durationSeconds / 60)} min duration`}
@@ -297,12 +297,12 @@ export default function PracticePage() {
 
                     {/* SUDS Shift Badge */}
                     <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
-                      <div className="flex items-center gap-1 font-mono text-xs">
-                        <span className="px-2 py-1 rounded bg-brand-coralSoft text-brand-coral font-bold">
+                      <div className="flex items-center gap-1.5 font-mono text-xs">
+                        <span className="px-2.5 py-1 rounded-xl bg-brand-coralSoft text-brand-coral font-bold shadow-2xs">
                           {log.preDistress ?? '—'}
                         </span>
-                        <span className="text-brand-ink/30">→</span>
-                        <span className="px-2 py-1 rounded bg-brand-softerTeal text-brand-teal font-bold">
+                        <span className="text-brand-ink/30 font-sans">→</span>
+                        <span className="px-2.5 py-1 rounded-xl bg-brand-softerTeal text-brand-teal font-bold shadow-2xs">
                           {log.postDistress ?? '—'}
                         </span>
                       </div>

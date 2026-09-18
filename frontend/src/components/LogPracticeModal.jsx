@@ -52,10 +52,10 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fade-in p-4 overflow-y-auto">
-      <div className="bg-brand-paper border border-brand-border rounded-md shadow-card-lift w-full max-w-lg p-6 sm:p-8 relative my-8">
+      <div className="bg-brand-paper border border-brand-border/70 rounded-3xl shadow-card-lift w-full max-w-lg p-6 sm:p-8 relative my-8">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-brand-ink/40 hover:text-brand-ink transition-colors p-1"
+          className="absolute top-5 right-5 text-brand-ink/40 hover:text-brand-ink transition-colors p-1"
           aria-label="Close modal"
         >
           <span className="material-symbols-outlined text-[20px]">close</span>
@@ -76,7 +76,7 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
         </p>
 
         {error && (
-          <div className="p-3 mb-4 rounded bg-brand-coralSoft border border-brand-coral/30 text-brand-coral text-xs">
+          <div className="p-3.5 mb-4 rounded-xl bg-brand-coralSoft border border-brand-coral/30 text-brand-coral text-xs">
             {error}
           </div>
         )}
@@ -84,7 +84,7 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
         {step === 1 && (
           <div className="space-y-5">
             {initialPlan && (
-              <div className="p-3 rounded bg-brand-softerTeal/60 border border-brand-teal/20 text-xs">
+              <div className="p-3.5 rounded-2xl bg-brand-softerTeal/60 border border-brand-teal/20 text-xs">
                 <span className="font-bold text-brand-teal uppercase tracking-wider text-[10px] block mb-0.5">
                   {initialPlan.type === 'clinician-assigned' ? 'Clinician-Assigned Guideline' : 'Practice Plan'}
                 </span>
@@ -101,7 +101,7 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
                 value={targetObsession}
                 onChange={(e) => setTargetObsession(e.target.value)}
                 placeholder="e.g. Touching kitchen doorknob, sending email without triple-checking"
-                className="w-full text-xs px-3.5 py-2.5 rounded border border-brand-border bg-brand-canvas/60 text-brand-ink focus:outline-none focus:border-brand-teal"
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-brand-border bg-brand-canvas/60 text-brand-ink focus:outline-none focus:border-brand-teal"
               />
             </div>
 
@@ -115,9 +115,9 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
                     key={c}
                     type="button"
                     onClick={() => setContext(c)}
-                    className={`px-3 py-1.5 rounded text-xs transition-colors ${
+                    className={`px-3.5 py-1.5 rounded-xl text-xs transition-colors ${
                       context === c
-                        ? 'bg-brand-ink text-white font-medium'
+                        ? 'bg-brand-ink text-white font-medium shadow-xs'
                         : 'bg-brand-canvas text-brand-ink/70 border border-brand-border hover:border-brand-ink/30'
                     }`}
                   >
@@ -142,7 +142,7 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
                 max="10"
                 value={preDistress}
                 onChange={(e) => setPreDistress(Number(e.target.value))}
-                className="w-full h-2 bg-brand-canvas rounded-lg appearance-none cursor-pointer accent-brand-coral"
+                className="w-full h-2 bg-brand-canvas rounded-full appearance-none cursor-pointer accent-brand-coral"
               />
               <div className="flex justify-between text-[10px] text-brand-ink/40 font-mono mt-1">
                 <span>0 (Calm)</span>
@@ -162,7 +162,7 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="px-5 py-2 rounded bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-sm"
+                className="px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-sm"
               >
                 Continue to Response Prevention →
               </button>
@@ -176,15 +176,15 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
               <label className="block text-xs font-semibold text-brand-ink uppercase tracking-wider mb-2">
                 Response Prevention Choice
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {RESPONSE_OPTIONS.map((opt) => (
                   <button
                     key={opt.id}
                     type="button"
                     onClick={() => setResponseType(opt.id)}
-                    className={`p-3 rounded border text-left transition-all ${
+                    className={`p-3.5 rounded-2xl border text-left transition-all ${
                       responseType === opt.id
-                        ? `${opt.color} ring-1 ring-current font-medium`
+                        ? `${opt.color} ring-1 ring-current font-medium shadow-xs`
                         : 'border-brand-border/70 bg-brand-paper hover:bg-brand-canvas text-brand-ink/70'
                     }`}
                   >
@@ -206,7 +206,7 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
                   max="180"
                   value={durationMinutes}
                   onChange={(e) => setDurationMinutes(Math.max(1, Number(e.target.value)))}
-                  className="w-full text-xs font-mono px-3.5 py-2.5 rounded border border-brand-border bg-brand-canvas/60 text-brand-ink focus:outline-none focus:border-brand-teal"
+                  className="w-full text-xs font-mono px-3.5 py-2.5 rounded-xl border border-brand-border bg-brand-canvas/60 text-brand-ink focus:outline-none focus:border-brand-teal"
                 />
               </div>
 
@@ -225,7 +225,7 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
                   max="10"
                   value={postDistress}
                   onChange={(e) => setPostDistress(Number(e.target.value))}
-                  className="w-full h-2 bg-brand-canvas rounded-lg appearance-none cursor-pointer accent-brand-teal"
+                  className="w-full h-2 bg-brand-canvas rounded-full appearance-none cursor-pointer accent-brand-teal"
                 />
               </div>
             </div>
@@ -239,7 +239,7 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 placeholder="e.g. Anxiety peaked for about 7 minutes, then settled. Discovered I could tolerate the doubt without checking."
-                className="w-full text-xs px-3.5 py-2.5 rounded border border-brand-border bg-brand-canvas/60 text-brand-ink focus:outline-none focus:border-brand-teal"
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-brand-border bg-brand-canvas/60 text-brand-ink focus:outline-none focus:border-brand-teal"
               />
             </div>
 
@@ -248,7 +248,7 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
                 type="button"
                 onClick={() => setStep(1)}
                 disabled={saving}
-                className="px-3 py-2 text-xs font-medium text-brand-ink/60 hover:text-brand-ink transition-colors"
+                className="px-3.5 py-2 text-xs font-medium text-brand-ink/60 hover:text-brand-ink transition-colors"
               >
                 ← Back
               </button>
@@ -265,7 +265,7 @@ export default function LogPracticeModal({ userId, initialPlan, onClose, onSaved
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-5 py-2 rounded bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
                 >
                   {saving ? 'Logging...' : 'Save Exposure Practice'}
                 </button>

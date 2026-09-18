@@ -49,17 +49,17 @@ export default function CrisisBanner() {
 
       {expanded && (
         <div className="max-w-7xl mx-auto pt-3 pb-1 border-t border-brand-border/40 mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-in text-[11px]">
-          <div className="p-2.5 rounded bg-brand-canvas border border-brand-border/40">
+          <div className="p-3 rounded-2xl bg-brand-canvas border border-brand-border/60">
             <p className="font-bold text-brand-ink">Tele-MANAS (Govt of India)</p>
             <p className="text-brand-ink/60 mt-0.5">National tele-mental health programme, 24/7 toll-free in 20+ languages.</p>
             <p className="font-mono font-bold text-brand-teal mt-1">14416 / 1800-891-4416</p>
           </div>
-          <div className="p-2.5 rounded bg-brand-canvas border border-brand-border/40">
+          <div className="p-3 rounded-2xl bg-brand-canvas border border-brand-border/60">
             <p className="font-bold text-brand-ink">Kiran Mental Health Helpline</p>
             <p className="text-brand-ink/60 mt-0.5">Ministry of Social Justice and Empowerment 24/7 helpline.</p>
             <p className="font-mono font-bold text-brand-teal mt-1">1800-599-0019</p>
           </div>
-          <div className="p-2.5 rounded bg-brand-canvas border border-brand-border/40">
+          <div className="p-3 rounded-2xl bg-brand-canvas border border-brand-border/60">
             <p className="font-bold text-brand-ink">Vandrevala Foundation</p>
             <p className="text-brand-ink/60 mt-0.5">Free, confidential mental health counseling via call or WhatsApp.</p>
             <p className="font-mono font-bold text-brand-teal mt-1">+91 9999 666 555</p>

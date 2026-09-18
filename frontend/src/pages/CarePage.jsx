@@ -130,10 +130,10 @@ export default function CarePage() {
       {/* ── Connect Modal ────────────────────────────────────────────────── */}
       {showConnectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-brand-paper border border-brand-border rounded-md shadow-card-lift w-full max-w-md p-6 relative">
+          <div className="bg-brand-paper border border-brand-border/70 rounded-3xl shadow-card-lift w-full max-w-md p-6 sm:p-8 relative">
             <button
               onClick={() => setShowConnectModal(false)}
-              className="absolute top-4 right-4 text-brand-ink/40 hover:text-brand-ink"
+              className="absolute top-5 right-5 text-brand-ink/40 hover:text-brand-ink"
             >
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
@@ -151,7 +151,7 @@ export default function CarePage() {
             </p>
 
             {connectError && (
-              <div className="p-2.5 rounded bg-brand-coralSoft text-brand-coral text-xs mb-3">
+              <div className="p-3 rounded-xl bg-brand-coralSoft text-brand-coral text-xs mb-3">
                 {connectError}
               </div>
             )}
@@ -166,7 +166,7 @@ export default function CarePage() {
                   value={selectedPractitionerId}
                   onChange={(e) => setSelectedPractitionerId(e.target.value)}
                   placeholder="e.g. MCI-2024-KM-7741"
-                  className="w-full text-xs font-mono px-3 py-2 rounded border border-brand-border bg-brand-canvas text-brand-ink focus:outline-none focus:border-brand-teal"
+                  className="w-full text-xs font-mono px-3.5 py-2.5 rounded-xl border border-brand-border bg-brand-canvas text-brand-ink focus:outline-none focus:border-brand-teal"
                 />
               </div>
 
@@ -179,12 +179,12 @@ export default function CarePage() {
                   onChange={(e) => setConnectMessage(e.target.value)}
                   rows={3}
                   placeholder="e.g. Hi Dr. Mehra, I have been using Between Sessions to log my ERP practice and would like to share my progress."
-                  className="w-full text-xs px-3 py-2 rounded border border-brand-border bg-brand-canvas text-brand-ink focus:outline-none focus:border-brand-teal"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-brand-border bg-brand-canvas text-brand-ink focus:outline-none focus:border-brand-teal"
                 />
               </div>
 
-              <div className="p-3 rounded bg-brand-softerTeal text-[11px] text-brand-ink/75 flex items-start gap-2">
-                <span className="material-symbols-outlined text-[16px] text-brand-teal shrink-0 mt-0.5">lock</span>
+              <div className="p-3.5 rounded-xl bg-brand-softerTeal text-[11px] text-brand-ink/75 flex items-start gap-2.5">
+                <span className="material-symbols-outlined text-[17px] text-brand-teal shrink-0 mt-0.5">lock</span>
                 <span>You maintain 100% control over what data your clinician sees via AWS Cedar WASM authorization.</span>
               </div>
 
@@ -192,7 +192,7 @@ export default function CarePage() {
                 <button
                   type="button"
                   onClick={() => setShowConnectModal(false)}
-                  className="px-3 py-1.5 text-xs text-brand-ink/60 hover:text-brand-ink"
+                  className="px-4 py-2 text-xs text-brand-ink/60 hover:text-brand-ink"
                 >
                   Cancel
                 </button>
@@ -200,7 +200,7 @@ export default function CarePage() {
                   type="button"
                   onClick={handleSendConnectRequest}
                   disabled={sendingConnect}
-                  className="px-4 py-2 rounded bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium shadow-xs disabled:opacity-50"
                 >
                   {sendingConnect ? 'Sending...' : 'Send Request'}
                 </button>
@@ -232,7 +232,7 @@ export default function CarePage() {
               setSelectedPractitionerId('MCI-2024-KM-7741');
               setShowConnectModal(true);
             }}
-            className="self-start sm:self-auto px-4 py-2 rounded bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-xs flex items-center gap-1.5"
+            className="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-xs flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-[16px]">person_add</span>
             <span>Connect Clinician</span>
@@ -245,9 +245,9 @@ export default function CarePage() {
 
             {/* Clinician Card & Recommendations (Col 1-7) */}
             <div className="lg:col-span-7 space-y-5">
-              <div className="bg-brand-paper border border-brand-border rounded p-6 shadow-card-lift space-y-4">
+              <div className="bg-brand-paper border border-brand-border/70 rounded-3xl p-6 sm:p-7 shadow-card-lift space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-brand-softSuccess text-clinical-success border border-clinical-success/30">
+                  <span className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full bg-brand-softSuccess text-clinical-success border border-clinical-success/30">
                     Active Clinical Connection
                   </span>
                   <span className="text-xs font-mono text-brand-ink/50">
@@ -256,7 +256,7 @@ export default function CarePage() {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-brand-teal text-white flex items-center justify-center font-editorial text-xl font-bold shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-teal text-white flex items-center justify-center font-editorial text-xl font-bold shrink-0 shadow-xs">
                     KM
                   </div>
                   <div>
@@ -272,21 +272,21 @@ export default function CarePage() {
                   </div>
                 </div>
 
-                <div className="p-3 rounded bg-brand-canvas border border-brand-border/60 text-xs text-brand-ink/75 leading-relaxed">
+                <div className="p-3.5 rounded-2xl bg-brand-canvas border border-brand-border/60 text-xs text-brand-ink/75 leading-relaxed">
                   Connected since {new Date(activeConnection.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}. Dr. Mehra can view only the categories you explicitly grant below.
                 </div>
               </div>
 
               {/* Clinical Recommendations from Practitioner */}
-              <div className="bg-brand-paper border border-brand-border rounded p-6 shadow-card-lift space-y-3">
+              <div className="bg-brand-paper border border-brand-border/70 rounded-3xl p-6 sm:p-7 shadow-card-lift space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px] text-brand-teal">clinical_notes</span>
-                    <h3 className="font-editorial text-xl text-brand-ink font-medium">
+                    <span className="material-symbols-outlined text-[20px] text-brand-teal">clinical_notes</span>
+                    <h3 className="font-editorial text-xl sm:text-2xl text-brand-ink font-medium">
                       Practitioner Guidance
                     </h3>
                   </div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-brand-teal px-2 py-0.5 rounded bg-brand-softerTeal">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-brand-teal px-3 py-1 rounded-full bg-brand-softerTeal border border-brand-teal/20">
                     Human Authored
                   </span>
                 </div>
@@ -296,7 +296,7 @@ export default function CarePage() {
                     {recommendations.map((rec) => (
                       <div
                         key={rec.SK || rec.recommendationId}
-                        className="p-4 rounded bg-brand-softerTeal/50 border border-brand-teal/30 space-y-2 text-xs"
+                        className="p-5 rounded-2xl bg-brand-softerTeal/50 border border-brand-teal/30 space-y-2.5 text-xs"
                       >
                         {rec.observation && (
                           <div>
@@ -328,18 +328,18 @@ export default function CarePage() {
 
             {/* Granular Consent Controls & Cedar WASM Gating (Col 8-12) */}
             <div className="lg:col-span-5 space-y-5">
-              <div className="bg-brand-paper border border-brand-border rounded p-6 shadow-card-lift space-y-4">
+              <div className="bg-brand-paper border border-brand-border/70 rounded-3xl p-6 sm:p-7 shadow-card-lift space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-2 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-3 py-1 rounded-full bg-brand-softerTeal border border-brand-teal/20">
                       Data Sovereignty
                     </span>
                     <span className="text-xs font-mono text-brand-ink/40">Granular Switches</span>
                   </div>
-                  <h3 className="font-editorial text-xl text-brand-ink font-medium">
+                  <h3 className="font-editorial text-2xl text-brand-ink font-medium">
                     Consent Gating
                   </h3>
-                  <p className="text-xs text-brand-ink/60">
+                  <p className="text-xs text-brand-ink/60 mt-0.5">
                     Toggle individual data streams. Revocation is enforced instantly.
                   </p>
                 </div>
@@ -352,7 +352,7 @@ export default function CarePage() {
                     return (
                       <div
                         key={cat.id}
-                        className={`p-3 rounded border transition-colors flex items-center justify-between ${
+                        className={`p-3.5 rounded-2xl border transition-colors flex items-center justify-between ${
                           isGranted ? 'bg-brand-canvas/80 border-brand-border' : 'bg-brand-canvas/30 border-brand-border/40 opacity-70'
                         }`}
                       >
@@ -385,7 +385,7 @@ export default function CarePage() {
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-brand-ink">Cedar WASM Engine:</span>
                     <span
-                      className={`font-mono text-[11px] font-bold px-2 py-0.5 rounded ${
+                      className={`font-mono text-[11px] font-bold px-2.5 py-1 rounded-full ${
                         cedarEval?.allowed
                           ? 'bg-brand-softSuccess text-clinical-success'
                           : 'bg-brand-coralSoft text-brand-coral'
@@ -404,10 +404,10 @@ export default function CarePage() {
           </div>
         ) : (
           /* Unconnected State: Directory Search */
-          <div className="space-y-4">
-            <div className="p-6 rounded bg-brand-paper border border-brand-border shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-5">
+            <div className="p-6 sm:p-7 rounded-3xl bg-brand-paper border border-brand-border/70 shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-2.5 py-0.5 rounded-full bg-brand-amberSoft border border-brand-amber/30">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-3 py-1 rounded-full bg-brand-amberSoft border border-brand-amber/30">
                   Not Yet Connected
                 </span>
                 <h2 className="font-editorial text-2xl text-brand-ink font-medium">
@@ -423,7 +423,7 @@ export default function CarePage() {
                   setSelectedPractitionerId('MCI-2024-KM-7741');
                   setShowConnectModal(true);
                 }}
-                className="px-4 py-2 rounded bg-brand-teal text-white text-xs font-medium hover:bg-brand-tealDark transition-colors shrink-0 shadow-xs"
+                className="px-5 py-2.5 rounded-xl bg-brand-teal text-white text-xs font-medium hover:bg-brand-tealDark transition-colors shrink-0 shadow-xs"
               >
                 Send Request to Dr. Mehra
               </button>
@@ -431,22 +431,22 @@ export default function CarePage() {
 
             {/* Directory Cards */}
             <div className="space-y-3 pt-2">
-              <h3 className="font-editorial text-xl text-brand-ink font-medium">Verified Public Directory</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <h3 className="font-editorial text-2xl text-brand-ink font-medium">Verified Public Directory</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {(directory || []).map((prac) => (
                   <div
                     key={prac.id}
-                    className="p-5 rounded bg-brand-paper border border-brand-border shadow-card-lift flex flex-col justify-between space-y-3"
+                    className="p-6 rounded-3xl bg-brand-paper border border-brand-border/70 shadow-card-lift flex flex-col justify-between space-y-4"
                   >
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-brand-softSuccess text-clinical-success border border-clinical-success/30">
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-brand-softSuccess text-clinical-success border border-clinical-success/30">
                           Verified Practitioner
                         </span>
                         <span className="text-[11px] font-mono text-brand-ink/40">ID: {prac.id}</span>
                       </div>
 
-                      <h4 className="font-editorial text-xl text-brand-ink font-medium">
+                      <h4 className="font-editorial text-2xl text-brand-ink font-medium">
                         {prac.name}
                       </h4>
                       <p className="text-xs text-brand-ink/70">{prac.credentials}</p>
@@ -455,7 +455,7 @@ export default function CarePage() {
                         {(prac.specialisation || []).map((spec) => (
                           <span
                             key={spec}
-                            className="text-[10px] px-2 py-0.5 rounded bg-brand-canvas border border-brand-border text-brand-ink/70 font-medium"
+                            className="text-[10px] px-2.5 py-0.5 rounded-full bg-brand-canvas border border-brand-border text-brand-ink/70 font-medium"
                           >
                             {spec}
                           </span>
@@ -472,7 +472,7 @@ export default function CarePage() {
                           setSelectedPractitionerId(prac.id);
                           setShowConnectModal(true);
                         }}
-                        className="px-3 py-1.5 rounded bg-brand-softerTeal hover:bg-brand-teal hover:text-white text-brand-teal text-xs font-semibold transition-colors"
+                        className="px-4 py-2 rounded-xl bg-brand-softerTeal hover:bg-brand-teal hover:text-white text-brand-teal text-xs font-semibold transition-colors"
                       >
                         Request Connection
                       </button>
@@ -485,35 +485,35 @@ export default function CarePage() {
         )}
 
         {/* ── Persistent Crisis Resources Sanctuary ───────────────────────── */}
-        <div className="p-6 rounded bg-brand-paper border border-brand-border shadow-card-lift space-y-3">
+        <div className="p-6 sm:p-8 rounded-3xl bg-brand-paper border border-brand-border/70 shadow-card-lift space-y-3.5">
           <div className="flex items-center gap-2 text-brand-coral font-bold text-xs uppercase tracking-wider">
             <span className="material-symbols-outlined text-[18px]">support_agent</span>
             <span>24/7 Immediate Crisis Support</span>
           </div>
-          <h3 className="font-editorial text-2xl text-brand-ink font-medium">
+          <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
             Professional & Emergency Helplines
           </h3>
-          <p className="text-xs text-brand-ink/70 leading-relaxed max-w-3xl">
+          <p className="text-xs sm:text-sm text-brand-ink/70 leading-relaxed max-w-3xl">
             Between Sessions is an intentional between-session behavioral companion, not an emergency clinical or suicide intervention service. If you are in immediate distress or crisis, please contact verified emergency counselors immediately:
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
-            <div className="p-3 rounded bg-brand-canvas border border-brand-border">
-              <span className="font-bold text-brand-ink block">Tele-MANAS (Govt of India)</span>
-              <span className="text-brand-ink/60 text-[11px] block mt-0.5">National tele-mental health helpline. Toll-free 24/7.</span>
-              <a href="tel:14416" className="font-mono font-bold text-brand-teal text-sm block mt-1">14416 / 1800-891-4416</a>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2 text-xs">
+            <div className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/80 space-y-1">
+              <span className="font-bold text-brand-ink block text-sm">Tele-MANAS (Govt of India)</span>
+              <span className="text-brand-ink/65 text-[11px] block">National tele-mental health helpline. Toll-free 24/7.</span>
+              <a href="tel:14416" className="font-mono font-bold text-brand-teal text-sm block pt-1">14416 / 1800-891-4416</a>
             </div>
 
-            <div className="p-3 rounded bg-brand-canvas border border-brand-border">
-              <span className="font-bold text-brand-ink block">Kiran Helpline</span>
-              <span className="text-brand-ink/60 text-[11px] block mt-0.5">24/7 National mental health helpline by MSJE.</span>
-              <a href="tel:18005990019" className="font-mono font-bold text-brand-teal text-sm block mt-1">1800-599-0019</a>
+            <div className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/80 space-y-1">
+              <span className="font-bold text-brand-ink block text-sm">Kiran Helpline</span>
+              <span className="text-brand-ink/65 text-[11px] block">24/7 National mental health helpline by MSJE.</span>
+              <a href="tel:18005990019" className="font-mono font-bold text-brand-teal text-sm block pt-1">1800-599-0019</a>
             </div>
 
-            <div className="p-3 rounded bg-brand-canvas border border-brand-border">
-              <span className="font-bold text-brand-ink block">Vandrevala Foundation</span>
-              <span className="text-brand-ink/60 text-[11px] block mt-0.5">Free 24/7 crisis counseling via phone or WhatsApp.</span>
-              <a href="tel:+919999666555" className="font-mono font-bold text-brand-teal text-sm block mt-1">+91 9999 666 555</a>
+            <div className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/80 space-y-1">
+              <span className="font-bold text-brand-ink block text-sm">Vandrevala Foundation</span>
+              <span className="text-brand-ink/65 text-[11px] block">Free 24/7 crisis counseling via phone or WhatsApp.</span>
+              <a href="tel:+919999666555" className="font-mono font-bold text-brand-teal text-sm block pt-1">+91 9999 666 555</a>
             </div>
           </div>
         </div>

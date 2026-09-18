@@ -284,11 +284,11 @@ function PatientView({ patient, onBack }) {
         </button>
       </header>
 
-      <div className="bg-brand-paper rounded border border-brand-border p-6 sm:p-8 shadow-card-lift">
+      <div className="bg-brand-paper rounded-3xl border border-brand-border/60 p-6 sm:p-8 shadow-card-lift">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-brand-teal px-2 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-brand-teal px-2.5 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
                 Patient Continuity Profile
               </span>
               <span className="font-mono text-xs text-brand-ink/40">
@@ -312,7 +312,7 @@ function PatientView({ patient, onBack }) {
                 {(summary?.patientProfile?.values || patient.values || []).map((v) => (
                   <span
                     key={v}
-                    className="text-[10px] px-2 py-0.5 rounded bg-brand-amberSoft text-brand-amber font-medium border border-brand-amber/20"
+                    className="text-[10px] px-2.5 py-0.5 rounded-full bg-brand-amberSoft text-brand-amber font-medium border border-brand-amber/20"
                   >
                     {v}
                   </span>
@@ -969,9 +969,9 @@ export default function PractitionerDashboardPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Card 1: Active Patients */}
-                  <div className="bg-brand-amberSoft border border-brand-amber/40 rounded p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                  <div className="bg-brand-amberSoft border border-brand-amber/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-2 py-0.5 rounded-full bg-white/80 border border-brand-amber/30">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-amber/30">
                         Patients
                       </span>
                       <span className="material-symbols-outlined text-[18px] text-brand-amber">group</span>
@@ -990,9 +990,9 @@ export default function PractitionerDashboardPage() {
                   </div>
 
                   {/* Card 2: Pending Requests */}
-                  <div className="bg-brand-coralSoft border border-brand-coral/40 rounded p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                  <div className="bg-brand-coralSoft border border-brand-coral/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-2 py-0.5 rounded-full bg-white/80 border border-brand-coral/30">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-coral/30">
                         Pending
                       </span>
                       <span className="material-symbols-outlined text-[18px] text-brand-coral">person_add</span>
@@ -1011,9 +1011,9 @@ export default function PractitionerDashboardPage() {
                   </div>
 
                   {/* Card 3: Exposure Protocols */}
-                  <div className="bg-brand-softerTeal border border-brand-teal/40 rounded p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                  <div className="bg-brand-softerTeal border border-brand-teal/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-2 py-0.5 rounded-full bg-white/80 border border-brand-teal/30">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-teal/30">
                         Protocols
                       </span>
                       <span className="material-symbols-outlined text-[18px] text-brand-teal">clinical_notes</span>
@@ -1032,9 +1032,9 @@ export default function PractitionerDashboardPage() {
                   </div>
 
                   {/* Card 4: Cedar WASM Policy Engine */}
-                  <div className="bg-brand-lavenderSoft border border-brand-lavender/40 rounded p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                  <div className="bg-brand-lavenderSoft border border-brand-lavender/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-lavender px-2 py-0.5 rounded-full bg-white/80 border border-brand-lavender/30">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-lavender px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-lavender/30">
                         Cedar WASM
                       </span>
                       <span className="material-symbols-outlined text-[18px] text-brand-lavender">verified_user</span>
@@ -1055,7 +1055,7 @@ export default function PractitionerDashboardPage() {
               )}
 
               {/* ── Pending requests panel ────────────────────────────── */}
-              <section className="bg-brand-paper rounded border border-brand-border p-6 shadow-card-lift space-y-4">
+              <section className="bg-brand-paper rounded-3xl border border-brand-border/60 p-6 sm:p-8 shadow-card-lift space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-brand-coral">
                     <span className="material-symbols-outlined text-[20px]">person_add</span>
@@ -1090,7 +1090,7 @@ export default function PractitionerDashboardPage() {
                       return (
                         <div
                           key={req.userId}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded bg-brand-canvas border border-brand-border/60"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-brand-canvas border border-brand-border/60"
                         >
                           <div className="flex-1 min-w-0 space-y-1">
                             <div className="flex items-center gap-2">
@@ -1110,7 +1110,7 @@ export default function PractitionerDashboardPage() {
                             )}
                           </div>
                           {done ? (
-                            <span className="px-3 py-1.5 rounded bg-brand-softSuccess text-clinical-success text-xs font-bold shrink-0">
+                            <span className="px-3 py-1.5 rounded-full bg-brand-softSuccess text-clinical-success text-xs font-bold shrink-0">
                               ✓ Accepted
                             </span>
                           ) : typeof actionState === 'string' &&
@@ -1124,14 +1124,14 @@ export default function PractitionerDashboardPage() {
                               <button
                                 onClick={() => handleAccept(req.userId)}
                                 disabled={busy}
-                                className="px-4 py-1.5 rounded bg-brand-teal text-white text-xs font-medium hover:bg-brand-tealDark transition-colors shadow-xs disabled:opacity-60"
+                                className="px-4 py-1.5 rounded-xl bg-brand-teal text-white text-xs font-medium hover:bg-brand-tealDark transition-colors shadow-xs disabled:opacity-60"
                               >
                                 {actionState === 'accepting' ? 'Accepting…' : 'Accept Request'}
                               </button>
                               <button
                                 onClick={() => handleDecline(req.userId)}
                                 disabled={busy}
-                                className="px-3 py-1.5 rounded border border-brand-border text-brand-ink/60 text-xs font-medium hover:text-brand-coral hover:border-brand-coral transition-colors disabled:opacity-60"
+                                className="px-3 py-1.5 rounded-xl border border-brand-border text-brand-ink/60 text-xs font-medium hover:text-brand-coral hover:border-brand-coral transition-colors disabled:opacity-60"
                               >
                                 {actionState === 'declining' ? 'Declining…' : 'Decline'}
                               </button>
@@ -1145,7 +1145,7 @@ export default function PractitionerDashboardPage() {
               </section>
 
               {/* ── Active patients list ──────────────────────────────── */}
-              <section className="bg-brand-paper rounded border border-brand-border p-6 shadow-card-lift space-y-4">
+              <section className="bg-brand-paper rounded-3xl border border-brand-border/60 p-6 sm:p-8 shadow-card-lift space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-brand-teal">
                     <span className="material-symbols-outlined text-[20px]">groups</span>
@@ -1180,12 +1180,12 @@ export default function PractitionerDashboardPage() {
                       return (
                         <div
                           key={patient.userId}
-                          className="p-5 rounded border border-brand-border bg-brand-canvas hover:border-brand-teal/40 transition-all flex flex-col justify-between space-y-3 group shadow-xs"
+                          className="p-5 rounded-3xl border border-brand-border bg-brand-canvas hover:border-brand-teal/40 transition-all flex flex-col justify-between space-y-3 group shadow-xs"
                         >
                           <div className="space-y-2">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded bg-brand-teal text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                <div className="w-10 h-10 rounded-2xl bg-brand-teal text-white flex items-center justify-center font-bold text-sm shrink-0">
                                   {displayName.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
@@ -1212,7 +1212,7 @@ export default function PractitionerDashboardPage() {
                                   {patientValues.map((v) => (
                                     <span
                                       key={v}
-                                      className="text-[10px] px-2 py-0.5 rounded bg-brand-amberSoft text-brand-amber font-medium border border-brand-amber/20"
+                                      className="text-[10px] px-2.5 py-0.5 rounded-full bg-brand-amberSoft text-brand-amber font-medium border border-brand-amber/20"
                                     >
                                       {v}
                                     </span>
@@ -1231,7 +1231,7 @@ export default function PractitionerDashboardPage() {
                                   {patient.consentedCategories.map((cat) => (
                                     <span
                                       key={cat}
-                                      className="text-[9px] font-mono px-2 py-0.5 rounded bg-brand-softerTeal text-brand-teal border border-brand-teal/20"
+                                      className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20"
                                     >
                                       {cat}
                                     </span>
@@ -1247,7 +1247,7 @@ export default function PractitionerDashboardPage() {
                             </span>
                             <button
                               onClick={() => openPatient(patient)}
-                              className="px-3.5 py-1.5 rounded bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors flex items-center gap-1 shadow-xs"
+                              className="px-3.5 py-1.5 rounded-xl bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors flex items-center gap-1 shadow-xs"
                             >
                               <span>Review Patient</span>
                               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>

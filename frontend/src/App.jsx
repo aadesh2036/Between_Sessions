@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import PractitionerProtectedRoute from './components/PractitionerProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import OnboardingFlow from './pages/OnboardingFlow';
@@ -21,9 +22,16 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Practitioner auth + dashboard */}
+          {/* Practitioner auth + protected dashboard */}
           <Route path="/practitioner/login" element={<LoginPage practitionerMode />} />
-          <Route path="/practitioner/*" element={<PractitionerDashboardPage />} />
+          <Route
+            path="/practitioner/*"
+            element={
+              <PractitionerProtectedRoute>
+                <PractitionerDashboardPage />
+              </PractitionerProtectedRoute>
+            }
+          />
 
           {/* Onboarding */}
           <Route path="/onboarding" element={

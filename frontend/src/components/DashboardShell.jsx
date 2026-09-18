@@ -46,75 +46,49 @@ export default function DashboardShell({ children, onDataRefresh }) {
         )}
 
         {/* ── Mobile Top Bar ────────────────────────────────────────────── */}
-        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-brand-border/60 sticky top-[37px] z-20">
+        <div className="md:hidden flex items-center justify-between px-4 py-2.5 bg-white/95 backdrop-blur-md border-b border-brand-border/60 sticky top-[37px] z-20 shadow-xs">
           <Logo />
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowCheckin(true)}
-              className="px-2.5 py-1.5 rounded-full bg-brand-softerTeal text-brand-teal text-[11px] font-semibold flex items-center gap-1"
+              className="px-3 py-1.5 rounded-full bg-brand-softerTeal hover:bg-brand-teal hover:text-white text-brand-teal text-[11px] font-semibold flex items-center gap-1.5 transition-all shadow-xs"
             >
-              <span className="material-symbols-outlined text-[14px]">monitor_heart</span>
-              Check-in
+              <span className="material-symbols-outlined text-[15px]">monitor_heart</span>
+              <span>Check-in</span>
             </button>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1.5 text-brand-ink/70 hover:text-brand-ink"
-              aria-label="Toggle navigation"
+            <Link
+              to="/app/settings"
+              className="w-8 h-8 rounded-full bg-brand-canvas border border-brand-border flex items-center justify-center text-brand-ink/70 hover:text-brand-teal hover:border-brand-teal transition-all"
+              title="Settings"
             >
-              <span className="material-symbols-outlined text-[24px]">
-                {mobileMenuOpen ? 'close' : 'menu'}
-              </span>
-            </button>
+              <span className="material-symbols-outlined text-[18px]">settings</span>
+            </Link>
           </div>
         </div>
 
-        {/* ── Mobile Dropdown Nav ────────────────────────────────────────── */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-b border-brand-border px-4 py-3 space-y-1 z-20 animate-fade-in">
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center justify-between px-3 py-2.5 rounded text-sm transition-colors ${
-                    isActive
-                      ? 'bg-brand-softerTeal text-brand-teal font-semibold'
-                      : 'text-brand-ink/70 hover:bg-brand-canvas hover:text-brand-ink font-medium'
-                  }`
-                }
-              >
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
-                  <span>{item.label}</span>
-                </div>
-                {item.badge && (
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white text-brand-teal border border-brand-teal/20">
-                    {item.badge}
-                  </span>
-                )}
-              </NavLink>
-            ))}
-            <div className="pt-2 border-t border-brand-border/40 flex items-center justify-between">
-              <Link
-                to="/app/settings"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-xs text-brand-ink/60 hover:text-brand-ink flex items-center gap-1.5"
-              >
-                <span className="material-symbols-outlined text-[16px]">settings</span>
-                Settings
-              </Link>
-              <button
-                onClick={logout}
-                className="text-xs text-brand-coral hover:underline flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-[16px]">logout</span>
-                Sign out
-              </button>
-            </div>
-          </div>
-        )}
+        {/* ── Mobile Fixed Bottom Navigation (Phone Reference Parity) ────── */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-brand-border/70 py-1 px-2 flex justify-around items-center shadow-[0_-4px_24px_rgba(23,50,58,0.06)]">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all relative ${
+                  isActive
+                    ? 'text-brand-teal bg-brand-softerTeal font-semibold scale-105'
+                    : 'text-brand-ink/60 hover:text-brand-ink hover:bg-brand-canvas font-medium'
+                }`
+              }
+            >
+              <span className="material-symbols-outlined text-[22px] leading-none">{item.icon}</span>
+              <span className="text-[10px] mt-0.5 tracking-tight">{item.label}</span>
+              {item.badge && (
+                <span className="absolute top-1 right-2 w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+              )}
+            </NavLink>
+          ))}
+        </nav>
 
         {/* ── Desktop Sticky Sidebar ────────────────────────────────────── */}
         <aside className="hidden md:flex w-[240px] lg:w-[260px] bg-white border-r border-brand-border/60 shrink-0 flex-col sticky top-[37px] h-[calc(100vh-37px)] z-20">
@@ -134,7 +108,7 @@ export default function DashboardShell({ children, onDataRefresh }) {
                     to={item.to}
                     end={item.end}
                     className={({ isActive }) =>
-                      `flex items-center justify-between px-3 py-2.5 rounded transition-all group ${
+                      `flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all group ${
                         isActive
                           ? 'bg-brand-softerTeal text-brand-teal font-semibold shadow-xs'
                           : 'text-brand-ink/70 hover:bg-brand-canvas hover:text-brand-ink font-medium'
@@ -159,7 +133,7 @@ export default function DashboardShell({ children, onDataRefresh }) {
             <div className="pt-2 border-t border-brand-border/40 space-y-2">
               <button
                 onClick={() => setShowCheckin(true)}
-                className="w-full py-2 px-3 rounded border border-brand-border/80 hover:border-brand-teal hover:bg-brand-softerTeal/40 text-brand-ink text-xs font-medium transition-colors flex items-center justify-between"
+                className="w-full py-2.5 px-3.5 rounded-xl border border-brand-border/80 hover:border-brand-teal hover:bg-brand-softerTeal/40 text-brand-ink text-xs font-medium transition-colors flex items-center justify-between"
               >
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-[16px] text-brand-teal">monitor_heart</span>
@@ -170,7 +144,7 @@ export default function DashboardShell({ children, onDataRefresh }) {
 
               <button
                 onClick={() => setShowPractice(true)}
-                className="w-full py-2 px-3 rounded bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-xs flex items-center justify-between"
+                className="w-full py-2.5 px-3.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-xs flex items-center justify-between"
               >
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-[16px]">add_task</span>
@@ -209,8 +183,8 @@ export default function DashboardShell({ children, onDataRefresh }) {
           </div>
         </aside>
 
-        {/* ── Main Viewport Content ─────────────────────────────────────── */}
-        <main className="flex-1 min-w-0 bg-brand-canvas relative overflow-y-auto">
+        {/* ── Main Viewport Content (Padding bottom for mobile bottom nav) ── */}
+        <main className="flex-1 min-w-0 bg-brand-canvas relative overflow-y-auto pb-28 md:pb-8">
           {children}
         </main>
       </div>

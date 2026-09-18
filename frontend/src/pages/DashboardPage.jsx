@@ -176,7 +176,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setShowCheckinModal(true)}
-              className="px-3.5 py-2 rounded border border-brand-border bg-brand-paper hover:bg-brand-canvas text-brand-ink text-xs font-medium transition-colors shadow-xs flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-xl border border-brand-border/80 bg-brand-paper hover:bg-brand-canvas text-brand-ink text-xs font-medium transition-all shadow-xs flex items-center gap-1.5"
             >
               <span className="material-symbols-outlined text-[16px] text-brand-teal">monitor_heart</span>
               <span>Check-in</span>
@@ -186,7 +186,7 @@ export default function DashboardPage() {
                 setSelectedPlanForModal(activePractice);
                 setShowPracticeModal(true);
               }}
-              className="px-4 py-2 rounded bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-xs flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-all shadow-xs flex items-center gap-1.5"
             >
               <span className="material-symbols-outlined text-[16px]">add_task</span>
               <span>Log Practice</span>
@@ -196,13 +196,13 @@ export default function DashboardPage() {
 
         {/* ── Practitioner Discovery Banner (if unconnected) ──────────────── */}
         {hasConnection === false && (
-          <div className="p-4 bg-brand-softerTeal/70 border border-brand-teal/20 rounded flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-fade-in shadow-xs">
-            <div className="flex items-start sm:items-center gap-3">
-              <div className="w-8 h-8 rounded bg-brand-teal text-white flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[18px]">medical_services</span>
+          <div className="p-5 bg-brand-softerTeal/70 border border-brand-teal/20 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-fade-in shadow-xs">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="w-9 h-9 rounded-xl bg-brand-teal text-white flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[20px]">medical_services</span>
               </div>
               <div>
-                <span className="font-semibold text-brand-ink block">Consultation Sanctuary Available</span>
+                <span className="font-semibold text-brand-ink block text-sm">Consultation Sanctuary Available</span>
                 <span className="text-brand-ink/70">
                   Connect with verified ERP clinicians like Dr. Kavita Mehra for structured, consent-gated review.
                 </span>
@@ -210,7 +210,7 @@ export default function DashboardPage() {
             </div>
             <Link
               to="/app/care"
-              className="self-start sm:self-auto px-3 py-1.5 rounded bg-brand-teal text-white font-medium hover:bg-brand-tealDark transition-colors shrink-0"
+              className="self-start sm:self-auto px-4 py-2 rounded-xl bg-brand-teal text-white font-medium hover:bg-brand-tealDark transition-colors shrink-0"
             >
               Find Practitioner →
             </Link>
@@ -218,15 +218,15 @@ export default function DashboardPage() {
         )}
 
         {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* INTERLOCKED BENTO GRID                                             */}
+        {/* INTERLOCKED BENTO GRID WITH ROW & COL SPANS                        */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-          {/* ── Bento Card 1: Today's Gentle Focus (Col 1-8) ──────────────── */}
-          <div className="md:col-span-8 bg-brand-amberSoft border border-brand-amber/30 rounded p-6 shadow-card-lift relative overflow-hidden flex flex-col justify-between">
-            <div className="relative z-10 space-y-3">
+          {/* ── Bento Card 1: Today's Gentle Focus (Cols 1-8, Rows 1-2) ─────── */}
+          <div className="lg:col-span-8 lg:row-span-2 bg-brand-amberSoft border border-brand-amber/30 rounded-3xl p-6 sm:p-8 shadow-card-lift relative overflow-hidden flex flex-col justify-between">
+            <div className="relative z-10 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-amber/20">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-3 py-1 rounded-full bg-white/80 border border-brand-amber/20 shadow-2xs">
                   Daily Grounding Focus
                 </span>
                 <span className="text-xs font-mono text-brand-ink/50">
@@ -243,10 +243,10 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="pt-4 mt-4 border-t border-brand-amber/20 flex flex-wrap items-center gap-3 text-xs">
+            <div className="pt-4 mt-6 border-t border-brand-amber/20 flex flex-wrap items-center gap-3 text-xs">
               <Link
                 to="/app/learn"
-                className="font-medium text-brand-ink hover:text-brand-teal flex items-center gap-1 transition-colors"
+                className="font-medium text-brand-ink hover:text-brand-teal flex items-center gap-1.5 transition-colors"
               >
                 <span>Read 'Embracing Maybe, Maybe Not'</span>
                 <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -256,15 +256,15 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ── Bento Card 2: Continue Practice (Col 9-12) ────────────────── */}
-          <div className="md:col-span-4 bg-brand-coralSoft border border-brand-coral/30 rounded p-6 shadow-card-lift flex flex-col justify-between">
+          {/* ── Bento Card 2: Continue Practice (Cols 9-12, Row 1) ──────────── */}
+          <div className="lg:col-span-4 lg:row-span-1 bg-brand-coralSoft border border-brand-coral/30 rounded-3xl p-6 shadow-card-lift flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-coral/20">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-3 py-1 rounded-full bg-white/80 border border-brand-coral/20">
                   {activePractice.type === 'clinician-assigned' ? 'Clinician-Assigned' : 'Active Practice'}
                 </span>
                 {activePractice.practitionerName && (
-                  <span className="text-[10px] font-medium text-brand-teal">Dr. Mehra</span>
+                  <span className="text-[10px] font-semibold text-brand-teal">Dr. Mehra</span>
                 )}
               </div>
 
@@ -272,24 +272,24 @@ export default function DashboardPage() {
                 <h3 className="font-editorial text-xl text-brand-ink font-medium leading-snug mb-1">
                   {activePractice.title}
                 </h3>
-                <p className="text-xs text-brand-ink/70 line-clamp-3 leading-relaxed">
+                <p className="text-xs text-brand-ink/70 line-clamp-2 leading-relaxed">
                   {activePractice.instructions}
                 </p>
               </div>
 
-              <div className="p-2.5 rounded bg-white/70 border border-brand-coral/20 flex items-center justify-between text-xs font-mono text-brand-ink/80">
-                <span>Target Response:</span>
+              <div className="p-3 rounded-2xl bg-white/80 border border-brand-coral/20 flex items-center justify-between text-xs font-mono text-brand-ink/80">
+                <span className="font-sans text-[11px] text-brand-ink/60">Target:</span>
                 <span className="font-sans font-semibold text-brand-coral">Delay or Resist</span>
               </div>
             </div>
 
-            <div className="pt-4 mt-2">
+            <div className="pt-3 mt-2">
               <button
                 onClick={() => {
                   setSelectedPlanForModal(activePractice);
                   setShowPracticeModal(true);
                 }}
-                className="w-full py-2 px-3 rounded bg-brand-ink hover:bg-brand-coral text-white text-xs font-medium transition-colors shadow-xs flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-3 rounded-xl bg-brand-ink hover:bg-brand-coral text-white text-xs font-medium transition-colors shadow-xs flex items-center justify-center gap-2"
               >
                 <span className="material-symbols-outlined text-[16px]">play_circle</span>
                 <span>Begin Exposure</span>
@@ -297,181 +297,217 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ── Bento Card 3: Quick Tools Sanctuary (Col 1-7) ──────────────── */}
-          <div className="md:col-span-7 bg-brand-paper border border-brand-border rounded p-6 shadow-card-lift space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-editorial text-xl text-brand-ink font-medium">Quick Calm Tools</h3>
-                <p className="text-xs text-brand-ink/60">Gentle regulation aids — not rituals to sanitize obsessions.</p>
-              </div>
-              <Link to="/app/toolkit" className="text-xs font-medium text-brand-teal hover:underline flex items-center gap-0.5">
-                <span>View All</span>
-                <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-              </Link>
-            </div>
-
-            {/* Inline Pause & Choose Tool Interactive Box */}
-            <div className="p-4 rounded bg-brand-lavenderSoft border border-brand-lavender/30 space-y-3">
-              <div className="flex items-center justify-between">
+          {/* ── Bento Card 3: Secondary AI & Weekly Synthesis (Cols 9-12, Row 2) */}
+          <div className="lg:col-span-4 lg:row-span-1 bg-brand-paper border border-brand-border/60 rounded-3xl p-6 shadow-card-lift flex flex-col justify-between space-y-3">
+            <div>
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-brand-lavender"></span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
-                    Pause & Choose
-                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-brand-teal">auto_awesome</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">Weekly Synthesis</span>
                 </div>
-                <span className="text-[11px] text-brand-ink/50">4-Step Hesitation</span>
+                <span className="text-[10px] font-mono text-brand-ink/50">Pattern Review</span>
               </div>
 
-              {inlinePauseStep === 'idle' && (
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-brand-ink/75">
-                    Feeling the urge to check, replay, or seek reassurance right now?
-                  </p>
-                  <button
-                    onClick={() => setInlinePauseStep('notice')}
-                    className="px-3 py-1.5 rounded bg-brand-lavender text-white text-xs font-medium hover:bg-brand-lavender/90 transition-colors shrink-0"
-                  >
-                    Pause 30s
-                  </button>
+              {aiSummary?.summary ? (
+                <div className="p-3.5 rounded-2xl bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/80 leading-relaxed">
+                  {aiSummary.summary}
                 </div>
-              )}
-
-              {inlinePauseStep === 'notice' && (
-                <div className="space-y-2 animate-fade-in">
-                  <p className="text-xs font-medium text-brand-ink">
-                    1. Notice: "I notice an intrusive thought and an urge to ritualize."
-                  </p>
-                  <p className="text-[11px] text-brand-ink/70">
-                    Acknowledge the urge without agreeing with the thought or arguing against it.
-                  </p>
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      onClick={() => setInlinePauseStep('idle')}
-                      className="px-2.5 py-1 text-xs text-brand-ink/60 hover:text-brand-ink"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => setInlinePauseStep('choose')}
-                      className="px-3 py-1 rounded bg-brand-lavender text-white text-xs font-medium"
-                    >
-                      Next: Choose Action →
-                    </button>
-                  </div>
+              ) : stats ? (
+                <div className="p-3.5 rounded-2xl bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/80 leading-relaxed">
+                  You logged <span className="font-mono font-semibold text-brand-ink">{stats.checkinCountThisWeek ?? 0}</span> check-ins this week. Avg pre-distress was <span className="font-mono font-semibold text-brand-ink">{stats.avgSudsThisWeek ? Number(stats.avgSudsThisWeek).toFixed(1) : '—'}</span>/10. Primary strategy: <span className="font-semibold text-brand-teal">{stats.primaryPattern || 'delay'}</span>.
                 </div>
-              )}
-
-              {inlinePauseStep === 'choose' && (
-                <div className="space-y-2.5 animate-fade-in">
-                  <p className="text-xs font-medium text-brand-ink">
-                    2. Choose: How will you respond to this urge?
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
-                    <button
-                      onClick={() => handleInlinePauseChoice('delay')}
-                      className="p-2 rounded border border-brand-amber/40 bg-white hover:bg-brand-amberSoft text-brand-ink text-center transition-colors"
-                    >
-                      <span className="font-semibold block text-[11px] text-brand-amber">Delay</span>
-                      <span className="text-[10px] text-brand-ink/60">Wait 15m</span>
-                    </button>
-                    <button
-                      onClick={() => handleInlinePauseChoice('resist')}
-                      className="p-2 rounded border border-brand-teal/40 bg-white hover:bg-brand-softerTeal text-brand-ink text-center transition-colors"
-                    >
-                      <span className="font-semibold block text-[11px] text-brand-teal">Resist</span>
-                      <span className="text-[10px] text-brand-ink/60">No Ritual</span>
-                    </button>
-                    <button
-                      onClick={() => handleInlinePauseChoice('return')}
-                      className="p-2 rounded border border-brand-lavender/40 bg-white hover:bg-brand-lavenderSoft text-brand-ink text-center transition-colors"
-                    >
-                      <span className="font-semibold block text-[11px] text-brand-lavender">Return</span>
-                      <span className="text-[10px] text-brand-ink/60">To Activity</span>
-                    </button>
-                    <button
-                      onClick={() => handleInlinePauseChoice('compulsion')}
-                      className="p-2 rounded border border-brand-coral/40 bg-white hover:bg-brand-coralSoft text-brand-ink text-center transition-colors"
-                    >
-                      <span className="font-semibold block text-[11px] text-brand-coral">Gave In</span>
-                      <span className="text-[10px] text-brand-ink/60">Honest Log</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {inlinePauseStep === 'committed' && (
-                <div className="p-2 rounded bg-white text-center text-xs font-medium text-brand-teal animate-fade-in">
-                  ✓ Response choice recorded. Returning to your sanctuary...
+              ) : (
+                <div className="p-3.5 rounded-2xl bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/50 italic">
+                  Log a check-in and practice session to view your weekly behavioral summary.
                 </div>
               )}
             </div>
 
-            {/* Quick Tool Shortcut Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-              <Link
-                to="/app/toolkit?tool=grounding"
-                className="p-3 rounded border border-brand-border/80 bg-brand-softerTeal/40 hover:bg-brand-softerTeal transition-all group"
-              >
-                <div className="flex items-center gap-2 mb-1 text-brand-teal">
-                  <span className="material-symbols-outlined text-[18px]">spa</span>
-                  <span className="text-xs font-bold uppercase tracking-wider">Grounding</span>
-                </div>
-                <p className="text-[11px] text-brand-ink/70">5-4-3-2-1 sensory anchor back to the physical room.</p>
-              </Link>
-
-              <Link
-                to="/app/toolkit?tool=breathing"
-                className="p-3 rounded border border-brand-border/80 bg-brand-amberSoft/40 hover:bg-brand-amberSoft transition-all group"
-              >
-                <div className="flex items-center gap-2 mb-1 text-brand-amber">
-                  <span className="material-symbols-outlined text-[18px]">air</span>
-                  <span className="text-xs font-bold uppercase tracking-wider">Paced Breath</span>
-                </div>
-                <p className="text-[11px] text-brand-ink/70">Gentle, unhurried pacing aid to steady the body.</p>
-              </Link>
-
-              <Link
-                to="/app/toolkit?tool=reassurance"
-                className="p-3 rounded border border-brand-border/80 bg-brand-coralSoft/40 hover:bg-brand-coralSoft transition-all group"
-              >
-                <div className="flex items-center gap-2 mb-1 text-brand-coral">
-                  <span className="material-symbols-outlined text-[18px]">help_center</span>
-                  <span className="text-xs font-bold uppercase tracking-wider">Interrupter</span>
-                </div>
-                <p className="text-[11px] text-brand-ink/70">"Am I checking?" Catch digital & cognitive certainty traps.</p>
+            <div className="pt-2 border-t border-brand-border/40 flex items-center justify-between text-[11px] text-brand-ink/50">
+              <span className="italic">Synthesized from logs — not medical advice.</span>
+              <Link to="/app/practice" className="font-medium text-brand-teal hover:underline">
+                History →
               </Link>
             </div>
           </div>
 
-          {/* ── Bento Card 4: Life Outside OCD (Col 8-12) ──────────────────── */}
-          <div className="md:col-span-5 bg-brand-paper border border-brand-border rounded p-6 shadow-card-lift flex flex-col justify-between space-y-4">
+          {/* ── Bento Card 4: Quick Tools Sanctuary (Cols 1-7, Rows 3-4) ────── */}
+          <div className="lg:col-span-7 lg:row-span-2 bg-brand-paper border border-brand-border/60 rounded-3xl p-6 sm:p-8 shadow-card-lift flex flex-col justify-between space-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-editorial text-2xl text-brand-ink font-medium">Quick Calm Tools</h3>
+                  <p className="text-xs text-brand-ink/60 mt-0.5">Gentle regulation aids — not rituals to sanitize obsessions.</p>
+                </div>
+                <Link to="/app/toolkit" className="text-xs font-medium text-brand-teal hover:underline flex items-center gap-0.5">
+                  <span>View All</span>
+                  <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                </Link>
+              </div>
+
+              {/* Inline Pause & Choose Tool Interactive Box */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-brand-lavenderSoft border border-brand-lavender/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-brand-lavender"></span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
+                      Pause & Choose
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-brand-ink/50 font-medium">4-Step Hesitation</span>
+                </div>
+
+                {inlinePauseStep === 'idle' && (
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-xs text-brand-ink/75">
+                      Feeling the urge to check, replay, or seek reassurance right now?
+                    </p>
+                    <button
+                      onClick={() => setInlinePauseStep('notice')}
+                      className="px-3.5 py-1.5 rounded-xl bg-brand-lavender text-white text-xs font-medium hover:bg-brand-lavender/90 transition-colors shrink-0 shadow-xs"
+                    >
+                      Pause 30s
+                    </button>
+                  </div>
+                )}
+
+                {inlinePauseStep === 'notice' && (
+                  <div className="space-y-2 animate-fade-in">
+                    <p className="text-xs font-medium text-brand-ink">
+                      1. Notice: "I notice an intrusive thought and an urge to ritualize."
+                    </p>
+                    <p className="text-[11px] text-brand-ink/70">
+                      Acknowledge the urge without agreeing with the thought or arguing against it.
+                    </p>
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        onClick={() => setInlinePauseStep('idle')}
+                        className="px-2.5 py-1 text-xs text-brand-ink/60 hover:text-brand-ink"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => setInlinePauseStep('choose')}
+                        className="px-3.5 py-1.5 rounded-xl bg-brand-lavender text-white text-xs font-medium"
+                      >
+                        Next: Choose Action →
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {inlinePauseStep === 'choose' && (
+                  <div className="space-y-2.5 animate-fade-in">
+                    <p className="text-xs font-medium text-brand-ink">
+                      2. Choose: How will you respond to this urge?
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
+                      <button
+                        onClick={() => handleInlinePauseChoice('delay')}
+                        className="p-2.5 rounded-xl border border-brand-amber/40 bg-white hover:bg-brand-amberSoft text-brand-ink text-center transition-colors shadow-2xs"
+                      >
+                        <span className="font-semibold block text-[11px] text-brand-amber">Delay</span>
+                        <span className="text-[10px] text-brand-ink/60">Wait 15m</span>
+                      </button>
+                      <button
+                        onClick={() => handleInlinePauseChoice('resist')}
+                        className="p-2.5 rounded-xl border border-brand-teal/40 bg-white hover:bg-brand-softerTeal text-brand-ink text-center transition-colors shadow-2xs"
+                      >
+                        <span className="font-semibold block text-[11px] text-brand-teal">Resist</span>
+                        <span className="text-[10px] text-brand-ink/60">No Ritual</span>
+                      </button>
+                      <button
+                        onClick={() => handleInlinePauseChoice('return')}
+                        className="p-2.5 rounded-xl border border-brand-lavender/40 bg-white hover:bg-brand-lavenderSoft text-brand-ink text-center transition-colors shadow-2xs"
+                      >
+                        <span className="font-semibold block text-[11px] text-brand-lavender">Return</span>
+                        <span className="text-[10px] text-brand-ink/60">To Activity</span>
+                      </button>
+                      <button
+                        onClick={() => handleInlinePauseChoice('compulsion')}
+                        className="p-2.5 rounded-xl border border-brand-coral/40 bg-white hover:bg-brand-coralSoft text-brand-ink text-center transition-colors shadow-2xs"
+                      >
+                        <span className="font-semibold block text-[11px] text-brand-coral">Gave In</span>
+                        <span className="text-[10px] text-brand-ink/60">Honest Log</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {inlinePauseStep === 'committed' && (
+                  <div className="p-3 rounded-xl bg-white text-center text-xs font-medium text-brand-teal animate-fade-in shadow-xs">
+                    ✓ Response choice recorded. Returning to your sanctuary...
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Tool Shortcut Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                <Link
+                  to="/app/toolkit?tool=grounding"
+                  className="p-3.5 rounded-2xl border border-brand-border/70 bg-brand-softerTeal/30 hover:bg-brand-softerTeal transition-all group"
+                >
+                  <div className="flex items-center gap-2 mb-1 text-brand-teal">
+                    <span className="material-symbols-outlined text-[18px]">spa</span>
+                    <span className="text-xs font-bold uppercase tracking-wider">Grounding</span>
+                  </div>
+                  <p className="text-[11px] text-brand-ink/70">5-4-3-2-1 sensory anchor back to reality.</p>
+                </Link>
+
+                <Link
+                  to="/app/toolkit?tool=breathing"
+                  className="p-3.5 rounded-2xl border border-brand-border/70 bg-brand-amberSoft/30 hover:bg-brand-amberSoft transition-all group"
+                >
+                  <div className="flex items-center gap-2 mb-1 text-brand-amber">
+                    <span className="material-symbols-outlined text-[18px]">air</span>
+                    <span className="text-xs font-bold uppercase tracking-wider">Paced Breath</span>
+                  </div>
+                  <p className="text-[11px] text-brand-ink/70">Unhurried pacing to steady the body.</p>
+                </Link>
+
+                <Link
+                  to="/app/toolkit?tool=reassurance"
+                  className="p-3.5 rounded-2xl border border-brand-border/70 bg-brand-coralSoft/30 hover:bg-brand-coralSoft transition-all group"
+                >
+                  <div className="flex items-center gap-2 mb-1 text-brand-coral">
+                    <span className="material-symbols-outlined text-[18px]">help_center</span>
+                    <span className="text-xs font-bold uppercase tracking-wider">Interrupter</span>
+                  </div>
+                  <p className="text-[11px] text-brand-ink/70">Catch digital & cognitive checking traps.</p>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Bento Card 5: Life Outside OCD (Cols 8-12, Rows 3-4) ────────── */}
+          <div className="lg:col-span-5 lg:row-span-2 bg-brand-paper border border-brand-border/60 rounded-3xl p-6 sm:p-8 shadow-card-lift flex flex-col justify-between space-y-4">
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-2 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-3 py-1 rounded-full bg-brand-softerTeal border border-brand-teal/20">
                   Life Outside OCD
                 </span>
                 <span className="text-xs font-mono text-brand-ink/50">Values Actions</span>
               </div>
-              <h3 className="font-editorial text-xl text-brand-ink font-medium">Daily Value Steps</h3>
-              <p className="text-xs text-brand-ink/60 mb-3">
+              <h3 className="font-editorial text-2xl text-brand-ink font-medium">Daily Value Steps</h3>
+              <p className="text-xs text-brand-ink/60 mb-4">
                 Recovery is not just reducing OCD; it is expanding what you care about.
               </p>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {(valuesData.suggestedActions || []).slice(0, 3).map((act) => {
                   const isDone = completedActions.includes(act.title);
                   return (
                     <div
                       key={act.id || act.title}
                       onClick={() => handleToggleAction(act)}
-                      className={`p-2.5 rounded border transition-all cursor-pointer flex items-start gap-2.5 ${
+                      className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 ${
                         isDone
-                          ? 'bg-brand-softSuccess/40 border-brand-teal/30 opacity-80'
-                          : 'bg-brand-canvas/60 border-brand-border hover:border-brand-teal/40'
+                          ? 'bg-brand-softSuccess/40 border-brand-teal/30 opacity-85'
+                          : 'bg-brand-canvas/60 border-brand-border/80 hover:border-brand-teal/40 hover:bg-brand-softerTeal/20'
                       }`}
                     >
                       <span
-                        className={`material-symbols-outlined text-[18px] shrink-0 mt-0.5 ${
+                        className={`material-symbols-outlined text-[20px] shrink-0 mt-0.5 ${
                           isDone ? 'text-brand-teal' : 'text-brand-ink/30'
                         }`}
                       >
@@ -496,83 +532,47 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="pt-2 border-t border-brand-border/40 text-[11px] text-brand-ink/60 flex items-center justify-between">
+            <div className="pt-3 border-t border-brand-border/40 text-[11px] text-brand-ink/60 flex items-center justify-between">
               <span>{completedActions.length} value actions completed</span>
               <span className="text-brand-teal font-medium">One step is enough</span>
             </div>
           </div>
 
-          {/* ── Bento Card 5: Gentle Plan for Today (Col 1-6) ──────────────── */}
-          <div className="md:col-span-6 bg-[#E8F3EE] border border-brand-border rounded p-6 shadow-card-lift space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-bold tracking-widest text-clinical-success px-2.5 py-0.5 rounded-full bg-white/80 border border-clinical-success/20">
-                Gentle Rhythm
-              </span>
-              <span className="text-xs font-mono text-brand-ink/50">Anti-Gamified</span>
+          {/* ── Bento Card 6: Gentle Plan for Today (Full Width Col 1-12) ──── */}
+          <div className="lg:col-span-12 bg-[#E8F3EE] border border-brand-border/60 rounded-3xl p-6 sm:p-8 shadow-card-lift flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-xl">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-clinical-success px-3 py-1 rounded-full bg-white/90 border border-clinical-success/20">
+                  Gentle Rhythm
+                </span>
+                <span className="text-xs font-mono text-brand-ink/50">Anti-Gamified</span>
+              </div>
+
+              <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
+                Today's Balanced Plan
+              </h3>
+
+              <p className="text-xs sm:text-sm text-brand-ink/75 leading-relaxed">
+                You do not need to do everything every day. A balanced recovery day consists of three simple anchors — no streaks, no scoreboards, simply gentle consistency.
+              </p>
             </div>
 
-            <h3 className="font-editorial text-2xl text-brand-ink font-medium">
-              Today's Balanced Plan
-            </h3>
-
-            <p className="text-xs text-brand-ink/75 leading-relaxed">
-              You do not need to do everything every day. A balanced recovery day consists of three simple anchors:
-            </p>
-
-            <div className="grid grid-cols-3 gap-2 pt-1 text-center">
-              <div className="p-2.5 rounded bg-white/80 border border-brand-border/40">
-                <span className="font-mono text-lg font-bold text-brand-coral block">1</span>
-                <span className="text-[11px] font-medium text-brand-ink">Practice</span>
-                <span className="text-[9px] text-brand-ink/50 block">Exposure trial</span>
+            <div className="grid grid-cols-3 gap-3 shrink-0">
+              <div className="p-3.5 rounded-2xl bg-white/90 border border-brand-border/50 text-center min-w-[85px] shadow-xs">
+                <span className="font-mono text-xl font-bold text-brand-coral block">1</span>
+                <span className="text-xs font-semibold text-brand-ink">Practice</span>
+                <span className="text-[10px] text-brand-ink/50 block">Exposure trial</span>
               </div>
-              <div className="p-2.5 rounded bg-white/80 border border-brand-border/40">
-                <span className="font-mono text-lg font-bold text-brand-teal block">1</span>
-                <span className="text-[11px] font-medium text-brand-ink">Life Action</span>
-                <span className="text-[9px] text-brand-ink/50 block">Value outside OCD</span>
+              <div className="p-3.5 rounded-2xl bg-white/90 border border-brand-border/50 text-center min-w-[85px] shadow-xs">
+                <span className="font-mono text-xl font-bold text-brand-teal block">1</span>
+                <span className="text-xs font-semibold text-brand-ink">Life Action</span>
+                <span className="text-[10px] text-brand-ink/50 block">Value step</span>
               </div>
-              <div className="p-2.5 rounded bg-white/80 border border-brand-border/40">
-                <span className="font-mono text-lg font-bold text-brand-lavender block">1</span>
-                <span className="text-[11px] font-medium text-brand-ink">Calm Tool</span>
-                <span className="text-[9px] text-brand-ink/50 block">Pause or Ground</span>
+              <div className="p-3.5 rounded-2xl bg-white/90 border border-brand-border/50 text-center min-w-[85px] shadow-xs">
+                <span className="font-mono text-xl font-bold text-brand-lavender block">1</span>
+                <span className="text-xs font-semibold text-brand-ink">Calm Tool</span>
+                <span className="text-[10px] text-brand-ink/50 block">Pause/ground</span>
               </div>
-            </div>
-
-            <p className="text-[11px] text-brand-ink/60 italic pt-1">
-              "No streaks, no points, no pressure. Simply gentle consistency."
-            </p>
-          </div>
-
-          {/* ── Bento Card 6: Secondary AI & Longitudinal Synthesis (Col 7-12) */}
-          <div className="md:col-span-6 bg-brand-paper border border-brand-border rounded p-6 shadow-card-lift flex flex-col justify-between space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px] text-brand-teal">auto_awesome</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">Weekly Synthesis</span>
-                </div>
-                <span className="text-[10px] font-mono text-brand-ink/50">Deterministic Summary</span>
-              </div>
-
-              {aiSummary?.summary ? (
-                <div className="p-3.5 rounded bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/80 leading-relaxed">
-                  {aiSummary.summary}
-                </div>
-              ) : stats ? (
-                <div className="p-3.5 rounded bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/80 leading-relaxed">
-                  You logged <span className="font-mono font-semibold text-brand-ink">{stats.checkinCountThisWeek ?? 0}</span> check-ins across the last 7 days. Average pre-distress was <span className="font-mono font-semibold text-brand-ink">{stats.avgSudsThisWeek ? Number(stats.avgSudsThisWeek).toFixed(1) : '—'}</span> out of 10. Most common response strategy logged: <span className="font-semibold text-brand-teal">{stats.primaryPattern || 'delay'}</span>.
-                </div>
-              ) : (
-                <div className="p-3.5 rounded bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/50 italic">
-                  Log a check-in and practice session to view your weekly behavioral summary.
-                </div>
-              )}
-            </div>
-
-            <div className="pt-2 border-t border-brand-border/40 flex items-center justify-between text-[11px] text-brand-ink/50">
-              <span className="italic">Synthesized from your logs — not medical advice.</span>
-              <Link to="/app/practice" className="font-medium text-brand-teal hover:underline">
-                View History →
-              </Link>
             </div>
           </div>
 

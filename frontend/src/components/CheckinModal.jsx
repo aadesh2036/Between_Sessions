@@ -33,10 +33,10 @@ export default function CheckinModal({ onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fade-in p-4">
-      <div className="bg-brand-paper border border-brand-border rounded-md shadow-card-lift w-full max-w-md p-6 sm:p-8 relative">
+      <div className="bg-brand-paper border border-brand-border/70 rounded-3xl shadow-card-lift w-full max-w-md p-6 sm:p-8 relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-brand-ink/40 hover:text-brand-ink transition-colors p-1"
+          className="absolute top-5 right-5 text-brand-ink/40 hover:text-brand-ink transition-colors p-1"
           aria-label="Close modal"
         >
           <span className="material-symbols-outlined text-[20px]">close</span>
@@ -55,7 +55,7 @@ export default function CheckinModal({ onClose, onSaved }) {
         </p>
 
         {error && (
-          <div className="p-3 mb-4 rounded bg-brand-coralSoft border border-brand-coral/30 text-brand-coral text-xs">
+          <div className="p-3.5 mb-4 rounded-xl bg-brand-coralSoft border border-brand-coral/30 text-brand-coral text-xs">
             {error}
           </div>
         )}
@@ -74,7 +74,7 @@ export default function CheckinModal({ onClose, onSaved }) {
               max="10"
               value={score}
               onChange={(e) => setScore(Number(e.target.value))}
-              className="w-full h-2 bg-brand-canvas rounded-lg appearance-none cursor-pointer accent-brand-teal"
+              className="w-full h-2 bg-brand-canvas rounded-full appearance-none cursor-pointer accent-brand-teal"
             />
             <div className="flex justify-between text-[10px] text-brand-ink/40 font-mono mt-1">
               <span>0 (None)</span>
@@ -96,7 +96,7 @@ export default function CheckinModal({ onClose, onSaved }) {
               max="10"
               value={urge}
               onChange={(e) => setUrge(Number(e.target.value))}
-              className="w-full h-2 bg-brand-canvas rounded-lg appearance-none cursor-pointer accent-brand-coral"
+              className="w-full h-2 bg-brand-canvas rounded-full appearance-none cursor-pointer accent-brand-coral"
             />
             <div className="flex justify-between text-[10px] text-brand-ink/40 font-mono mt-1">
               <span>0 (No Urge)</span>
@@ -114,7 +114,7 @@ export default function CheckinModal({ onClose, onSaved }) {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="e.g. Intrusive thought about front door, preparing dinner"
-              className="w-full text-xs px-3.5 py-2.5 rounded border border-brand-border bg-brand-canvas/60 text-brand-ink focus:outline-none focus:border-brand-teal"
+              className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-brand-border bg-brand-canvas/60 text-brand-ink focus:outline-none focus:border-brand-teal"
               maxLength={120}
             />
           </div>
@@ -130,7 +130,7 @@ export default function CheckinModal({ onClose, onSaved }) {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-5 py-2 rounded bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
             >
               {saving ? 'Recording...' : 'Record Check-in'}
             </button>

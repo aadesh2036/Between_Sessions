@@ -19,12 +19,22 @@ export default function LoginPage({ practitionerMode = false }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showEntryAnimation, setShowEntryAnimation] = useState(false);
 
-  const { login, register, verifyEmail, resendEmail } = useAuth();
+  const { user, login, register, verifyEmail, resendEmail } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/app';
 
   useEffect(() => {
+    // If already logged in, redirect away from login
+    if (practitionerMode && localStorage.getItem('bs_prac_token')) {
+      navigate('/practitioner', { replace: true });
+      return;
+    }
+    if (!practitionerMode && user && localStorage.getItem('bs_token')) {
+      navigate('/app', { replace: true });
+      return;
+    }
+
     setShowEntryAnimation(true);
     const params = new URLSearchParams(location.search);
     const token = params.get('verify');
@@ -38,7 +48,7 @@ export default function LoginPage({ practitionerMode = false }) {
           setError(err.message || 'Verification failed or token expired.');
         });
     }
-  }, [location.search]);
+  }, [location.search, practitionerMode, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,6 +71,7 @@ export default function LoginPage({ practitionerMode = false }) {
         const data = await practitionerApi.login(email, password, govCertId);
         localStorage.setItem('bs_prac_token', data.token);
         localStorage.setItem('bs_prac_user', JSON.stringify(data.practitioner));
+        document.cookie = `bs_prac_token=${data.token}; path=/; max-age=2592000; SameSite=Lax`;
         setTimeout(() => navigate('/practitioner', { replace: true }), 100);
       } else {
         await login(email, password);
@@ -180,7 +191,7 @@ export default function LoginPage({ practitionerMode = false }) {
 
         {/* Centered Form */}
         <main className="flex-1 flex items-center justify-center px-4 py-12">
-          <div className="w-full max-w-md bg-white rounded border border-brand-border shadow-card-lift p-8 sm:p-10 space-y-6">
+          <div className="w-full max-w-md bg-white rounded-3xl border border-brand-border/70 shadow-card-lift p-8 sm:p-10 space-y-6">
             {/* Header */}
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal text-[11px] font-semibold mb-2">
@@ -221,12 +232,12 @@ export default function LoginPage({ practitionerMode = false }) {
 
             {/* Success / Error banners */}
             {successMsg && (
-              <div className="px-4 py-3 rounded bg-brand-softerTeal text-brand-teal text-xs font-medium">
+              <div className="px-4 py-3 rounded-xl bg-brand-softerTeal text-brand-teal text-xs font-medium">
                 {successMsg}
               </div>
             )}
             {error && (
-              <div className="px-4 py-3 rounded bg-brand-coralSoft text-brand-coral text-xs font-medium">
+              <div className="px-4 py-3 rounded-xl bg-brand-coralSoft text-brand-coral text-xs font-medium">
                 {error}
               </div>
             )}
@@ -237,17 +248,18 @@ export default function LoginPage({ practitionerMode = false }) {
                 {/* Demo autofill helper */}
                 <div className="p-3 bg-brand-softerTeal/70 border border-brand-teal/20 rounded-xl flex items-center justify-between text-xs">
                   <div>
-                    <div className="font-bold text-brand-teal">Demo Clinician: Dr. Kavita Mehra</div>
-                    <div className="text-[11px] text-brand-ink/60 font-mono">kavita@betweensessions.com</div>
+                    <span className="font-bold text-brand-teal">Demo Clinician</span>
+                    <p className="text-[11px] text-brand-ink/60">Dr. Kavita Mehra</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => {
                       setEmail('kavita@betweensessions.com');
-                      setPassword('Prac1234!');
+                      setPassword('ClinicianPass2024!');
                       setGovCertId('MCI-2024-KM-7741');
+                      setError('');
                     }}
-                    className="px-2.5 py-1 rounded bg-brand-teal text-white text-[10px] font-bold hover:bg-brand-tealDark transition-colors"
+                    className="px-2.5 py-1 rounded-lg bg-brand-teal text-white text-[10px] font-bold hover:bg-brand-tealDark transition-colors"
                   >
                     Autofill
                   </button>
@@ -264,7 +276,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="kavita@betweensessions.com"
-                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     autoComplete="email"
                   />
@@ -281,7 +293,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     autoComplete="current-password"
                   />
@@ -298,7 +310,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={govCertId}
                     onChange={(e) => setGovCertId(e.target.value)}
                     placeholder="e.g. MCI-2024-KM-7741"
-                    className="w-full px-4 py-2.5 text-sm font-mono rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-sm font-mono rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     autoComplete="off"
                     spellCheck={false}
@@ -312,7 +324,7 @@ export default function LoginPage({ practitionerMode = false }) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 rounded bg-brand-teal text-white font-semibold text-sm hover:bg-brand-tealDark transition-colors flex items-center justify-center gap-2 mt-1 disabled:opacity-60"
+                  className="w-full py-3 rounded-xl bg-brand-teal text-white font-semibold text-sm hover:bg-brand-tealDark transition-colors flex items-center justify-center gap-2 mt-1 disabled:opacity-60"
                 >
                   {isLoading ? (
                     <>
@@ -350,7 +362,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Dr. Rajiv Patel"
-                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                   />
                 </div>
@@ -366,7 +378,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="rajiv@betweensessions.com"
-                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     autoComplete="email"
                   />
@@ -383,7 +395,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     autoComplete="new-password"
                   />
@@ -400,7 +412,7 @@ export default function LoginPage({ practitionerMode = false }) {
                       <button
                         type="button"
                         onClick={() => setGovCertId('MCI-2025-RP-3312')}
-                        className="px-1.5 py-0.5 bg-brand-canvas hover:bg-brand-border rounded font-mono border"
+                        className="px-1.5 py-0.5 bg-brand-canvas hover:bg-brand-border rounded-md font-mono border"
                       >
                         MCI-2025-RP-3312
                       </button>
@@ -412,7 +424,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={govCertId}
                     onChange={(e) => setGovCertId(e.target.value)}
                     placeholder="e.g. MCI-2025-RP-3312"
-                    className="w-full px-4 py-2.5 text-sm font-mono rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-sm font-mono rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     spellCheck={false}
                   />
@@ -429,7 +441,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={credentials}
                     onChange={(e) => setCredentials(e.target.value)}
                     placeholder="MD, DPM, Consultant Psychiatrist"
-                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                   />
                 </div>
 
@@ -444,7 +456,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={specialty}
                     onChange={(e) => setSpecialty(e.target.value)}
                     placeholder="ERP &amp; Clinical Psychology"
-                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                   />
                 </div>
 
@@ -452,7 +464,7 @@ export default function LoginPage({ practitionerMode = false }) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 rounded bg-brand-teal text-white font-semibold text-sm hover:bg-brand-tealDark transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-60"
+                  className="w-full py-3 rounded-xl bg-brand-teal text-white font-semibold text-sm hover:bg-brand-tealDark transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-60"
                 >
                   {isLoading ? (
                     <>
@@ -507,7 +519,8 @@ export default function LoginPage({ practitionerMode = false }) {
           max-width: 100%;
           min-height: 640px;
           background: #FFFFFF;
-          border-radius: 4px;
+          border-radius: 28px;
+          border: 1px solid rgba(216, 223, 222, 0.7);
           box-shadow: 0 25px 60px -15px rgba(23, 50, 58, 0.12), 0 4px 25px rgba(23, 50, 58, 0.05);
           overflow: hidden;
         }
@@ -675,12 +688,12 @@ export default function LoginPage({ practitionerMode = false }) {
 
               {/* Success / verification banners */}
               {successMsg && (
-                <div className="px-3.5 py-2.5 rounded bg-brand-softerTeal text-brand-teal text-xs font-medium">
+                <div className="px-3.5 py-2.5 rounded-xl bg-brand-softerTeal text-brand-teal text-xs font-medium">
                   {successMsg}
                 </div>
               )}
               {needsVerification && (
-                <div className="px-3.5 py-2.5 rounded bg-brand-amberSoft text-brand-amber text-xs font-medium flex items-center justify-between">
+                <div className="px-3.5 py-2.5 rounded-xl bg-brand-amberSoft text-brand-amber text-xs font-medium flex items-center justify-between">
                   <span>Your email isn't verified yet.</span>
                   <button
                     type="button"
@@ -704,7 +717,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full px-4 py-2.5 text-xs rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     autoComplete="email"
                   />
@@ -728,7 +741,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-4 py-2.5 text-xs rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2.5 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     autoComplete="current-password"
                   />
@@ -767,7 +780,7 @@ export default function LoginPage({ practitionerMode = false }) {
               </form>
 
               {/* Calming ambient note */}
-              <div className="p-2.5 rounded bg-brand-amberSoft text-brand-ink text-[10.5px] flex items-start gap-2">
+              <div className="p-3 rounded-xl bg-brand-amberSoft text-brand-ink text-[10.5px] flex items-start gap-2">
                 <span className="text-brand-amber font-bold text-xs mt-0.5">●</span>
                 <span>Between Sessions works at your pace. No time pressure, no streak penalties.</span>
               </div>
@@ -819,7 +832,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Alex or SkySeeker"
-                    className="w-full px-4 py-2 text-xs rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     autoComplete="name"
                   />
@@ -837,7 +850,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full px-4 py-2 text-xs rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     autoComplete="email"
                   />
@@ -854,7 +867,7 @@ export default function LoginPage({ practitionerMode = false }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className="w-full px-4 py-2 text-xs rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    className="w-full px-4 py-2 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
                     autoComplete="new-password"
                   />

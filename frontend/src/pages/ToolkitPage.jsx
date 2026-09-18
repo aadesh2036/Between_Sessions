@@ -35,12 +35,12 @@ export default function ToolkitPage() {
         </header>
 
         {/* ── NON-RITUAL CLINICAL DISCLAIMER BANNER ───────────────────────── */}
-        <div className="p-4 rounded bg-brand-amberSoft border border-brand-amber/40 shadow-xs flex items-start gap-3">
-          <span className="material-symbols-outlined text-brand-amber text-[20px] shrink-0 mt-0.5">
+        <div className="p-5 rounded-2xl bg-brand-amberSoft border border-brand-amber/40 shadow-xs flex items-start gap-3.5">
+          <span className="material-symbols-outlined text-brand-amber text-[22px] shrink-0 mt-0.5">
             shield
           </span>
           <div className="text-xs text-brand-ink/80 space-y-1">
-            <span className="font-bold text-brand-ink block">
+            <span className="font-bold text-brand-ink block text-sm">
               Clinical Boundary: Grounding is NOT an OCD Neutralizing Ritual
             </span>
             <p className="leading-relaxed">
@@ -50,7 +50,7 @@ export default function ToolkitPage() {
         </div>
 
         {/* ── Tool Tabs ───────────────────────────────────────────────────── */}
-        <div className="flex flex-wrap gap-2 border-b border-brand-border pb-3">
+        <div className="flex flex-wrap gap-2 border-b border-brand-border/60 pb-3">
           {[
             { id: 'grounding', label: 'Grounding & Sensory', icon: 'spa' },
             { id: 'breathing', label: 'Paced Breathing', icon: 'air' },
@@ -61,7 +61,7 @@ export default function ToolkitPage() {
             <button
               key={t.id}
               onClick={() => setActiveTool(t.id)}
-              className={`px-3.5 py-2 rounded text-xs font-medium transition-all flex items-center gap-2 ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center gap-2 ${
                 activeTool === t.id
                   ? 'bg-brand-ink text-white shadow-xs font-semibold'
                   : 'bg-brand-paper border border-brand-border text-brand-ink/70 hover:bg-brand-canvas hover:text-brand-ink'
@@ -74,7 +74,7 @@ export default function ToolkitPage() {
         </div>
 
         {/* ── Active Tool Component Container ─────────────────────────────── */}
-        <div className="bg-brand-paper border border-brand-border rounded p-6 sm:p-8 shadow-card-lift">
+        <div className="bg-brand-paper border border-brand-border/70 rounded-3xl p-6 sm:p-8 shadow-card-lift">
           {activeTool === 'grounding' && <GroundingTool />}
           {activeTool === 'breathing' && <BreathingTool />}
           {activeTool === 'pause-choose' && <PauseChooseTool />}
@@ -138,7 +138,7 @@ function GroundingTool() {
               setLogged(false);
               setStep54321(5);
             }}
-            className={`px-3 py-1.5 rounded transition-colors ${
+            className={`px-3.5 py-1.5 rounded-xl transition-colors ${
               subTool === st.id
                 ? 'bg-brand-softerTeal text-brand-teal font-semibold border border-brand-teal/30'
                 : 'text-brand-ink/60 hover:text-brand-ink'
@@ -153,12 +153,12 @@ function GroundingTool() {
         <div className="space-y-6 animate-fade-in text-center py-4">
           {!logged ? (
             <>
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20">
-                <span className="material-symbols-outlined text-[28px]">{current.icon}</span>
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20 shadow-xs">
+                <span className="material-symbols-outlined text-[30px]">{current.icon}</span>
               </div>
 
               <div className="space-y-2">
-                <span className="text-[11px] font-bold uppercase tracking-widest text-brand-teal">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-brand-teal px-3 py-1 rounded-full bg-brand-softerTeal">
                   Step {6 - step54321} of 5
                 </span>
                 <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
@@ -173,14 +173,14 @@ function GroundingTool() {
                 {step54321 < 5 && (
                   <button
                     onClick={() => setStep54321(step54321 + 1)}
-                    className="px-4 py-2 rounded text-xs font-medium text-brand-ink/60 hover:text-brand-ink"
+                    className="px-4 py-2 rounded-xl text-xs font-medium text-brand-ink/60 hover:text-brand-ink"
                   >
                     Previous
                   </button>
                 )}
                 <button
                   onClick={handleNext54321}
-                  className="px-6 py-2.5 rounded bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-xs"
+                  className="px-6 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-xs"
                 >
                   {step54321 === 1 ? 'Complete Sequence' : 'I Notice These → Next'}
                 </button>
@@ -188,8 +188,8 @@ function GroundingTool() {
             </>
           ) : (
             <div className="space-y-4 py-6">
-              <div className="w-12 h-12 rounded-full bg-brand-softSuccess text-clinical-success mx-auto flex items-center justify-center">
-                <span className="material-symbols-outlined text-[24px]">check</span>
+              <div className="w-14 h-14 rounded-full bg-brand-softSuccess text-clinical-success mx-auto flex items-center justify-center shadow-xs">
+                <span className="material-symbols-outlined text-[26px]">check</span>
               </div>
               <h3 className="font-editorial text-2xl text-brand-ink font-medium">
                 Sensory Sequence Complete
@@ -202,7 +202,7 @@ function GroundingTool() {
                   setLogged(false);
                   setStep54321(5);
                 }}
-                className="px-4 py-2 rounded border border-brand-border text-xs text-brand-ink hover:bg-brand-canvas"
+                className="px-4 py-2 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-brand-canvas"
               >
                 Reset Exercise
               </button>
@@ -220,15 +220,15 @@ function GroundingTool() {
             When obsessions hijack attention, mental focus narrows onto imaginary catastrophes. Orienting gently invites your visual system to explore physical reality.
           </p>
           <div className="space-y-3 pt-2">
-            <div className="p-3.5 rounded bg-brand-canvas border border-brand-border/60 text-xs text-brand-ink/80 space-y-1">
+            <div className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/60 text-xs text-brand-ink/80 space-y-1">
               <span className="font-bold text-brand-ink block">1. Slow Head Turn</span>
               <p>Turn your head slowly to the left, taking in everything from floor to ceiling. Then turn gently to the right.</p>
             </div>
-            <div className="p-3.5 rounded bg-brand-canvas border border-brand-border/60 text-xs text-brand-ink/80 space-y-1">
+            <div className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/60 text-xs text-brand-ink/80 space-y-1">
               <span className="font-bold text-brand-ink block">2. Identify 3 Neutral Items</span>
               <p>Pick three inanimate objects that have no emotional charge (e.g. a book spine, a door hinge, a coffee mug). Name their material: wood, metal, ceramic.</p>
             </div>
-            <div className="p-3.5 rounded bg-brand-canvas border border-brand-border/60 text-xs text-brand-ink/80 space-y-1">
+            <div className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/60 text-xs text-brand-ink/80 space-y-1">
               <span className="font-bold text-brand-ink block">3. Remind Yourself</span>
               <p className="italic">"Right here in this room, at this exact moment, I am sitting safely. The doubt is in my head, not in the room."</p>
             </div>
@@ -245,10 +245,10 @@ function GroundingTool() {
             Bring all awareness into the soles of your feet resting on the floor.
           </p>
           <div className="space-y-3 pt-2 text-xs text-brand-ink/80">
-            <p className="p-3 rounded bg-brand-canvas border border-brand-border/60">
+            <p className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/60">
               Feel the gravity pressing down through your heels and toes. Notice the firm resistance of the floor beneath you supporting your entire body.
             </p>
-            <p className="p-3 rounded bg-brand-canvas border border-brand-border/60">
+            <p className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/60">
               Wiggle your toes slightly. Notice the fabric of your socks or the chill of the tiles. You do not need to push away any intrusive thoughts; simply let them exist above you like clouds while your roots stay grounded.
             </p>
           </div>
@@ -264,10 +264,10 @@ function GroundingTool() {
             Hold a tangible physical item in your hand—a stone, a keyset, a piece of wood, or a glass of water.
           </p>
           <div className="space-y-3 pt-2 text-xs text-brand-ink/80">
-            <p className="p-3 rounded bg-brand-canvas border border-brand-border/60">
+            <p className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/60">
               Notice the temperature: is it cool or warm? Notice the weight in your palm. Run your thumb across its edge.
             </p>
-            <p className="p-3 rounded bg-brand-canvas border border-brand-border/60">
+            <p className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/60">
               This physical object exists in consensus reality. When mental loops try to drag you into catastrophic speculation, hold the anchor and remind yourself: <span className="italic font-medium">"I am here with this object now."</span>
             </p>
           </div>
@@ -350,7 +350,7 @@ function BreathingTool() {
                 setDuration(m.s);
                 setTimeLeft(m.s);
               }}
-              className={`px-3 py-1.5 rounded transition-colors ${
+              className={`px-4 py-2 rounded-xl transition-colors ${
                 duration === m.s
                   ? 'bg-brand-ink text-white font-semibold'
                   : 'bg-brand-canvas text-brand-ink/70 border border-brand-border hover:text-brand-ink'
@@ -387,7 +387,7 @@ function BreathingTool() {
       <div className="pt-2">
         <button
           onClick={handleToggle}
-          className={`px-6 py-2.5 rounded text-xs font-medium transition-colors shadow-xs ${
+          className={`px-7 py-2.5 rounded-xl text-xs font-medium transition-colors shadow-xs ${
             running
               ? 'bg-brand-coral hover:bg-brand-coral/90 text-white'
               : 'bg-brand-teal hover:bg-brand-tealDark text-white'
@@ -418,28 +418,25 @@ function PauseChooseTool() {
       await toolkitApi.logInteraction({
         toolId: 'pause-choose',
         actionChosen: choice,
-        notes: `Selected response prevention choice: ${choice}`,
+        details: 'Selected during multi-step hesitation in Toolkit',
       });
-    } catch { /* best effort */ }
+    } catch { /* non-blocking */ }
     setCompleted(true);
   };
 
   return (
-    <div className="space-y-6 max-w-xl mx-auto py-2">
-      <div className="text-center space-y-1">
-        <span className="text-[10px] uppercase font-bold tracking-widest text-brand-lavender px-2 py-0.5 rounded-full bg-brand-lavenderSoft border border-brand-lavender/30">
-          Mindful Hesitation
-        </span>
+    <div className="space-y-6 max-w-xl mx-auto text-center py-2">
+      <div className="space-y-1">
         <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
           Pause & Choose
         </h3>
-        <p className="text-xs text-brand-ink/65 max-w-md mx-auto">
-          Create a conscious space between the compulsive urge and your physical action.
+        <p className="text-xs text-brand-ink/65">
+          Insert a conscious pause between the OCD urge and your behavioral response.
         </p>
       </div>
 
       {!completed ? (
-        <div className="p-5 rounded bg-brand-canvas border border-brand-border space-y-4">
+        <div className="p-6 rounded-2xl bg-brand-canvas border border-brand-border/70 space-y-4 shadow-xs text-left">
           <div className="flex items-center justify-between text-xs border-b border-brand-border/60 pb-2">
             <span className="font-semibold text-brand-ink">Step {step} of 4</span>
             <span className="text-brand-ink/50 font-mono">
@@ -456,7 +453,7 @@ function PauseChooseTool() {
               <div className="pt-2 flex justify-end">
                 <button
                   onClick={() => setStep(2)}
-                  className="px-4 py-2 rounded bg-brand-lavender text-white font-medium"
+                  className="px-4 py-2 rounded-xl bg-brand-lavender text-white font-medium hover:bg-brand-lavender/90 transition-all shadow-xs"
                 >
                   I Notice It → Next
                 </button>
@@ -470,13 +467,13 @@ function PauseChooseTool() {
               <p className="text-brand-ink/70 leading-relaxed">
                 Don't push the feeling away. Locate where it lives in your body: tight chest? knot in the stomach? Allow the discomfort to be there for 30 seconds without trying to fix it.
               </p>
-              <div className="pt-2 flex justify-between">
-                <button onClick={() => setStep(1)} className="text-brand-ink/50 hover:text-brand-ink">
-                  Back
+              <div className="pt-2 flex justify-between items-center">
+                <button onClick={() => setStep(1)} className="text-brand-ink/50 hover:text-brand-ink text-xs font-medium">
+                  ← Back
                 </button>
                 <button
                   onClick={() => setStep(3)}
-                  className="px-4 py-2 rounded bg-brand-lavender text-white font-medium"
+                  className="px-4 py-2 rounded-xl bg-brand-lavender text-white font-medium hover:bg-brand-lavender/90 transition-all shadow-xs"
                 >
                   I Can Sit with It → Next
                 </button>
@@ -490,7 +487,7 @@ function PauseChooseTool() {
               <p className="text-brand-ink/70 leading-relaxed">
                 You have agency. You are not forced to obey the OCD siren. Select how you wish to respond:
               </p>
-              <div className="grid grid-cols-2 gap-2 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                 {[
                   { id: 'delay', label: 'Delay by 15 mins', desc: 'I will wait before performing any check' },
                   { id: 'resist', label: 'Resist completely', desc: 'I will not perform the ritual today' },
@@ -500,7 +497,7 @@ function PauseChooseTool() {
                   <button
                     key={opt.id}
                     onClick={() => handlePick(opt.id)}
-                    className="p-3 rounded border border-brand-border bg-white hover:border-brand-lavender hover:bg-brand-lavenderSoft/50 text-left transition-colors"
+                    className="p-3.5 rounded-2xl border border-brand-border bg-white hover:border-brand-lavender hover:bg-brand-lavenderSoft/50 text-left transition-all shadow-2xs"
                   >
                     <span className="font-semibold block text-brand-ink">{opt.label}</span>
                     <span className="text-[10px] text-brand-ink/60">{opt.desc}</span>
@@ -511,14 +508,14 @@ function PauseChooseTool() {
           )}
         </div>
       ) : (
-        <div className="p-6 rounded bg-brand-softSuccess/40 border border-brand-teal/30 text-center space-y-3 animate-fade-in">
-          <div className="w-10 h-10 rounded-full bg-brand-teal text-white mx-auto flex items-center justify-center">
-            <span className="material-symbols-outlined text-[20px]">check</span>
+        <div className="p-6 rounded-2xl bg-brand-softSuccess/40 border border-brand-teal/30 text-center space-y-3 animate-fade-in shadow-xs">
+          <div className="w-12 h-12 rounded-full bg-brand-teal text-white mx-auto flex items-center justify-center shadow-xs">
+            <span className="material-symbols-outlined text-[24px]">check</span>
           </div>
-          <h4 className="font-editorial text-xl text-brand-ink font-medium">
+          <h4 className="font-editorial text-2xl text-brand-ink font-medium">
             Choice Recorded: <span className="capitalize text-brand-teal">{chosen}</span>
           </h4>
-          <p className="text-xs text-brand-ink/70 max-w-sm mx-auto">
+          <p className="text-xs text-brand-ink/70 max-w-sm mx-auto leading-relaxed">
             Every moment you delay or step back from an urge, your neural pathways adapt. Trust the process.
           </p>
           <button
@@ -527,7 +524,7 @@ function PauseChooseTool() {
               setStep(1);
               setChosen(null);
             }}
-            className="px-4 py-2 rounded border border-brand-border text-xs text-brand-ink hover:bg-white"
+            className="px-4 py-2 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-white transition-colors"
           >
             Start Another Pause
           </button>
@@ -599,9 +596,9 @@ function ReassuranceTool() {
 
       {!recorded ? (
         <div className="space-y-4">
-          <div className="p-4 rounded bg-brand-coralSoft/50 border border-brand-coral/20 text-xs text-brand-ink/80">
-            <span className="font-bold text-brand-coral block mb-1">Common Reassurance Traps:</span>
-            <ul className="list-disc pl-4 space-y-1 text-brand-ink/70">
+          <div className="p-5 rounded-2xl bg-brand-coralSoft/50 border border-brand-coral/20 text-xs text-brand-ink/80 shadow-xs">
+            <span className="font-bold text-brand-coral block mb-1.5 text-sm">Common Reassurance Traps:</span>
+            <ul className="list-disc pl-4 space-y-1 text-brand-ink/75 leading-relaxed">
               <li>Googling medical symptoms or philosophical doubts</li>
               <li>Asking a partner: "Are you sure this is okay?"</li>
               <li>Mentally replaying a past conversation over and over</li>
@@ -614,15 +611,15 @@ function ReassuranceTool() {
               Choose a Healthy Behavioral Alternative:
             </span>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {ACTIONS.map((act) => (
                 <button
                   key={act.id}
                   onClick={() => handleAction(act)}
-                  className="p-3.5 rounded border border-brand-border bg-white hover:border-brand-coral hover:bg-brand-coralSoft/30 text-left transition-all space-y-1 shadow-xs"
+                  className="p-4 rounded-2xl border border-brand-border bg-white hover:border-brand-coral hover:bg-brand-coralSoft/30 text-left transition-all space-y-1.5 shadow-xs"
                 >
                   <div className="flex items-center gap-2 text-brand-coral font-semibold text-xs">
-                    <span className="material-symbols-outlined text-[16px]">{act.icon}</span>
+                    <span className="material-symbols-outlined text-[18px]">{act.icon}</span>
                     <span>{act.title}</span>
                   </div>
                   <p className="text-[11px] text-brand-ink/70 leading-relaxed">{act.desc}</p>
@@ -632,14 +629,14 @@ function ReassuranceTool() {
           </div>
         </div>
       ) : (
-        <div className="p-6 rounded bg-brand-softSuccess/40 border border-brand-teal/30 text-center space-y-3 animate-fade-in">
-          <div className="w-10 h-10 rounded-full bg-brand-teal text-white mx-auto flex items-center justify-center">
-            <span className="material-symbols-outlined text-[20px]">check</span>
+        <div className="p-6 rounded-2xl bg-brand-softSuccess/40 border border-brand-teal/30 text-center space-y-3 animate-fade-in shadow-xs">
+          <div className="w-12 h-12 rounded-full bg-brand-teal text-white mx-auto flex items-center justify-center shadow-xs">
+            <span className="material-symbols-outlined text-[24px]">check</span>
           </div>
-          <h4 className="font-editorial text-xl text-brand-ink font-medium">
+          <h4 className="font-editorial text-2xl text-brand-ink font-medium">
             Reassurance Interrupted!
           </h4>
-          <p className="text-xs text-brand-ink/75 max-w-sm mx-auto">
+          <p className="text-xs text-brand-ink/75 max-w-sm mx-auto leading-relaxed">
             You chose: <span className="font-semibold text-brand-ink">{selectedAction?.title}</span>.
             Certainty is a mirage in OCD. Embracing the doubt is freedom.
           </p>
@@ -648,7 +645,7 @@ function ReassuranceTool() {
               setRecorded(false);
               setSelectedAction(null);
             }}
-            className="px-4 py-2 rounded border border-brand-border text-xs text-brand-ink hover:bg-white"
+            className="px-4 py-2 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-white transition-colors"
           >
             Reset Tool
           </button>
@@ -714,7 +711,7 @@ function FocusTool() {
           onChange={(e) => setTaskName(e.target.value)}
           placeholder="What are you focusing on? (e.g. Reading, painting, writing)"
           disabled={isActive}
-          className="w-full text-xs text-center px-3.5 py-2.5 rounded border border-brand-border bg-brand-canvas text-brand-ink focus:outline-none focus:border-brand-teal"
+          className="w-full text-xs text-center px-4 py-2.5 rounded-xl border border-brand-border bg-brand-canvas text-brand-ink focus:outline-none focus:border-brand-teal"
         />
       </div>
 
@@ -725,9 +722,9 @@ function FocusTool() {
             <button
               key={m}
               onClick={() => handleSetMinutes(m)}
-              className={`px-3.5 py-1.5 rounded transition-colors ${
+              className={`px-4 py-2 rounded-xl transition-colors ${
                 durationMin === m
-                  ? 'bg-brand-ink text-white font-semibold'
+                  ? 'bg-brand-ink text-white font-semibold shadow-xs'
                   : 'bg-brand-canvas text-brand-ink/70 border border-brand-border hover:text-brand-ink'
               }`}
             >
@@ -747,7 +744,7 @@ function FocusTool() {
       <div className="flex justify-center gap-3">
         <button
           onClick={() => setIsActive(!isActive)}
-          className={`px-6 py-2.5 rounded text-xs font-medium transition-colors shadow-xs ${
+          className={`px-6 py-2.5 rounded-xl text-xs font-medium transition-colors shadow-xs ${
             isActive
               ? 'bg-brand-coral hover:bg-brand-coral/90 text-white'
               : 'bg-brand-teal hover:bg-brand-tealDark text-white'
@@ -758,7 +755,7 @@ function FocusTool() {
         {isActive && (
           <button
             onClick={() => handleSetMinutes(durationMin)}
-            className="px-4 py-2.5 rounded border border-brand-border text-xs text-brand-ink hover:bg-brand-canvas"
+            className="px-4 py-2.5 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-brand-canvas transition-colors"
           >
             Reset
           </button>
