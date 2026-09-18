@@ -235,24 +235,27 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            {/* Middle Section: Grounding Quote on Left, Ambient Doubt SVG Animation on Desktop Right */}
-            <div className="relative z-10 my-auto py-3 max-w-full md:max-w-[60%] lg:max-w-[62%] space-y-3.5">
-              <h2 className="font-editorial text-2xl sm:text-3xl text-brand-ink leading-snug font-medium">
-                “You do not need to solve the doubt to continue living your life.”
-              </h2>
+            {/* Column Flexbox Body: Text on Top, Animation Stacked Below */}
+            <div className="relative z-10 my-auto py-3 flex flex-col gap-4">
+              {/* Stacked 1: Quote & Explanation */}
+              <div className="space-y-2.5 max-w-2xl">
+                <h2 className="font-editorial text-2xl sm:text-3xl lg:text-4xl text-brand-ink leading-snug font-medium">
+                  “You do not need to solve the doubt to continue living your life.”
+                </h2>
 
-              <p className="text-xs sm:text-sm text-brand-ink/75 leading-relaxed">
-                In OCD, the brain treats uncertainty as an urgent life-or-death puzzle. Today’s gentle practice is allowing the question to remain unanswered while you direct your attention to what genuinely matters.
-              </p>
-            </div>
+                <p className="text-xs sm:text-sm text-brand-ink/75 leading-relaxed">
+                  In OCD, the brain treats uncertainty as an urgent life-or-death puzzle. Today’s gentle practice is allowing the question to remain unanswered while you direct your attention to what genuinely matters.
+                </p>
+              </div>
 
-            {/* Desktop-only Ambient Doubt & Soft Shapes Animation */}
-            <div className="hidden md:flex absolute -right-2 lg:right-2 top-1/2 -translate-y-1/2 pointer-events-none select-none z-0">
-              <DoubtGroundingAnimation />
+              {/* Stacked 2: Ambient Organic Shapes & Separate Question Mark Animation (Desktop Only) */}
+              <div className="hidden md:flex items-center justify-center w-full py-1 pointer-events-none select-none">
+                <DoubtGroundingAnimation />
+              </div>
             </div>
 
             {/* Footer Bar */}
-            <div className="pt-4 mt-6 border-t border-brand-amber/20 flex flex-wrap items-center gap-3 text-xs relative z-10">
+            <div className="pt-4 mt-4 border-t border-brand-amber/20 flex flex-wrap items-center gap-3 text-xs relative z-10">
               <Link
                 to="/app/learn"
                 className="font-medium text-brand-ink hover:text-brand-teal flex items-center gap-1.5 transition-colors"

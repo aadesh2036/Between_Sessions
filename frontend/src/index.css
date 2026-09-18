@@ -357,109 +357,135 @@ body {
   border-radius: 4px;
 }
 
-/* ================= DOUBT & GROUNDING SOFT SHAPE ANIMATIONS ================= */
-@keyframes doubt-blob-drift {
+/* ================= DOUBT & GROUNDING: DYNAMIC SPACING LOOP ================= */
+/* Spacing between all shapes increases and reduces in a harmonic breathing loop */
+
+@keyframes spacing-qm-group {
   0%, 100% {
-    transform: translate(0px, 0px) rotate(0deg) scale(1);
+    transform: translateX(20px);
   }
-  33% {
-    transform: translate(-3px, -5px) rotate(3deg) scale(1.025);
-  }
-  66% {
-    transform: translate(3px, -2px) rotate(-2deg) scale(0.985);
+  50% {
+    transform: translateX(-24px);
   }
 }
 
-@keyframes doubt-pebble-drift {
+@keyframes spacing-qm-hook {
   0%, 100% {
-    transform: translate(0px, 0px) rotate(0deg) scale(1);
+    transform: translateY(3px) rotate(0deg);
   }
-  40% {
-    transform: translate(3px, 4px) rotate(-4deg) scale(1.02);
-  }
-  75% {
-    transform: translate(-2px, 2px) rotate(2deg) scale(0.99);
+  50% {
+    transform: translateY(-8px) rotate(-3deg);
   }
 }
 
-@keyframes doubt-arc-breathe {
+@keyframes spacing-qm-dot {
   0%, 100% {
-    transform: scale(1) translate(0px, 0px);
+    transform: translateY(-2px) scale(0.95);
+  }
+  50% {
+    transform: translateY(8px) scale(1.08);
+  }
+}
+
+@keyframes spacing-flower {
+  0%, 100% {
+    transform: translateX(10px) rotate(0deg);
+  }
+  50% {
+    transform: translateX(-10px) rotate(6deg) scale(1.03);
+  }
+}
+
+@keyframes spacing-aura {
+  0%, 100% {
+    transform: scale(0.9);
     opacity: 0.45;
   }
   50% {
-    transform: scale(1.03) translate(2px, -2px);
-    opacity: 0.6;
-  }
-}
-
-@keyframes doubt-mark-float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-4px) rotate(-1.5deg);
-  }
-}
-
-@keyframes doubt-pulse-soft {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.55;
-  }
-  50% {
-    transform: scale(1.05);
+    transform: scale(1.15);
     opacity: 0.75;
   }
 }
 
-@keyframes doubt-drift-dots {
+@keyframes spacing-pebble {
   0%, 100% {
-    transform: translateX(0px);
-    opacity: 0.5;
+    transform: translateX(-10px) rotate(45deg);
   }
   50% {
-    transform: translateX(4px);
-    opacity: 0.85;
+    transform: translateX(12px) rotate(50deg) scale(1.02);
   }
 }
 
-.anim-doubt-blob {
-  animation: doubt-blob-drift 11s ease-in-out infinite;
-  transform-origin: 105px 120px;
+@keyframes spacing-arc {
+  0%, 100% {
+    transform: translateX(-22px) scale(0.95);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateX(28px) scale(1.05);
+    opacity: 0.55;
+  }
 }
 
-.anim-doubt-pebble {
-  animation: doubt-pebble-drift 13s ease-in-out infinite;
-  transform-origin: 220px 120px;
+@keyframes spacing-drift-dots {
+  0%, 100% {
+    transform: translateX(-14px);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateX(18px);
+    opacity: 0.8;
+  }
 }
 
-.anim-doubt-arc {
-  animation: doubt-arc-breathe 15s ease-in-out infinite;
-  transform-origin: 295px 120px;
+.anim-spacing-qm {
+  animation: spacing-qm-group 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 86px 75px;
 }
 
-.anim-doubt-mark {
-  animation: doubt-mark-float 6.5s ease-in-out infinite;
-  transform-origin: 105px 120px;
+.anim-spacing-qm-hook {
+  animation: spacing-qm-hook 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 86px 65px;
 }
 
-.anim-doubt-pulse {
-  animation: doubt-pulse-soft 8.5s ease-in-out infinite;
-  transform-origin: 165px 120px;
+.anim-spacing-qm-dot {
+  animation: spacing-qm-dot 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 86px 130px;
 }
 
-.anim-doubt-drift {
-  animation: doubt-drift-dots 7s ease-in-out infinite;
+.anim-spacing-flower {
+  animation: spacing-flower 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 195px 75px;
+}
+
+.anim-spacing-aura {
+  animation: spacing-aura 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 285px 75px;
+}
+
+.anim-spacing-pebble {
+  animation: spacing-pebble 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 365px 75px;
+}
+
+.anim-spacing-arc {
+  animation: spacing-arc 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 445px 75px;
+}
+
+.anim-spacing-drift {
+  animation: spacing-drift-dots 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .anim-doubt-blob,
-  .anim-doubt-pebble,
-  .anim-doubt-arc,
-  .anim-doubt-mark,
-  .anim-doubt-pulse,
-  .anim-doubt-drift {
+  .anim-spacing-qm,
+  .anim-spacing-qm-hook,
+  .anim-spacing-qm-dot,
+  .anim-spacing-flower,
+  .anim-spacing-aura,
+  .anim-spacing-pebble,
+  .anim-spacing-arc,
+  .anim-spacing-drift {
     animation: none !important;
   }
 }
