@@ -9,26 +9,49 @@ const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
 exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body || '{}');
-    const { userId, responseType, urgeLevel } = body;
+    const {
+      userId,
+      responseType,
+      urgeLevel,
+      exerciseId,
+      preDistress,
+      postDistress,
+      durationSeconds,
+      context,
+      notes,
+    } = body;
 
     if (!userId || !responseType) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Missing required fields' })
+        body: JSON.stringify({ error: 'Missing required fields: userId and responseType required.' })
       };
     }
 
     const eventId = `EVT_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     const timestamp = new Date().toISOString();
+    const isPrevented = ['delay', 'resist', 'return', 'continue'].includes(responseType);
 
     const item = {
       PK: `USER#${userId}`,
-      SK: `EVENT#${timestamp}#${eventId}`,
+      SK: `PRACTICE#${timestamp}#${eventId}`,
+      entityType: 'PracticeLog',
       type: 'BehaviorEvent',
+      practiceId: eventId,
+      eventId,
+      userId,
+      exerciseId: exerciseId || 'pause-and-choose',
       responseType,
-      urgeLevel: urgeLevel || null,
-      occurredAt: timestamp,
-      createdAt: timestamp
+      responsePrevented: isPrevented,
+      urgeLevel: urgeLevel !== undefined ? Number(urgeLevel) : null,
+      preDistress: preDistress !== undefined ? Number(preDistress) : null,
+      postDistress: postDistress !== undefined ? Number(postDistress) : null,
+      durationSeconds: durationSeconds !== undefined ? Number(durationSeconds) : null,
+      context: context || 'home',
+      notes: notes || null,
+      completed: true,
+      completedAt: timestamp,
+      createdAt: timestamp,
     };
 
     await docClient.send(new PutCommand({

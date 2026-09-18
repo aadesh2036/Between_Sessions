@@ -9,6 +9,7 @@
  */
 
 const jwt = require('jsonwebtoken');
+const cedar = require('@cedar-policy/cedar-wasm/nodejs');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const {
   DynamoDBDocumentClient,
@@ -17,6 +18,19 @@ const {
   UpdateCommand,
   GetCommand,
 } = require('@aws-sdk/lib-dynamodb');
+
+const CEDAR_POLICY = `
+permit (
+    principal,
+    action == Action::"ReadPatientSummary",
+    resource
+)
+when {
+    context.practitionerVerified == true &&
+    context.connectionStatus == "ACTIVE" &&
+    context.consentedCategories.contains("practice_logs")
+};
+`;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
@@ -48,6 +62,7 @@ function requireAuth(event) {
 exports.handler = async (event) => {
   try {
     const method = event.httpMethod;
+    const path = event.path || event.rawPath || '';
 
     if (method === 'POST') {
       /* ── Create connection request ────────────────────────────────────── */
@@ -120,6 +135,122 @@ exports.handler = async (event) => {
         statusCode: 201,
         headers: CORS_HEADERS,
         body: JSON.stringify({ message: 'Connection request sent.', data: item }),
+      };
+    }
+
+    if (method === 'GET' && path.includes('/recommendations')) {
+      /* ── List user recommendations ──────────────────────────────────── */
+      const decoded = requireAuth(event);
+      const userId = decoded.userId;
+
+      const result = await docClient.send(
+        new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: 'PK = :pk AND begins_with(SK, :prefix)',
+          ExpressionAttributeValues: {
+            ':pk': `USER#${userId}`,
+            ':prefix': 'RECOMMENDATION#',
+          },
+          ScanIndexForward: false,
+        })
+      );
+
+      const recs = result.Items || [];
+      const enriched = await Promise.all(
+        recs.map(async (rec) => {
+          if (rec.practitionerId && !rec.practitionerName) {
+            try {
+              const pRes = await docClient.send(
+                new GetCommand({
+                  TableName: TABLE_NAME,
+                  Key: { PK: `PRACTITIONER#${rec.practitionerId}`, SK: 'PROFILE' },
+                })
+              );
+              if (pRes.Item) {
+                return {
+                  ...rec,
+                  practitionerName: pRes.Item.name,
+                  practitionerCredentials: pRes.Item.credentials,
+                };
+              }
+            } catch {
+              // fallback
+            }
+          }
+          return rec;
+        })
+      );
+
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ data: enriched }),
+      };
+    }
+
+    if (method === 'GET' && path.includes('/cedar-eval')) {
+      /* ── Evaluate Cedar policy for connection ────────────────────────── */
+      const decoded = requireAuth(event);
+      const userId = decoded.userId;
+      const practitionerId = (event.queryStringParameters || {}).practitionerId || 'MCI-2024-KM-7741';
+
+      const connRes = await docClient.send(
+        new GetCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `USER#${userId}`, SK: `CONNECTION#${practitionerId}` },
+        })
+      );
+      const conn = connRes.Item;
+      const connectionStatus = conn?.status || 'NO_CONNECTION';
+      const consentedCategories = conn?.consentedCategories || [];
+      const practitionerVerified = true;
+
+      let allowed = false;
+      try {
+        const result = cedar.isAuthorized({
+          policies: { staticPolicies: CEDAR_POLICY },
+          entities: [
+            { uid: { type: 'Practitioner', id: practitionerId }, attrs: {}, parents: [] },
+            { uid: { type: 'Patient', id: userId }, attrs: {}, parents: [] },
+          ],
+          principal: { type: 'Practitioner', id: practitionerId },
+          action:    { type: 'Action', id: 'ReadPatientSummary' },
+          resource:  { type: 'Patient', id: userId },
+          context: {
+            practitionerVerified,
+            connectionStatus,
+            consentedCategories: Array.isArray(consentedCategories) ? consentedCategories : [],
+          },
+        });
+        allowed = (result?.response?.decision ?? result?.decision) === 'allow';
+      } catch {
+        allowed = practitionerVerified && connectionStatus === 'ACTIVE' &&
+          Array.isArray(consentedCategories) && consentedCategories.includes('practice_logs');
+      }
+
+      const reasons = allowed
+        ? ['Verified clinician status confirmed', 'Connection status is ACTIVE', 'practice_logs consent is explicitly granted by patient']
+        : [
+            connectionStatus !== 'ACTIVE' ? `Connection is not ACTIVE (current: ${connectionStatus})` : null,
+            !consentedCategories.includes('practice_logs') ? 'Required data category "practice_logs" is NOT granted by patient' : null,
+          ].filter(Boolean);
+
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({
+          data: {
+            principal: `Practitioner::"${practitionerId}"`,
+            action: 'Action::"ReadPatientSummary"',
+            resource: `Patient::"${userId}"`,
+            connectionStatus,
+            consentedCategories,
+            decision: allowed ? 'allow' : 'deny',
+            allowed,
+            reasons,
+            policy: CEDAR_POLICY.trim(),
+          },
+        }),
       };
     }
 

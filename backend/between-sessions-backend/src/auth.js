@@ -81,7 +81,24 @@ exports.handler = async (event) => {
       if (!user || user.password !== password) return { statusCode: 401, body: JSON.stringify({ error: 'Invalid credentials' }) };
       
       const token = jwt.sign({ userId: user.id, email }, JWT_SECRET, { expiresIn: '7d' });
-      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ token, user: { id: user.id, email: user.email, onboardingComplete: user.onboardingComplete, name: user.name, isVerified: user.isVerified } }) };
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          token,
+          user: {
+            id: user.id,
+            email: user.email,
+            onboardingComplete: user.onboardingComplete,
+            name: user.name,
+            isVerified: user.isVerified,
+            values: user.values || [],
+            focusPatterns: user.focusPatterns || [],
+            supportStatus: user.supportStatus || null,
+            goal: user.goal || null,
+          }
+        })
+      };
     }
 
     if (path.includes('/auth/verify')) {
@@ -133,7 +150,7 @@ exports.handler = async (event) => {
         return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'VALIDATION_ERROR', message: 'Email is required.' }) };
       }
 
-      const { name, password, onboardingComplete } = body;
+      const { name, password, onboardingComplete, values, focusPatterns, supportStatus, goal, preferences } = body;
       const updateExpr = [];
       const exprVals = {};
       const exprNames = {};
@@ -141,6 +158,12 @@ exports.handler = async (event) => {
       if (name) { updateExpr.push("#nm = :n"); exprVals[":n"] = name; exprNames["#nm"] = "name"; }
       if (password) { updateExpr.push("password = :p"); exprVals[":p"] = password; }
       if (onboardingComplete !== undefined) { updateExpr.push("onboardingComplete = :oc"); exprVals[":oc"] = onboardingComplete; }
+      if (values !== undefined) { updateExpr.push("values = :val"); exprVals[":val"] = values; }
+      if (focusPatterns !== undefined) { updateExpr.push("focusPatterns = :fp"); exprVals[":fp"] = focusPatterns; }
+      if (supportStatus !== undefined) { updateExpr.push("supportStatus = :ss"); exprVals[":ss"] = supportStatus; }
+      if (goal !== undefined) { updateExpr.push("goal = :gl"); exprVals[":gl"] = goal; }
+      if (preferences !== undefined) { updateExpr.push("preferences = :pref"); exprVals[":pref"] = preferences; }
+
       if (updateExpr.length > 0) {
         await docClient.send(new UpdateCommand({
           TableName: TABLE_NAME,
@@ -149,12 +172,145 @@ exports.handler = async (event) => {
           ExpressionAttributeValues: exprVals,
           ...(Object.keys(exprNames).length > 0 ? { ExpressionAttributeNames: exprNames } : {})
         }));
+
+        if (decoded.userId) {
+          try {
+            await docClient.send(new UpdateCommand({
+              TableName: TABLE_NAME,
+              Key: { PK: `USER#${decoded.userId}`, SK: `PROFILE` },
+              UpdateExpression: "SET " + updateExpr.join(", "),
+              ExpressionAttributeValues: exprVals,
+              ...(Object.keys(exprNames).length > 0 ? { ExpressionAttributeNames: exprNames } : {})
+            }));
+          } catch {
+            // Best effort update for ID key
+          }
+        }
       }
       return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'User updated successfully.' }) };
     }
 
+    if (path.includes('/auth/practitioner-register')) {
+      const { password, name, govCertId, credentials, specialisation, languages, remoteAvailable } = body;
+      if (!email || !password || !name) {
+        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'Email, password, and name are required.' } }) };
+      }
+      if (password.length < 8) {
+        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'Password must be at least 8 characters.' } }) };
+      }
+      if (!govCertId || !govCertId.trim()) {
+        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'Practitioner ID is required.' } }) };
+      }
+
+      const certIdTrimmed = govCertId.trim().toUpperCase();
+      const syntheticRegex = /^MCI-(202[4-6])-[A-Z]{2}-\d{4}$/;
+      const allowedStatic = ['MCI-2024-KM-7741', 'MCI-2024-RD-3829', 'MCI-2025-AS-9182', 'MCI-2025-NK-5540', 'MCI-2025-PB-1204', 'MCI-2026-TS-8891'];
+      if (!syntheticRegex.test(certIdTrimmed) && !allowedStatic.includes(certIdTrimmed)) {
+        return {
+          statusCode: 400,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({
+            error: {
+              code: 'INVALID_PRACTITIONER_ID',
+              message: 'Invalid demo credential format. Synthetic format: MCI-YYYY-II-NNNN (e.g. MCI-2024-RD-3829). See DEMO_PRACTITIONER_IDS.md.'
+            }
+          })
+        };
+      }
+
+      const existing = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `PRACTITIONER#${email}`, SK: 'PROFILE' } }));
+      if (existing.Item) {
+        return { statusCode: 409, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: { code: 'CONFLICT', message: 'Practitioner already registered with this email.' } }) };
+      }
+
+      const pracId = certIdTrimmed;
+      const now = new Date().toISOString();
+      const pracCreds = credentials || 'MD, Clinical Practitioner · ERP Specialist';
+      const pracSpecs = Array.isArray(specialisation) && specialisation.length > 0 ? specialisation : ['OCD', 'Anxiety Disorders', 'ERP'];
+      const pracLangs = Array.isArray(languages) && languages.length > 0 ? languages : ['English', 'Hindi'];
+      const pracRemote = remoteAvailable !== undefined ? remoteAvailable : true;
+
+      const pracItem = {
+        PK: `PRACTITIONER#${email}`,
+        SK: 'PROFILE',
+        id: pracId,
+        email,
+        password,
+        name,
+        credentials: pracCreds,
+        specialisation: pracSpecs,
+        languages: pracLangs,
+        remoteAvailable: pracRemote,
+        isVerified: true,
+        govCertId: certIdTrimmed,
+        verificationNote: 'Synthetic demo registration — verified for evaluation',
+        createdAt: now,
+      };
+
+      await docClient.send(new PutCommand({ TableName: TABLE_NAME, Item: pracItem }));
+      await docClient.send(new PutCommand({
+        TableName: TABLE_NAME,
+        Item: { ...pracItem, PK: `PRACTITIONER#${pracId}` }
+      }));
+
+      // Append to public directory listing
+      try {
+        const listingRes = await docClient.send(new GetCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: 'LISTING#PRACTITIONERS', SK: 'INDEX' }
+        }));
+        const currentList = listingRes.Item?.practitioners || [];
+        const updatedList = [
+          ...currentList.filter(p => p.email !== email && p.id !== pracId),
+          {
+            id: pracId,
+            name,
+            credentials: pracCreds,
+            specialisation: pracSpecs,
+            languages: pracLangs,
+            remoteAvailable: pracRemote,
+            isVerified: true,
+            verificationNote: 'Synthetic demo registration — verified for evaluation',
+            syntheticProfile: true,
+          }
+        ];
+        await docClient.send(new PutCommand({
+          TableName: TABLE_NAME,
+          Item: { PK: 'LISTING#PRACTITIONERS', SK: 'INDEX', practitioners: updatedList }
+        }));
+      } catch (e) {
+        console.error('Could not update practitioner listing:', e);
+      }
+
+      const token = jwt.sign(
+        { practitionerId: pracId, email, role: 'practitioner', name, isVerified: true },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      return {
+        statusCode: 201,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          message: 'Practitioner registration successful. Demo credentials verified.',
+          token,
+          practitioner: {
+            id: pracId,
+            email,
+            name,
+            isVerified: true,
+            credentials: pracCreds,
+            specialisation: pracSpecs,
+            govCertId: certIdTrimmed,
+            role: 'practitioner',
+          }
+        })
+      };
+    }
+
     if (path.includes('/auth/practitioner-login')) {
-      const { password, practitionerId: govCertId } = body;
+      const { password } = body;
+      const govCertId = body.practitionerId || body.govCertId;
       if (!email || !password) return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Email and password required' }) };
 
       // Practitioners are keyed by email under PK = PRACTITIONER#email
@@ -165,11 +321,8 @@ exports.handler = async (event) => {
         return { statusCode: 401, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Invalid credentials' }) };
       }
 
-      // Mock Practitioner ID / Government Certification ID validation
-      // In production this would verify against a certified medical registry API.
-      // For demo: the stored govCertId must match what the practitioner enters.
       if (govCertId !== undefined && govCertId !== null && govCertId !== '') {
-        if (prac.govCertId && prac.govCertId !== govCertId.trim().toUpperCase()) {
+        if (prac.govCertId && prac.govCertId.toUpperCase() !== govCertId.trim().toUpperCase()) {
           return {
             statusCode: 401,
             headers: { 'Access-Control-Allow-Origin': '*' },
@@ -177,13 +330,13 @@ exports.handler = async (event) => {
           };
         }
       } else if (!govCertId || govCertId.trim() === '') {
-        // Practitioner ID is required
         return {
           statusCode: 400,
           headers: { 'Access-Control-Allow-Origin': '*' },
           body: JSON.stringify({ error: 'Practitioner ID (government certification number) is required.' })
         };
       }
+
 
       const token = jwt.sign(
         { practitionerId: prac.id, email, role: 'practitioner', name: prac.name, isVerified: prac.isVerified },

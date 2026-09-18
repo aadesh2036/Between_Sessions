@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
-import { Link } from 'react-router-dom';
-import { dashboardApi, checkinsApi, practiceApi, aiSummaryApi, connectionsApi } from '../services/api';
+import { dashboardApi, checkinsApi, practiceApi, aiSummaryApi, connectionsApi, recommendationsApi } from '../services/api';
 
 /* ── Helpers ──────────────────────────────────────────────────────────────── */
 
@@ -118,7 +118,6 @@ function LogPracticeModal({ onClose, onSaved, userId }) {
   const [trigger, setTrigger] = useState('');
   const [urge, setUrge] = useState(5);
   const [responseType, setResponseType] = useState('delay');
-  const [outcome, setOutcome] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -222,6 +221,9 @@ export default function DashboardPage() {
   const [aiError, setAiError] = useState('');
   const [aiGenerated, setAiGenerated] = useState(false);
 
+  // Clinical recommendations authored by connected practitioner
+  const [recommendations, setRecommendations] = useState([]);
+
   // Pause & Choose tool
   const [pauseStep, setPauseStep] = useState('idle');
   const [selectedResponse, setSelectedResponse] = useState(null);
@@ -253,6 +255,16 @@ export default function DashboardPage() {
     }
   }, []);
 
+  // Load clinician recommendations
+  const loadRecommendations = useCallback(async () => {
+    try {
+      const res = await recommendationsApi.list();
+      setRecommendations(res.data || []);
+    } catch {
+      setRecommendations([]);
+    }
+  }, []);
+
   // Check connections for discovery banner
   const loadConnections = useCallback(async () => {
     try {
@@ -267,8 +279,9 @@ export default function DashboardPage() {
   useEffect(() => {
     loadDashboard();
     loadAiSummary();
+    loadRecommendations();
     loadConnections();
-  }, [loadDashboard, loadAiSummary, loadConnections]);
+  }, [loadDashboard, loadAiSummary, loadRecommendations, loadConnections]);
 
   // Generate AI summary on demand
   const handleGenerateSummary = async () => {
@@ -455,12 +468,12 @@ export default function DashboardPage() {
           ) : stats ? (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-fade-up">
               <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">Practice this week</div>
-                <div className="font-mono text-3xl font-medium text-brand-ink">{stats.thisWeekPractice ?? '—'}</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">Practice (7d)</div>
+                <div className="font-mono text-3xl font-medium text-brand-ink">{stats.thisWeekPractice ?? 0}<span className="text-base text-brand-ink/40 ml-1">sessions</span></div>
               </div>
               <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">Check-in streak</div>
-                <div className="font-mono text-3xl font-medium text-brand-ink">{stats.checkinStreak ?? 0}<span className="text-base text-brand-ink/40 ml-1">days</span></div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">Check-ins (7d)</div>
+                <div className="font-mono text-3xl font-medium text-brand-ink">{stats.checkinCountThisWeek ?? stats.checkinStreak ?? 0}<span className="text-base text-brand-ink/40 ml-1">logged</span></div>
               </div>
               <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">Avg SUDS (7d)</div>
@@ -474,6 +487,78 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : null}
+
+          {/* ── Active Clinical Recommendations ─────────────────────────── */}
+          {recommendations.length > 0 && (
+            <section className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-brand-teal/20 shadow-dashboard animate-fade-up relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-5 border-b border-brand-border/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-brand-softerTeal flex items-center justify-center text-brand-teal shrink-0">
+                    <span className="material-symbols-outlined text-[22px]">clinical_notes</span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold uppercase tracking-widest text-brand-teal">Curated Structured Practice</span>
+                      <span className="px-2 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal text-[10px] font-bold">Human-Authored Note</span>
+                    </div>
+                    <h3 className="font-editorial text-2xl text-brand-ink mt-0.5">
+                      {recommendations[0].practitionerName ? `Recommendation from ${recommendations[0].practitionerName}` : 'Clinical Recommendation'}
+                    </h3>
+                  </div>
+                </div>
+                <div className="text-left sm:text-right sm:self-center">
+                  <div className="text-xs font-bold text-brand-ink/80">{recommendations[0].practitionerCredentials || 'Verified Clinician'}</div>
+                  <div className="text-[11px] text-brand-ink/40 font-mono">
+                    {recommendations[0].authoredAt ? new Date(recommendations[0].authoredAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recent'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Recommended Next Step / Practice */}
+                <div className="p-5 rounded-2xl bg-brand-softerTeal/60 border border-brand-teal/20 space-y-2">
+                  <div className="flex items-center gap-2 text-brand-teal text-xs font-bold uppercase tracking-wider">
+                    <span className="material-symbols-outlined text-[16px]">task_alt</span>
+                    Recommended Practice Window
+                  </div>
+                  <p className="text-sm font-medium text-brand-ink leading-relaxed">
+                    {recommendations[0].nextStep}
+                  </p>
+                </div>
+
+                {/* Clinical Observation */}
+                {recommendations[0].observation && (
+                  <div className="p-5 rounded-2xl bg-brand-canvas border border-brand-border/40 space-y-2">
+                    <div className="flex items-center gap-2 text-brand-ink/60 text-xs font-bold uppercase tracking-wider">
+                      <span className="material-symbols-outlined text-[16px]">visibility</span>
+                      Clinical Observation
+                    </div>
+                    <p className="text-sm text-brand-ink/80 leading-relaxed italic">
+                      "{recommendations[0].observation}"
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Direct Note to User */}
+              {recommendations[0].noteToUser && (
+                <div className="mt-4 p-4 rounded-2xl bg-brand-amberSoft/60 border border-brand-amber/20 flex items-start gap-3">
+                  <span className="material-symbols-outlined text-brand-amber text-[18px] shrink-0 mt-0.5">edit_note</span>
+                  <div className="text-xs text-brand-ink/80 leading-relaxed">
+                    <span className="font-bold text-brand-ink">Note from practitioner: </span>
+                    {recommendations[0].noteToUser}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-5 pt-4 border-t border-brand-border/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] text-brand-ink/40">
+                <span>This structured practice is authored by your clinician based on your shared logs. Not an automated diagnosis.</span>
+                <Link to="/app/clinician" className="text-brand-teal font-bold hover:underline shrink-0">
+                  Manage Sharing &amp; Clinician →
+                </Link>
+              </div>
+            </section>
+          )}
 
           {/* ── Bento Grid ─────────────────────────────────────────────── */}
           <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-up" style={{ animationDelay: '100ms' }}>

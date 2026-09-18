@@ -6,10 +6,13 @@ import Logo from '../components/Logo';
 
 export default function LoginPage({ practitionerMode = false }) {
   const [isRegister, setIsRegister] = useState(false);
+  const [isPracRegister, setIsPracRegister] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [govCertId, setGovCertId] = useState('');
+  const [credentials, setCredentials] = useState('MD, Psychiatry');
+  const [specialty, setSpecialty] = useState('Psychiatry & ERP Specialist');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -66,6 +69,52 @@ export default function LoginPage({ practitionerMode = false }) {
     } catch (err) {
       if (err.message.includes('Email not verified')) setNeedsVerification(true);
       setError(err.message || 'Sign in failed. Please check your credentials and try again.');
+      setIsLoading(false);
+    }
+  };
+
+  const handlePractitionerRegisterSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+
+    if (!name || !email || !password || !govCertId) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+
+    const regex = /^MCI-(202[4-6])-[A-Z]{2}-\d{4}$/;
+    if (!regex.test(govCertId.trim())) {
+      setError('Practitioner ID must match demo synthetic format: MCI-YYYY-XX-NNNN (e.g. MCI-2025-RP-3312).');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await practitionerApi.register({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+        govCertId: govCertId.trim(),
+        credentials: credentials.trim() || 'MD, Psychiatry',
+        specialty: specialty.trim() || 'Psychiatry & ERP Specialist',
+      });
+
+      if (res.token && res.practitioner) {
+        localStorage.setItem('bs_prac_token', res.token);
+        localStorage.setItem('bs_prac_user', JSON.stringify(res.practitioner));
+        navigate('/practitioner', { replace: true });
+      } else {
+        setSuccessMsg(res.message || 'Practitioner account registered successfully. You may now sign in.');
+        setIsPracRegister(false);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to register practitioner account.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -139,11 +188,35 @@ export default function LoginPage({ practitionerMode = false }) {
                 Clinician Portal
               </div>
               <h1 className="font-editorial text-3xl text-brand-ink font-normal leading-snug">
-                Clinician Sign In
+                {isPracRegister ? 'Register as Practitioner' : 'Clinician Sign In'}
               </h1>
               <p className="text-xs text-brand-ink/60">
-                Access your patient dashboard and consent-controlled summaries.
+                {isPracRegister
+                  ? 'Join Between Sessions as a verified clinician to support patients with structured care.'
+                  : 'Access your patient dashboard and consent-controlled summaries.'}
               </p>
+            </div>
+
+            {/* Tab switch */}
+            <div className="flex border-b border-brand-border gap-4">
+              <button
+                type="button"
+                onClick={() => { setIsPracRegister(false); setError(''); setSuccessMsg(''); }}
+                className={`pb-2.5 text-xs font-bold border-b-2 transition-colors ${
+                  !isPracRegister ? 'border-brand-teal text-brand-teal' : 'border-transparent text-brand-ink/40 hover:text-brand-ink'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsPracRegister(true); setError(''); setSuccessMsg(''); }}
+                className={`pb-2.5 text-xs font-bold border-b-2 transition-colors ${
+                  isPracRegister ? 'border-brand-teal text-brand-teal' : 'border-transparent text-brand-ink/40 hover:text-brand-ink'
+                }`}
+              >
+                Register Practitioner
+              </button>
             </div>
 
             {/* Success / Error banners */}
@@ -158,86 +231,247 @@ export default function LoginPage({ practitionerMode = false }) {
               </div>
             )}
 
-            {/* Form */}
-            <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-              {/* Email */}
-              <div>
-                <label htmlFor="prac-email" className="block text-xs font-semibold text-brand-ink mb-1">
-                  Email address
-                </label>
-                <input
-                  id="prac-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="kavita@betweensessions.com"
-                  className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
-                  required
-                  autoComplete="email"
-                />
-              </div>
+            {!isPracRegister ? (
+              /* Sign In Form */
+              <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+                {/* Demo autofill helper */}
+                <div className="p-3 bg-brand-softerTeal/70 border border-brand-teal/20 rounded-xl flex items-center justify-between text-xs">
+                  <div>
+                    <div className="font-bold text-brand-teal">Demo Clinician: Dr. Kavita Mehra</div>
+                    <div className="text-[11px] text-brand-ink/60 font-mono">kavita@betweensessions.com</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail('kavita@betweensessions.com');
+                      setPassword('Prac1234!');
+                      setGovCertId('MCI-2024-KM-7741');
+                    }}
+                    className="px-2.5 py-1 rounded bg-brand-teal text-white text-[10px] font-bold hover:bg-brand-tealDark transition-colors"
+                  >
+                    Autofill
+                  </button>
+                </div>
 
-              {/* Password */}
-              <div>
-                <label htmlFor="prac-password" className="block text-xs font-semibold text-brand-ink mb-1">
-                  Password
-                </label>
-                <input
-                  id="prac-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
-                  required
-                  autoComplete="current-password"
-                />
-              </div>
+                {/* Email */}
+                <div>
+                  <label htmlFor="prac-email" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Email address
+                  </label>
+                  <input
+                    id="prac-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="kavita@betweensessions.com"
+                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                    autoComplete="email"
+                  />
+                </div>
 
-              {/* Practitioner ID */}
-              <div>
-                <label htmlFor="prac-gov-id" className="block text-xs font-semibold text-brand-ink mb-1">
-                  Practitioner ID
-                </label>
-                <input
-                  id="prac-gov-id"
-                  type="text"
-                  value={govCertId}
-                  onChange={(e) => setGovCertId(e.target.value)}
-                  placeholder="e.g. MCI-2024-KM-7741"
-                  className="w-full px-4 py-2.5 text-sm font-mono rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
-                  required
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-                <p className="mt-1.5 text-[11px] text-brand-ink/55 leading-relaxed">
-                  Your government medical certification number. This is verified against your registration.
-                </p>
-              </div>
+                {/* Password */}
+                <div>
+                  <label htmlFor="prac-password" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Password
+                  </label>
+                  <input
+                    id="prac-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                    autoComplete="current-password"
+                  />
+                </div>
 
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-3 rounded bg-brand-teal text-white font-semibold text-sm hover:bg-brand-tealDark transition-colors flex items-center justify-center gap-2 mt-1 disabled:opacity-60"
-              >
-                {isLoading ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
-                    Verifying…
-                  </>
-                ) : (
-                  'Sign In'
-                )}
-              </button>
-            </form>
+                {/* Practitioner ID */}
+                <div>
+                  <label htmlFor="prac-gov-id" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Practitioner ID
+                  </label>
+                  <input
+                    id="prac-gov-id"
+                    type="text"
+                    value={govCertId}
+                    onChange={(e) => setGovCertId(e.target.value)}
+                    placeholder="e.g. MCI-2024-KM-7741"
+                    className="w-full px-4 py-2.5 text-sm font-mono rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                  <p className="mt-1.5 text-[11px] text-brand-ink/55 leading-relaxed">
+                    Demo credential format: <span className="font-mono text-brand-ink">MCI-YYYY-XX-NNNN</span>. Demo credential — not a real government ID.
+                  </p>
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-3 rounded bg-brand-teal text-white font-semibold text-sm hover:bg-brand-tealDark transition-colors flex items-center justify-center gap-2 mt-1 disabled:opacity-60"
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                      </svg>
+                      Verifying…
+                    </>
+                  ) : (
+                    'Sign In'
+                  )}
+                </button>
+              </form>
+            ) : (
+              /* Register Practitioner Form */
+              <form className="space-y-4" onSubmit={handlePractitionerRegisterSubmit} noValidate>
+                {/* Synthetic disclaimer banner */}
+                <div className="p-3 bg-brand-amberSoft border border-brand-amber/30 rounded-xl text-xs text-brand-ink/80 flex items-start gap-2">
+                  <span className="material-symbols-outlined text-brand-amber text-[18px] shrink-0 mt-0.5">info</span>
+                  <div>
+                    <div className="font-bold text-brand-ink">Demo Credential Notice</div>
+                    <div>Demo credential — not a real government ID. Must match format <code className="font-mono bg-white px-1 py-0.5 rounded text-[10px]">MCI-YYYY-XX-NNNN</code>.</div>
+                  </div>
+                </div>
+
+                {/* Full Name */}
+                <div>
+                  <label htmlFor="prac-name" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Full Name &amp; Title
+                  </label>
+                  <input
+                    id="prac-name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Dr. Rajiv Patel"
+                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label htmlFor="prac-reg-email" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Work Email
+                  </label>
+                  <input
+                    id="prac-reg-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="rajiv@betweensessions.com"
+                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label htmlFor="prac-reg-password" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Password (min 8 chars)
+                  </label>
+                  <input
+                    id="prac-reg-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                    autoComplete="new-password"
+                  />
+                </div>
+
+                {/* Practitioner ID */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label htmlFor="prac-reg-id" className="block text-xs font-semibold text-brand-ink">
+                      Practitioner ID
+                    </label>
+                    <div className="flex items-center gap-1.5 text-[10px] text-brand-ink/50">
+                      <span>Sample:</span>
+                      <button
+                        type="button"
+                        onClick={() => setGovCertId('MCI-2025-RP-3312')}
+                        className="px-1.5 py-0.5 bg-brand-canvas hover:bg-brand-border rounded font-mono border"
+                      >
+                        MCI-2025-RP-3312
+                      </button>
+                    </div>
+                  </div>
+                  <input
+                    id="prac-reg-id"
+                    type="text"
+                    value={govCertId}
+                    onChange={(e) => setGovCertId(e.target.value)}
+                    placeholder="e.g. MCI-2025-RP-3312"
+                    className="w-full px-4 py-2.5 text-sm font-mono rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                    spellCheck={false}
+                  />
+                </div>
+
+                {/* Credentials */}
+                <div>
+                  <label htmlFor="prac-credentials" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Credentials &amp; Degree
+                  </label>
+                  <input
+                    id="prac-credentials"
+                    type="text"
+                    value={credentials}
+                    onChange={(e) => setCredentials(e.target.value)}
+                    placeholder="MD, DPM, Consultant Psychiatrist"
+                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                  />
+                </div>
+
+                {/* Specialty */}
+                <div>
+                  <label htmlFor="prac-specialty" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Specialty / Clinical Focus
+                  </label>
+                  <input
+                    id="prac-specialty"
+                    type="text"
+                    value={specialty}
+                    onChange={(e) => setSpecialty(e.target.value)}
+                    placeholder="ERP &amp; Clinical Psychology"
+                    className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                  />
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-3 rounded bg-brand-teal text-white font-semibold text-sm hover:bg-brand-tealDark transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-60"
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                      </svg>
+                      Registering…
+                    </>
+                  ) : (
+                    'Register Practitioner Account'
+                  )}
+                </button>
+              </form>
+            )}
 
             {/* Mock verification note */}
             <p className="text-[11px] text-brand-ink/45 leading-relaxed border-t border-brand-border pt-4">
-              Practitioner ID is a mock verification against your stored government certification number. In production, this connects to MCI / state medical council APIs.
+              Practitioner ID is verified against the demo synthetic registry. Demo credential — not a real government ID. In production, this connects to NMC / state medical council APIs.
             </p>
           </div>
         </main>

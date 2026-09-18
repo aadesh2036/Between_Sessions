@@ -83,9 +83,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const completeOnboarding = async () => {
+  const completeOnboarding = async (onboardingData = {}) => {
     if (user) {
-      await updateUser({ onboardingComplete: true });
+      await updateUser({ onboardingComplete: true, ...onboardingData });
     }
   };
 

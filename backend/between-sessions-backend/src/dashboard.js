@@ -154,7 +154,9 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         data: {
           thisWeekPractice,
-          checkinStreak: streak,
+          checkinStreak: checkinDays.size,
+          activeDaysThisWeek: checkinDays.size,
+          checkinCountThisWeek: checkins.length,
           avgSudsThisWeek,
           recentCheckins,
           recentJournal,

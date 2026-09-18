@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { connectionsApi, consentsApi } from '../services/api';
+import { connectionsApi, consentsApi, practitionersApi } from '../services/api';
 import Logo from '../components/Logo';
 
 /* ── Status badges ──────────────────────────────────────────────────────── */
@@ -22,8 +22,8 @@ const DATA_CATEGORIES = [
 ];
 
 /* ── Connect Request Modal ───────────────────────────────────────────────── */
-function ConnectModal({ onClose, onSent }) {
-  const [practitionerId, setPractitionerId] = useState('');
+function ConnectModal({ onClose, onSent, initialPractitionerId = '' }) {
+  const [practitionerId, setPractitionerId] = useState(initialPractitionerId);
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
@@ -214,6 +214,7 @@ export default function ClinicianConnectPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [selectedPractitionerId, setSelectedPractitionerId] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [revoking, setRevoking] = useState(null);
   const [practitioners, setPractitioners] = useState([]);
@@ -226,12 +227,14 @@ export default function ClinicianConnectPage() {
     setLoading(true);
     setError('');
     try {
-      const [connRes, consentRes] = await Promise.all([
+      const [connRes, consentRes, pracRes] = await Promise.all([
         connectionsApi.list(),
         consentsApi.list(),
+        practitionersApi.list().catch(() => ({ data: [] })),
       ]);
       setConnections(connRes.data || []);
       setConsents(consentRes.data || []);
+      setPractitioners(pracRes.data || []);
     } catch (err) {
       setError(err.message || 'Could not load connections.');
     } finally {
@@ -257,11 +260,11 @@ export default function ClinicianConnectPage() {
     setCedarLoading(true);
     setCedarResult(null);
     try {
-      const res = await fetch('http://localhost:3000/api/v1/practitioner/patients/usr_demo_001/summary');
-      const data = await res.json();
-      setCedarResult({ ok: res.ok, data });
+      const targetId = activeConnections[0]?.practitionerId || (practitioners[0]?.id || 'MCI-2024-KM-7741');
+      const res = await connectionsApi.cedarEval(targetId);
+      setCedarResult({ ok: res.data?.allowed, data: res.data });
     } catch (err) {
-      setCedarResult({ ok: false, data: { error: err.message } });
+      setCedarResult({ ok: false, data: { error: err.message || 'Cedar evaluation failed.' } });
     } finally {
       setCedarLoading(false);
     }
@@ -276,7 +279,11 @@ export default function ClinicianConnectPage() {
 
       {showConnectModal && (
         <ConnectModal
-          onClose={() => setShowConnectModal(false)}
+          initialPractitionerId={selectedPractitionerId}
+          onClose={() => {
+            setShowConnectModal(false);
+            setSelectedPractitionerId('');
+          }}
           onSent={loadData}
         />
       )}
@@ -363,6 +370,73 @@ export default function ClinicianConnectPage() {
             <span className="material-symbols-outlined text-brand-amber text-[20px] shrink-0">lock</span>
             <div>
               <span className="font-bold text-brand-ink">Your privacy is protected.</span> No data is visible to any clinician until you explicitly grant access by category. Revoke at any time — revocation takes effect immediately.
+            </div>
+          </div>
+
+          {/* Verified Practitioners Directory */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-brand-teal">
+                <span className="material-symbols-outlined text-[20px]">badge</span>
+                <span className="text-xs font-bold uppercase tracking-widest">Verified Clinicians Directory</span>
+              </div>
+              <span className="text-[10px] text-brand-ink/40 font-mono">Demo Registry</span>
+            </div>
+            <p className="text-xs text-brand-ink/60">
+              Practitioners registered on Between Sessions with verified medical credentials. You retain 100% control of data visibility.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              {practitioners.length > 0 ? (
+                practitioners.map(prac => {
+                  const isConnected = activeConnections.some(c => c.practitionerId === prac.id);
+                  const isPending = pendingConnections.some(c => c.practitionerId === prac.id);
+
+                  return (
+                    <div key={prac.id} className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/40 flex flex-col justify-between gap-4">
+                      <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h4 className="font-bold text-sm text-brand-ink">{prac.name}</h4>
+                            <p className="text-[11px] text-brand-teal font-medium mt-0.5">{prac.credentials}</p>
+                          </div>
+                          <span className="px-2 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal text-[9px] font-bold uppercase shrink-0">
+                            Verified
+                          </span>
+                        </div>
+                        <div className="mt-2 text-xs text-brand-ink/70">{prac.specialty}</div>
+                        <div className="mt-1 font-mono text-[10px] text-brand-ink/40">ID: {prac.id}</div>
+                      </div>
+
+                      <div className="pt-2 border-t border-brand-border/30 flex items-center justify-between">
+                        {isConnected ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-clinical-success">
+                            <span className="w-1.5 h-1.5 rounded-full bg-clinical-success"></span> Connected
+                          </span>
+                        ) : isPending ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-amber">
+                            <span className="w-1.5 h-1.5 rounded-full bg-brand-amber"></span> Request Pending
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setSelectedPractitionerId(prac.id);
+                              setShowConnectModal(true);
+                            }}
+                            className="px-4 py-1.5 rounded-full bg-brand-ink text-white text-xs font-bold hover:bg-brand-teal transition-colors"
+                          >
+                            Connect
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="col-span-2 text-center py-4 text-xs text-brand-ink/40">
+                  Loading practitioner directory...
+                </div>
+              )}
             </div>
           </div>
 
@@ -516,7 +590,7 @@ export default function ClinicianConnectPage() {
             </div>
             <h3 className="font-editorial text-2xl text-brand-ink mb-2">AWS Cedar policy enforcement</h3>
             <p className="text-brand-ink/60 text-sm mb-5 max-w-lg">
-              Simulate a practitioner API read. Cedar verifies connection status and consent categories before allowing access. The policy requires an <span className="font-bold">ACTIVE</span> connection and <span className="font-bold">PRACTICE_HISTORY</span> consent.
+              Simulate a practitioner API read. The backend Cedar WASM engine evaluates your connection status and consent categories before allowing access. The policy requires an <span className="font-bold">ACTIVE</span> connection and <span className="font-bold">practice_logs</span> consent.
             </p>
             <button
               onClick={handleCedarDemo}
@@ -524,24 +598,36 @@ export default function ClinicianConnectPage() {
               className="px-6 py-2.5 rounded-full bg-brand-teal text-white text-xs font-bold hover:bg-brand-tealDark transition-all shadow-sm disabled:opacity-70 flex items-center gap-2"
             >
               {cedarLoading
-                ? <><span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span> Evaluating policy...</>
-                : <><span className="material-symbols-outlined text-[14px]">policy</span> Simulate Practitioner Request</>
+                ? <><span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span> Evaluating Cedar policy...</>
+                : <><span className="material-symbols-outlined text-[14px]">policy</span> Evaluate Cedar Access Live</>
               }
             </button>
 
             {cedarResult && (
               <div className={`mt-4 p-5 rounded-2xl border ${cedarResult.ok ? 'bg-brand-softSuccess border-clinical-success/30' : 'bg-brand-coralSoft border-brand-coral/20'}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={`material-symbols-outlined text-[18px] ${cedarResult.ok ? 'text-clinical-success' : 'text-brand-coral'}`}>
-                    {cedarResult.ok ? 'check_circle' : 'cancel'}
-                  </span>
-                  <span className={`text-xs font-bold uppercase tracking-wider ${cedarResult.ok ? 'text-clinical-success' : 'text-brand-coral'}`}>
-                    {cedarResult.ok ? 'Access Granted (Cedar)' : 'Access Denied (Cedar)'}
-                  </span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className={`material-symbols-outlined text-[18px] ${cedarResult.ok ? 'text-clinical-success' : 'text-brand-coral'}`}>
+                      {cedarResult.ok ? 'check_circle' : 'cancel'}
+                    </span>
+                    <span className={`text-xs font-bold uppercase tracking-wider ${cedarResult.ok ? 'text-clinical-success' : 'text-brand-coral'}`}>
+                      {cedarResult.ok ? 'Access Permitted (Cedar WASM Engine)' : 'Access Denied (Cedar WASM Engine)'}
+                    </span>
+                  </div>
+                  {cedarResult.data?.reasons?.length > 0 && (
+                    <ul className="text-xs text-brand-ink/80 space-y-1 list-disc list-inside">
+                      {cedarResult.data.reasons.map((r, i) => (
+                        <li key={i}>{r}</li>
+                      ))}
+                    </ul>
+                  )}
+                  <div className="pt-2 border-t border-brand-border/30">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-brand-ink/40 mb-1">Cedar Engine Evaluation Telemetry</div>
+                    <pre className="text-[11px] font-mono text-brand-ink/70 whitespace-pre-wrap overflow-auto max-h-40 bg-white/70 p-3 rounded-xl border border-brand-border/30">
+                      {JSON.stringify(cedarResult.data, null, 2)}
+                    </pre>
+                  </div>
                 </div>
-                <pre className="text-xs font-mono text-brand-ink/70 whitespace-pre-wrap overflow-auto max-h-40">
-                  {JSON.stringify(cedarResult.data, null, 2)}
-                </pre>
               </div>
             )}
           </div>

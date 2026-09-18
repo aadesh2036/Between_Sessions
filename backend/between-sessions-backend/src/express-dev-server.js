@@ -109,13 +109,16 @@ app.get('/api/v1/consents', bridge(consentsHandler));
 app.put('/api/v1/consents/:consentId', bridge(consentsHandler));
 app.put('/api/v1/consents', bridge(consentsHandler)); // new consent without id
 
-// ── Connections ──────────────────────────────────────────────────────────────
+// ── Connections & Recommendations ───────────────────────────────────────────
 app.post('/api/v1/connections', bridge(connectionsHandler));
 app.get('/api/v1/connections', bridge(connectionsHandler));
 app.delete('/api/v1/connections/:id', bridge(connectionsHandler));
+app.get('/api/v1/recommendations', bridge(connectionsHandler));
+app.get('/api/v1/connections/cedar-eval', bridge(connectionsHandler));
 
-// ── Practitioner login ───────────────────────────────────────────────────────
+// ── Practitioner auth ────────────────────────────────────────────────────────
 app.post('/api/v1/auth/practitioner-login', bridge(authHandler));
+app.post('/api/v1/auth/practitioner-register', bridge(authHandler));
 
 // ── Public practitioner discovery (no auth) ──────────────────────────────────
 app.get('/api/v1/practitioners', bridge(practitionerHandler));

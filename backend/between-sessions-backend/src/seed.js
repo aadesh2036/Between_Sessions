@@ -42,8 +42,8 @@ const PRIYA_EMAIL   = 'priya@betweensessions.com';
 const PRIYA_ID      = 'usr_priya_sharma_001';
 
 const PRAC_EMAIL    = 'kavita@betweensessions.com';
-const PRAC_ID       = 'prac_kavita_mehra_001';
 const GOV_CERT_ID   = 'MCI-2024-KM-7741';   // mock government cert ID
+const PRAC_ID       = GOV_CERT_ID;          // Uniform ID matching synthetic demo registry format
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -131,6 +131,36 @@ async function seed() {
     createdAt: ago(90),
   });
 
+  // Alias for practitioner@betweensessions.com
+  await put({
+    PK: `PRACTITIONER#practitioner@betweensessions.com`,
+    SK: 'PROFILE',
+    id: PRAC_ID,
+    email: PRAC_EMAIL,
+    password: 'Prac1234!',
+    govCertId: GOV_CERT_ID,
+    name: 'Dr. Kavita Mehra',
+    credentials: 'MD, MCI Registered Psychiatrist · ERP Specialist',
+    specialisation: ['OCD', 'Anxiety Disorders', 'ERP'],
+    isVerified: true,
+    createdAt: ago(90),
+  });
+
+  // Alias for prac_kavita_mehra_001 legacy ID
+  await put({
+    PK: `PRACTITIONER#prac_kavita_mehra_001`,
+    SK: 'PROFILE',
+    id: PRAC_ID,
+    email: PRAC_EMAIL,
+    password: 'Prac1234!',
+    govCertId: GOV_CERT_ID,
+    name: 'Dr. Kavita Mehra',
+    credentials: 'MD, MCI Registered Psychiatrist · ERP Specialist',
+    specialisation: ['OCD', 'Anxiety Disorders', 'ERP'],
+    isVerified: true,
+    createdAt: ago(90),
+  });
+
   const pracToken = jwt.sign(
     { practitionerId: PRAC_ID, email: PRAC_EMAIL, role: 'practitioner', name: 'Dr. Kavita Mehra', isVerified: true },
     JWT_SECRET, { expiresIn: '30d' }
@@ -165,6 +195,24 @@ async function seed() {
 
   await put({
     PK: `USER#${PRIYA_EMAIL}`,
+    SK: 'PROFILE',
+    id: PRIYA_ID,
+    email: PRIYA_EMAIL,
+    name: 'Priya Sharma',
+    password: 'Demo1234!',
+    isVerified: true,
+    onboardingComplete: true,
+    ageBand: '25-34',
+    language: 'en',
+    goal: 'track_patterns',
+    values: ['Career', 'Family', 'Reading', 'Yoga'],
+    aiSummariesEnabled: true,
+    privacyAcknowledgedAt: ago(21),
+    createdAt: ago(21),
+  });
+  // Alias for demo@betweensessions.com
+  await put({
+    PK: `USER#demo@betweensessions.com`,
     SK: 'PROFILE',
     id: PRIYA_ID,
     email: PRIYA_EMAIL,

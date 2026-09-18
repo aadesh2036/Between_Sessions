@@ -167,6 +167,11 @@ export const connectionsApi = {
 
   remove: (practitionerId) =>
     apiFetch(`/connections/${practitionerId}`, { method: 'DELETE' }),
+
+  cedarEval: (practitionerId) => {
+    const qs = practitionerId ? `?practitionerId=${encodeURIComponent(practitionerId)}` : '';
+    return apiFetch(`/connections/cedar-eval${qs}`);
+  },
 };
 
 // ── Practitioner (Clinician Dashboard) ───────────────────────────────────────
@@ -213,10 +218,26 @@ async function pracFetch(path, options = {}) {
   return data;
 }
 
+// ── Recommendations (Patient View) ───────────────────────────────────────────
+
+export const recommendationsApi = {
+  list: () => apiFetch('/recommendations'),
+};
+
+// ── Public Practitioner Directory ────────────────────────────────────────────
+
+export const practitionersApi = {
+  list: () => apiFetch('/practitioners'),
+};
+
 export const practitionerApi = {
   /** Authenticate a practitioner — uses apiFetch (no token needed for login) */
   login: (email, password, govCertId) =>
     apiFetch('/auth/practitioner-login', { method: 'POST', body: JSON.stringify({ email, password, practitionerId: govCertId }) }),
+
+  /** Register a new practitioner with synthetic demo credential */
+  register: (payload) =>
+    apiFetch('/auth/practitioner-register', { method: 'POST', body: JSON.stringify(payload) }),
 
   /** Get the currently authenticated practitioner's profile */
   me: () => pracFetch('/practitioner/me'),
@@ -251,3 +272,4 @@ export const practitionerApi = {
       body: JSON.stringify(payload),
     }),
 };
+

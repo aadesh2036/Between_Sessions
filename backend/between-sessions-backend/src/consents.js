@@ -135,19 +135,18 @@ exports.handler = async (event) => {
 
       await docClient.send(new PutCommand({ TableName: TABLE_NAME, Item: item }));
 
-      // If revoking, also update the matching CONNECTION to strip consent categories
-      if (consentStatus === 'revoked') {
-        try {
-          await docClient.send(new UpdateCommand({
-            TableName: TABLE_NAME,
-            Key: { PK: `USER#${userId}`, SK: `CONNECTION#${recipientId}` },
-            UpdateExpression: 'SET consentedCategories = :empty, updatedAt = :now',
-            ExpressionAttributeValues: { ':empty': [], ':now': now },
-            ConditionExpression: 'attribute_exists(PK)', // only if connection exists
-          }));
-        } catch {
-          // connection may not exist — fine
-        }
+      // Synchronize matching CONNECTION's consentedCategories so Cedar checks see the update immediately
+      try {
+        const syncedCategories = consentStatus === 'active' ? categories : [];
+        await docClient.send(new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `USER#${userId}`, SK: `CONNECTION#${recipientId}` },
+          UpdateExpression: 'SET consentedCategories = :cats, updatedAt = :now',
+          ExpressionAttributeValues: { ':cats': syncedCategories, ':now': now },
+          ConditionExpression: 'attribute_exists(PK)', // only if connection exists
+        }));
+      } catch {
+        // connection may not exist yet — fine
       }
 
       return {
