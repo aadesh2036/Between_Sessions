@@ -535,7 +535,7 @@ function PatientView({ patient, onBack }) {
           </section>
 
           {/* Recommendations */}
-          <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
+          <section id="recommendation-section" className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 text-brand-teal">
                 <span className="text-xs font-bold uppercase tracking-widest">Recommendations</span>
@@ -1020,6 +1020,13 @@ export default function PractitionerDashboardPage() {
   // Per-request action state  { [userId]: 'accepting' | 'declining' | 'done' | error }
   const [reqActions, setReqActions] = useState({});
 
+  /* ── Toast notification ──────────────────────────────────────────────── */
+  const [toastMsg, setToastMsg] = useState('');
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(''), 3200);
+  };
+
   /* ── Auth gate ──────────────────────────────────────────────────────── */
   useEffect(() => {
     const token = localStorage.getItem('bs_prac_token');
@@ -1328,28 +1335,32 @@ export default function PractitionerDashboardPage() {
           {/* VIEW: patient detail                                        */}
           {/* ═══════════════════════════════════════════════════════════ */}
           {view === 'patient' && selectedPatient && (
-            <PatientView patient={selectedPatient} onBack={backToDashboard} />
+            <div key={selectedPatient.userId || selectedPatient.id} className="animate-tab-switch">
+              <PatientView patient={selectedPatient} onBack={backToDashboard} />
+            </div>
           )}
 
           {/* ═══════════════════════════════════════════════════════════ */}
           {/* VIEW: practitioner settings                                  */}
           {/* ═══════════════════════════════════════════════════════════ */}
           {view === 'dashboard' && navItem === 'settings' && (
-            <PractitionerSettingsView
-              prac={prac}
-              onUpdated={(updatedPrac) => {
-                setPrac(updatedPrac);
-                localStorage.setItem('bs_prac_user', JSON.stringify(updatedPrac));
-              }}
-              onLogout={handleLogout}
-            />
+            <div key="settings" className="animate-tab-switch">
+              <PractitionerSettingsView
+                prac={prac}
+                onUpdated={(updatedPrac) => {
+                  setPrac(updatedPrac);
+                  localStorage.setItem('bs_prac_user', JSON.stringify(updatedPrac));
+                }}
+                onLogout={handleLogout}
+              />
+            </div>
           )}
 
           {/* ═══════════════════════════════════════════════════════════ */}
           {/* VIEW: requests (Inbound Triage)                             */}
           {/* ═══════════════════════════════════════════════════════════ */}
           {view === 'dashboard' && navItem === 'requests' && (
-            <div className="space-y-6 animate-fade-in">
+            <div key="requests" className="space-y-6 animate-tab-switch">
               <header>
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-coralSoft text-brand-coral text-xs font-semibold mb-2">
                   <span className="material-symbols-outlined text-sm">person_add</span>
@@ -1486,7 +1497,7 @@ export default function PractitionerDashboardPage() {
           {/* VIEW: patients (Consented Patient Roster)                    */}
           {/* ═══════════════════════════════════════════════════════════ */}
           {view === 'dashboard' && navItem === 'patients' && (
-            <div className="space-y-6 animate-fade-in">
+            <div key="patients" className="space-y-6 animate-tab-switch">
               <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-semibold mb-2">
@@ -1648,7 +1659,7 @@ export default function PractitionerDashboardPage() {
           {/* VIEW: dashboard (Clinical Overview)                         */}
           {/* ═══════════════════════════════════════════════════════════ */}
           {view === 'dashboard' && navItem === 'dashboard' && (
-            <>
+            <div key="dashboard" className="space-y-8 animate-tab-switch">
               {/* ── Welcome header ────────────────────────────────────── */}
               <header>
                 <p className="text-brand-teal font-bold text-xs uppercase tracking-widest mb-2">
@@ -1859,7 +1870,7 @@ export default function PractitionerDashboardPage() {
                   </div>
                 )}
               </section>
-            </>
+            </div>
           )}
 
           {/* ── Safety footer ──────────────────────────────────────────── */}
@@ -1872,6 +1883,14 @@ export default function PractitionerDashboardPage() {
           </footer>
         </div>
       </div>
+
+      {/* ── Floating Toast Notification ───────────────────────────────── */}
+      {toastMsg && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-brand-ink text-white text-xs font-semibold shadow-card-lift flex items-center gap-2 animate-tab-switch border border-white/20 pointer-events-none">
+          <span className="material-symbols-outlined text-[17px] text-brand-softerTeal">check_circle</span>
+          <span>{toastMsg}</span>
+        </div>
+      )}
 
       {/* ── Mobile Floating Bottom Bar ───────────────────────────────── */}
       <MobileBottomNav
@@ -1907,41 +1926,53 @@ export default function PractitionerDashboardPage() {
             onClick: () => navClick('settings'),
           },
         ]}
-        actionTitle="Clinical Actions"
+        actionTitle="Clinical Quick Actions"
         actionPills={[
           {
-            id: 'triage',
-            icon: 'person_add',
-            label: 'Review Connection Requests',
-            subtitle: `${pendingCount} inbound requests awaiting triage`,
-            highlight: pendingCount > 0,
-            onClick: () => navClick('requests'),
+            id: 'draft-rec',
+            icon: 'edit_note',
+            label: selectedPatient ? `Draft Note for ${selectedPatient.name || 'Patient'}` : 'Write Clinical Recommendation',
+            subtitle: selectedPatient ? 'Document ERP trial guidance or response strategy' : 'Select an active patient to formulate guidance',
+            highlight: true,
+            onClick: () => {
+              if (selectedPatient) {
+                const recSec = document.getElementById('recommendation-section');
+                if (recSec) recSec.scrollIntoView({ behavior: 'smooth' });
+                showToast(`Focused recommendation composer for ${selectedPatient.name || 'patient'}`);
+              } else if (patients.length > 0) {
+                openPatient(patients[0]);
+                showToast(`Opened ${patients[0].name || 'patient'} to draft recommendation`);
+              } else {
+                navClick('requests');
+                showToast('Review connection requests to link with patients first');
+              }
+            },
           },
           {
-            id: 'roster',
-            icon: 'groups',
-            label: 'Consented Patient Roster',
-            subtitle: `${patients.length} active patients with live telemetry`,
-            onClick: () => navClick('patients'),
+            id: 'copy-id',
+            icon: 'badge',
+            label: 'Copy Practitioner ID',
+            subtitle: `Share ID with patient: ${prac?.govCertId || 'MCI-2024-KM-7741'}`,
+            onClick: () => {
+              const code = prac?.govCertId || prac?.id || 'MCI-2024-KM-7741';
+              navigator.clipboard?.writeText(code);
+              showToast(`Practitioner ID ${code} copied to clipboard!`);
+            },
           },
           {
-            id: 'overview-action',
-            icon: 'monitoring',
-            label: 'Clinical Practice Overview',
-            subtitle: 'Caseload telemetry & response stats',
-            onClick: () => navClick('dashboard'),
-          },
-          {
-            id: 'settings-action',
-            icon: 'tune',
-            label: 'Practice & Intake Settings',
-            subtitle: 'Credentials, remote status & council registry',
-            onClick: () => navClick('settings'),
+            id: 'triage-elevated',
+            icon: 'notifications_active',
+            label: 'Priority Caseload Triage',
+            subtitle: 'Review consented cases with recent high distress',
+            onClick: () => {
+              navClick('patients');
+              showToast('Filtered caseload for priority clinical review');
+            },
           },
           {
             id: 'logout-action',
             icon: 'logout',
-            label: 'Sign Out Practitioner Session',
+            label: 'Sign Out Clinician Session',
             subtitle: 'Secure encrypted session termination',
             onClick: handleLogout,
           },

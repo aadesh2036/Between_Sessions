@@ -224,7 +224,7 @@ export default function PracticePage() {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex gap-1.5 p-1 rounded-2xl bg-brand-canvas border border-brand-border text-xs">
+            <div className="flex gap-1 p-1 rounded-full bg-brand-canvas border border-brand-border/80 text-xs shadow-xs">
               {[
                 { id: 'all', label: 'All' },
                 { id: 'prevented', label: 'Prevented' },
@@ -235,10 +235,10 @@ export default function PracticePage() {
                 <button
                   key={t.id}
                   onClick={() => setFilter(t.id)}
-                  className={`px-3.5 py-1.5 rounded-xl transition-colors text-[11px] font-medium ${
+                  className={`px-3.5 py-1.5 rounded-full transition-all text-[11px] ${
                     filter === t.id
                       ? 'bg-white text-brand-ink shadow-xs font-semibold'
-                      : 'text-brand-ink/60 hover:text-brand-ink'
+                      : 'text-brand-ink/55 hover:text-brand-ink font-medium'
                   }`}
                 >
                   {t.label}
@@ -248,12 +248,12 @@ export default function PracticePage() {
           </div>
 
           {filteredLogs.length === 0 ? (
-            <div className="p-12 rounded-3xl border border-brand-border/80 bg-brand-paper text-center space-y-2">
+            <div key={`empty-${filter}`} className="p-12 rounded-3xl border border-brand-border/80 bg-brand-paper text-center space-y-2 animate-tab-switch">
               <span className="material-symbols-outlined text-[36px] text-brand-ink/30">inventory_2</span>
               <p className="text-xs text-brand-ink/60">No practice sessions found for this filter.</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div key={`list-${filter}`} className="space-y-3 animate-tab-switch">
               {filteredLogs.map((log) => {
                 const meta = RESPONSE_TYPE_META[log.responseType] || RESPONSE_TYPE_META.no_response;
                 const d = new Date(log.createdAt || log.completedAt);

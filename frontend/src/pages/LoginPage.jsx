@@ -275,7 +275,7 @@ export default function LoginPage({ practitionerMode = false }) {
           position: absolute;
           top: 0;
           height: 100%;
-          transition: all 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+          transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .sign-in-container {
@@ -301,7 +301,7 @@ export default function LoginPage({ practitionerMode = false }) {
           transform: translateX(100%);
           opacity: 1;
           z-index: 5;
-          animation: show 0.65s;
+          animation: show 0.45s;
         }
 
         @keyframes show {
@@ -316,7 +316,7 @@ export default function LoginPage({ practitionerMode = false }) {
           width: 50%;
           height: 100%;
           overflow: hidden;
-          transition: transform 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+          transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
           z-index: 100;
         }
 
@@ -331,7 +331,7 @@ export default function LoginPage({ practitionerMode = false }) {
           height: 100%;
           width: 200%;
           transform: translateX(0);
-          transition: transform 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+          transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
           color: #FFFFFF;
         }
 
@@ -351,7 +351,7 @@ export default function LoginPage({ practitionerMode = false }) {
           height: 100%;
           width: 50%;
           transform: translateX(0);
-          transition: transform 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+          transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .overlay-left {
@@ -408,20 +408,37 @@ export default function LoginPage({ practitionerMode = false }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-xs">
-          <a href="tel:14416" className="text-brand-coral font-bold hover:underline flex items-center gap-1.5">
+        <div className="flex items-center gap-3 text-xs">
+          <a href="tel:14416" className="text-brand-coral font-bold hover:underline hidden sm:flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-brand-coral animate-pulse" />
             Tele-MANAS 14416
           </a>
-          {practitionerMode ? (
-            <Link to="/login" className="text-brand-ink/70 hover:text-brand-teal font-semibold transition-colors">
-              Individual Portal →
-            </Link>
-          ) : (
-            <Link to="/practitioner/login" className="text-brand-ink/70 hover:text-brand-teal font-semibold transition-colors">
-              Clinician Portal →
-            </Link>
-          )}
+
+          {/* Segmented Pill Switcher (Individual vs Clinician) */}
+          <div className="flex items-center p-1 rounded-full bg-brand-canvas border border-brand-border shadow-xs">
+            <button
+              type="button"
+              onClick={() => practitionerMode && navigate('/login')}
+              className={`px-3 py-1 rounded-full transition-all text-xs font-semibold ${
+                !practitionerMode
+                  ? 'bg-white text-brand-ink shadow-xs'
+                  : 'text-brand-ink/55 hover:text-brand-ink'
+              }`}
+            >
+              Individual
+            </button>
+            <button
+              type="button"
+              onClick={() => !practitionerMode && navigate('/practitioner/login')}
+              className={`px-3 py-1 rounded-full transition-all text-xs font-semibold ${
+                practitionerMode
+                  ? 'bg-white text-brand-ink shadow-xs'
+                  : 'text-brand-ink/55 hover:text-brand-ink'
+              }`}
+            >
+              Clinician
+            </button>
+          </div>
         </div>
       </header>
 
@@ -523,7 +540,7 @@ export default function LoginPage({ practitionerMode = false }) {
           </div>
         ) : practitionerMode ? (
           /* ── B. PRACTITIONER SLIDING DUAL-PANEL ── */
-          <div className={`auth-container ${isPracRegister ? 'right-panel-active' : ''}`}>
+          <div key="clinician-auth-panel" className={`auth-container animate-tab-switch ${isPracRegister ? 'right-panel-active' : ''}`}>
             {/* 1. Practitioner Sign In Form (Left) */}
             <div className="form-container sign-in-container flex flex-col justify-center px-8 sm:px-14 py-10 bg-white">
               <div className="w-full max-w-md mx-auto space-y-4">
@@ -856,7 +873,7 @@ export default function LoginPage({ practitionerMode = false }) {
           </div>
         ) : (
           /* ── C. INDIVIDUAL SLIDING DUAL-PANEL ── */
-          <div className={`auth-container ${isRegister ? 'right-panel-active' : ''}`}>
+          <div key="individual-auth-panel" className={`auth-container animate-tab-switch ${isRegister ? 'right-panel-active' : ''}`}>
             {/* 1. Individual Sign In Form (Left) */}
             <div className="form-container sign-in-container flex flex-col justify-center px-8 sm:px-14 py-10 bg-white">
               <div className="w-full max-w-md mx-auto space-y-4">

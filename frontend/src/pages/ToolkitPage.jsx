@@ -74,7 +74,7 @@ export default function ToolkitPage() {
         </div>
 
         {/* ── Active Tool Component Container ─────────────────────────────── */}
-        <div className="bg-brand-paper border border-brand-border/70 rounded-3xl p-6 sm:p-8 shadow-card-lift">
+        <div key={activeTool} className="bg-brand-paper border border-brand-border/70 rounded-3xl p-6 sm:p-8 shadow-card-lift animate-tab-switch">
           {activeTool === 'grounding' && <GroundingTool />}
           {activeTool === 'breathing' && <BreathingTool />}
           {activeTool === 'pause-choose' && <PauseChooseTool />}

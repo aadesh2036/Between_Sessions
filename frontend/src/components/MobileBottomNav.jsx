@@ -111,17 +111,17 @@ export default function MobileBottomNav({
           {/* ── Main Dark Pill Navigation Bar ── */}
           <div className="relative w-full h-[62px]">
             {/* Background pill */}
-            <div className="absolute inset-0 bg-brand-ink rounded-full shadow-[0_12px_36px_rgba(23,50,58,0.3)] flex items-center justify-between px-5">
-              {/* Left 2 items */}
-              <div className="flex items-center gap-6">
+            <div className="absolute inset-0 bg-brand-ink rounded-full shadow-[0_12px_36px_rgba(23,50,58,0.3)] flex items-center px-3">
+              {/* Left 2 items - equal 2-column grid */}
+              <div className="flex-1 grid grid-cols-2 place-items-center">
                 {leftItems.map((item) => renderNavItem(item))}
               </div>
 
               {/* Center spacer for mound */}
-              <div className="w-12 shrink-0" />
+              <div className="w-[60px] shrink-0" />
 
-              {/* Right 2 items */}
-              <div className="flex items-center gap-6">
+              {/* Right 2 items - equal 2-column grid */}
+              <div className="flex-1 grid grid-cols-2 place-items-center">
                 {rightItems.map((item) => renderNavItem(item))}
               </div>
             </div>
@@ -185,7 +185,7 @@ function renderNavItem(item) {
         to={item.to}
         end={item.end}
         className={({ isActive }) =>
-          `flex flex-col items-center justify-center py-1 transition-all relative ${
+          `w-full flex flex-col items-center justify-center py-1 transition-all relative ${
             isActive ? 'text-white font-bold' : 'text-white/55 hover:text-white font-medium'
           }`
         }
@@ -202,7 +202,7 @@ function renderNavItem(item) {
               <span className="w-1.5 h-1.5 rounded-full bg-transparent mt-1" />
             )}
             {item.badge && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-brand-coral animate-pulse" />
+              <span className="absolute -top-1 right-1/4 w-2 h-2 rounded-full bg-brand-coral animate-pulse" />
             )}
           </>
         )}
@@ -217,7 +217,7 @@ function renderNavItem(item) {
       key={item.id || item.label}
       type="button"
       onClick={item.onClick}
-      className={`flex flex-col items-center justify-center py-1 transition-all relative ${
+      className={`w-full flex flex-col items-center justify-center py-1 transition-all relative ${
         isActive ? 'text-white font-bold' : 'text-white/55 hover:text-white font-medium'
       }`}
     >
@@ -231,7 +231,7 @@ function renderNavItem(item) {
         <span className="w-1.5 h-1.5 rounded-full bg-transparent mt-1" />
       )}
       {item.badge && (
-        <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 rounded-full bg-brand-coral text-white text-[9px] font-bold flex items-center justify-center">
+        <span className="absolute -top-1 right-1/4 min-w-[14px] h-3.5 px-1 rounded-full bg-brand-coral text-white text-[9px] font-bold flex items-center justify-center">
           {item.badge}
         </span>
       )}
