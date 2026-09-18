@@ -144,6 +144,7 @@ app.get('/api/v1/practitioners', bridge(practitionerHandler));
 
 // ── Practitioner domain routes ───────────────────────────────────────────────
 app.get('/api/v1/practitioner/me',                                          bridge(practitionerHandler));
+app.put('/api/v1/practitioner/me',                                          bridge(practitionerHandler));
 app.get('/api/v1/practitioner/requests',                                    bridge(practitionerHandler));
 app.post('/api/v1/practitioner/requests/:userId/accept',                    bridge(practitionerHandler));
 app.post('/api/v1/practitioner/requests/:userId/decline',                   bridge(practitionerHandler));

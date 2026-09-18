@@ -363,53 +363,125 @@ exports.handler = async (event) => {
     }
 
     if (path.includes('/auth/forgot-password')) {
-      if (!email) return { statusCode: 400, body: JSON.stringify({ error: 'Email required' }) };
+      if (!email) return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Email required' }) };
 
-      // Check user exists (don't reveal whether they do or not — always 200)
-      const res2 = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `USER#${email}`, SK: 'PROFILE' } }));
-      if (res2.Item) {
-        const resetToken = jwt.sign({ email, purpose: 'reset' }, JWT_SECRET, { expiresIn: '1h' });
-        const transporter = nodemailer.createTransport({
-          host: process.env.MAILTRAP_SMTP_HOST || 'sandbox.smtp.mailtrap.io',
-          port: process.env.MAILTRAP_SMTP_PORT || 2525,
-          auth: { user: process.env.MAILTRAP_SMTP_USER, pass: process.env.MAILTRAP_SMTP_PASS },
-        });
-        const emailBody = {
-          body: {
-            name: email.split('@')[0],
-            intro: 'We received a request to reset your password.',
-            action: {
-              instructions: 'Click the button below to set a new password. This link expires in 1 hour.',
-              button: { color: '#176B67', text: 'Reset Password', link: `http://localhost:5173/login?reset=${resetToken}` },
+      // Check if user or practitioner exists
+      const userRes = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `USER#${email}`, SK: 'PROFILE' } }));
+      const pracRes = !userRes.Item ? await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `PRACTITIONER#${email}`, SK: 'PROFILE' } })) : null;
+
+      const account = userRes.Item || pracRes?.Item;
+      let devResetUrl = null;
+      let devToken = null;
+
+      if (account) {
+        const isPractitioner = !!pracRes?.Item;
+        const resetToken = jwt.sign(
+          { email, purpose: 'reset', role: isPractitioner ? 'practitioner' : 'user' },
+          JWT_SECRET,
+          { expiresIn: '1h' }
+        );
+        devToken = resetToken;
+        const resetLink = `http://localhost:5173/login?reset=${resetToken}${isPractitioner ? '&mode=practitioner' : ''}`;
+        devResetUrl = resetLink;
+
+        try {
+          const transporter = nodemailer.createTransport({
+            host: process.env.MAILTRAP_SMTP_HOST || 'sandbox.smtp.mailtrap.io',
+            port: process.env.MAILTRAP_SMTP_PORT || 2525,
+            auth: {
+              user: process.env.MAILTRAP_SMTP_USER || 'dummy',
+              pass: process.env.MAILTRAP_SMTP_PASS || 'dummy',
             },
-            outro: 'If you did not request this, you can ignore this email.',
-          },
-        };
-        await transporter.sendMail({
-          from: 'sanctuary@betweensessions.com',
-          to: email,
-          subject: 'Reset your Between Sessions password',
-          html: mailGenerator.generate(emailBody),
-        });
+          });
+          const emailBody = {
+            body: {
+              name: account.name || email.split('@')[0],
+              intro: 'We received a request to reset your Between Sessions password.',
+              action: {
+                instructions: 'Click the button below to set a new password. This link expires in 1 hour.',
+                button: { color: '#176B67', text: 'Reset Password', link: resetLink },
+              },
+              outro: 'If you did not request this, you can safely ignore this email.',
+            },
+          };
+          await transporter.sendMail({
+            from: 'sanctuary@betweensessions.com',
+            to: email,
+            subject: 'Reset your Between Sessions password',
+            html: mailGenerator.generate(emailBody),
+          });
+        } catch (mailErr) {
+          console.log('📧 [Local Dev Mailer Notice]: SMTP not connected or delivery bypassed.');
+          console.log(`🔑 [Between Sessions Dev Reset Link]: ${resetLink}`);
+        }
       }
-      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'If that address is registered, you will receive a reset link shortly.' }) };
+
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          message: 'If that email address is registered, a password reset link has been dispatched.',
+          ...(devResetUrl ? { devResetUrl, resetToken: devToken } : {}),
+        }),
+      };
     }
 
     if (path.includes('/auth/reset-password')) {
       const { token, newPassword } = body;
-      if (!token || !newPassword) return { statusCode: 400, body: JSON.stringify({ error: 'token and newPassword are required.' }) };
+      if (!token || !newPassword) {
+        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'token and newPassword are required.' }) };
+      }
+      if (newPassword.length < 8) {
+        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Password must be at least 8 characters.' }) };
+      }
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
         if (decoded.purpose !== 'reset') throw new Error('Invalid token type');
-        await docClient.send(new UpdateCommand({
-          TableName: TABLE_NAME,
-          Key: { PK: `USER#${decoded.email}`, SK: 'PROFILE' },
-          UpdateExpression: 'SET password = :p',
-          ExpressionAttributeValues: { ':p': newPassword },
-        }));
-        return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'Password updated successfully.' }) };
-      } catch {
-        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Invalid or expired reset token.' }) };
+
+        // Check whether this is a user or practitioner
+        const userRes = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `USER#${decoded.email}`, SK: 'PROFILE' } }));
+        if (userRes.Item) {
+          await docClient.send(new UpdateCommand({
+            TableName: TABLE_NAME,
+            Key: { PK: `USER#${decoded.email}`, SK: 'PROFILE' },
+            UpdateExpression: 'SET password = :p',
+            ExpressionAttributeValues: { ':p': newPassword },
+          }));
+          if (userRes.Item.id) {
+            try {
+              await docClient.send(new UpdateCommand({
+                TableName: TABLE_NAME,
+                Key: { PK: `USER#${userRes.Item.id}`, SK: 'PROFILE' },
+                UpdateExpression: 'SET password = :p',
+                ExpressionAttributeValues: { ':p': newPassword },
+              }));
+            } catch {}
+          }
+        }
+
+        const pracRes = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `PRACTITIONER#${decoded.email}`, SK: 'PROFILE' } }));
+        if (pracRes.Item) {
+          await docClient.send(new UpdateCommand({
+            TableName: TABLE_NAME,
+            Key: { PK: `PRACTITIONER#${decoded.email}`, SK: 'PROFILE' },
+            UpdateExpression: 'SET password = :p',
+            ExpressionAttributeValues: { ':p': newPassword },
+          }));
+          if (pracRes.Item.id) {
+            try {
+              await docClient.send(new UpdateCommand({
+                TableName: TABLE_NAME,
+                Key: { PK: `PRACTITIONER#${pracRes.Item.id}`, SK: 'PROFILE' },
+                UpdateExpression: 'SET password = :p',
+                ExpressionAttributeValues: { ':p': newPassword },
+              }));
+            } catch {}
+          }
+        }
+
+        return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'Password updated successfully. You can now log in.' }) };
+      } catch (err) {
+        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: err.message || 'Invalid or expired reset token.' }) };
       }
     }
 

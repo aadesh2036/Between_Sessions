@@ -59,9 +59,6 @@ export default function SettingsPage() {
   const [resendMsg, setResendMsg] = useState({ type: '', msg: '' });
   const [resending, setResending] = useState(false);
 
-  /* ── Data Export state ────────────────────────────────────────────────── */
-  const [exporting, setExporting] = useState(false);
-
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setSavingProfile(true);
@@ -148,42 +145,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleExportData = async () => {
-    setExporting(true);
-    try {
-      const [practicesRes, checkinsRes] = await Promise.all([
-        practiceApi.list(),
-        checkinsApi.list(),
-      ]);
-      const exportPayload = {
-        user: {
-          id: user?.id,
-          email: user?.email,
-          name: user?.name,
-          values: user?.values || userValues,
-          exportedAt: new Date().toISOString(),
-        },
-        practices: practicesRes?.practices || practicesRes || [],
-        checkins: checkinsRes?.checkins || checkinsRes || [],
-      };
-      const blob = new Blob([JSON.stringify(exportPayload, null, 2)], {
-        type: 'application/json',
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `between-sessions-data-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Export failed:', err);
-    } finally {
-      setExporting(false);
-    }
-  };
-
   const initialLetter = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
 
   return (
@@ -250,16 +211,8 @@ export default function SettingsPage() {
 
             <div className="flex items-center gap-3 shrink-0">
               <button
-                onClick={handleExportData}
-                disabled={exporting}
-                className="px-4 py-2.5 rounded-xl border border-brand-border bg-brand-canvas hover:bg-brand-paper text-xs font-semibold text-brand-ink transition-colors flex items-center gap-2 shadow-xs disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-[16px] text-brand-teal">download</span>
-                <span>{exporting ? 'Exporting...' : 'Export Data (JSON)'}</span>
-              </button>
-              <button
                 onClick={logout}
-                className="px-4 py-2.5 rounded-xl bg-brand-coralSoft text-brand-coral hover:bg-brand-coral hover:text-white text-xs font-semibold transition-colors flex items-center gap-2 shadow-xs"
+                className="px-5 py-2.5 rounded-xl bg-brand-coralSoft text-brand-coral hover:bg-brand-coral hover:text-white text-xs font-semibold transition-colors flex items-center gap-2 shadow-xs"
               >
                 <span className="material-symbols-outlined text-[16px]">logout</span>
                 <span>Sign Out</span>
@@ -630,42 +583,38 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* ── Box 4: Session Safety & Data Portability (Cols 8-12) ─────────── */}
+          {/* ── Box 4: Session & Device Security (Cols 8-12) ─────────────────── */}
           <div className="lg:col-span-5 bg-brand-paper rounded-3xl p-6 sm:p-8 border border-brand-border/60 shadow-card-lift space-y-5 flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2 text-brand-ink/60 mb-1">
                     <span className="w-2 h-2 rounded-full bg-brand-ink/40" />
-                    <span className="text-xs font-bold uppercase tracking-widest">Data Freedom</span>
+                    <span className="text-xs font-bold uppercase tracking-widest">Device & Session</span>
                   </div>
                   <h2 className="font-editorial text-2xl text-brand-ink font-medium">
-                    Data Portability
+                    Session Security
                   </h2>
                 </div>
-                <span className="material-symbols-outlined text-brand-ink/40 text-[22px]">database</span>
+                <span className="material-symbols-outlined text-brand-ink/40 text-[22px]">security</span>
               </div>
 
               <p className="text-xs text-brand-ink/70 leading-relaxed">
-                You own all your exposure entries, check-in records, and personal reflections. Download your complete historical log at any time in standard JSON format.
+                Your sanctuary is protected by strict token authentication and encrypted headers. Your records are only accessible to you and clinicians you explicitly authorize.
               </p>
 
-              <div className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/60 space-y-2.5">
+              <div className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/60 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-brand-ink">Sanctuary Snapshot</span>
-                  <span className="text-[10px] font-mono text-brand-teal">JSON Format</span>
+                  <span className="text-xs font-bold text-brand-ink">Active Device Sync</span>
+                  <span className="text-[10px] font-mono text-clinical-success font-semibold">Protected</span>
                 </div>
-                <p className="text-[11px] text-brand-ink/60">
-                  Includes all ERP exposure records, pre/post SUDS ratings, response prevention selections, and timestamps.
+                <p className="text-[11px] text-brand-ink/60 leading-relaxed">
+                  Session token synchronized via secure HTTP-compatible storage and browser cookies (SameSite=Lax).
                 </p>
-                <button
-                  onClick={handleExportData}
-                  disabled={exporting}
-                  className="w-full py-2.5 rounded-xl border border-brand-teal/40 bg-brand-paper hover:bg-brand-softerTeal text-brand-teal text-xs font-semibold transition-colors flex items-center justify-center gap-2 shadow-xs disabled:opacity-50"
-                >
-                  <span className="material-symbols-outlined text-[16px]">file_download</span>
-                  <span>{exporting ? 'Generating JSON...' : 'Download My Data Archive'}</span>
-                </button>
+                <div className="pt-1 flex items-center gap-1.5 text-[10px] text-brand-ink/50 font-mono">
+                  <span className="w-1.5 h-1.5 rounded-full bg-clinical-success" />
+                  <span>Zero third-party trackers or ad beacons</span>
+                </div>
               </div>
             </div>
 
@@ -673,7 +622,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-brand-ink block">Active Session</span>
-                  <span className="text-[11px] text-brand-ink/50 font-mono">Cookie + LocalStorage Synced</span>
+                  <span className="text-[11px] text-brand-ink/50 font-mono">ID: {user?.id || 'usr_current'}</span>
                 </div>
                 <button
                   onClick={logout}

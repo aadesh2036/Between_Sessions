@@ -6,10 +6,14 @@ export default function Logo({ className = '', to }) {
   const { user } = useAuth();
   const location = useLocation();
 
-  // Determine safe destination: Never kick authenticated individuals to public landing page
+  // Determine safe destination:
+  // - If on login or registration pages, clicking logo returns to public landing page (/)
+  // - If authenticated or inside the dashboard, clicking logo routes to appropriate home (/app or /practitioner)
   let target = to;
   if (!target) {
-    if (location.pathname.startsWith('/practitioner')) {
+    if (location.pathname === '/login' || location.pathname === '/practitioner/login') {
+      target = '/';
+    } else if (location.pathname.startsWith('/practitioner')) {
       target = '/practitioner';
     } else if (location.pathname.startsWith('/app')) {
       target = '/app';

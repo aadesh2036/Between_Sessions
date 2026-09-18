@@ -156,6 +156,48 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ data: safe }) };
     }
 
+    // ── PUT /practitioner/me ─────────────────────────────────────────────────
+    if (method === 'PUT' && path.includes('/practitioner/me')) {
+      const decoded = requirePractitionerAuth(event);
+      const body = JSON.parse(event.body || '{}');
+      const { name, credentials, specialisation, languages, remoteAvailable, clinicName, notes } = body;
+
+      const updateExpr = [];
+      const exprVals = {};
+      const exprNames = {};
+
+      if (name) { updateExpr.push("#nm = :n"); exprVals[":n"] = name; exprNames["#nm"] = "name"; }
+      if (credentials) { updateExpr.push("credentials = :c"); exprVals[":c"] = credentials; }
+      if (specialisation) { updateExpr.push("specialisation = :s"); exprVals[":s"] = specialisation; }
+      if (languages) { updateExpr.push("languages = :l"); exprVals[":l"] = languages; }
+      if (remoteAvailable !== undefined) { updateExpr.push("remoteAvailable = :ra"); exprVals[":ra"] = remoteAvailable; }
+      if (clinicName) { updateExpr.push("clinicName = :cn"); exprVals[":cn"] = clinicName; }
+      if (notes) { updateExpr.push("notes = :nt"); exprVals[":nt"] = notes; }
+
+      if (updateExpr.length > 0) {
+        await docClient.send(new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `PRACTITIONER#${decoded.practitionerId}`, SK: 'PROFILE' },
+          UpdateExpression: 'SET ' + updateExpr.join(', '),
+          ExpressionAttributeValues: exprVals,
+          ...(Object.keys(exprNames).length > 0 ? { ExpressionAttributeNames: exprNames } : {}),
+        }));
+        if (decoded.email) {
+          try {
+            await docClient.send(new UpdateCommand({
+              TableName: TABLE_NAME,
+              Key: { PK: `PRACTITIONER#${decoded.email}`, SK: 'PROFILE' },
+              UpdateExpression: 'SET ' + updateExpr.join(', '),
+              ExpressionAttributeValues: exprVals,
+              ...(Object.keys(exprNames).length > 0 ? { ExpressionAttributeNames: exprNames } : {}),
+            }));
+          } catch {}
+        }
+      }
+
+      return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ message: 'Practitioner profile updated successfully.' }) };
+    }
+
     // ── GET /practitioner/requests ───────────────────────────────────────────
     if (method === 'GET' && path.includes('/practitioner/requests') && !path.includes('/accept') && !path.includes('/decline')) {
       const decoded = requirePractitionerAuth(event);

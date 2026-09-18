@@ -627,6 +627,366 @@ function PatientView({ patient, onBack }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
+/*  Practitioner Settings View                                                 */
+/* ─────────────────────────────────────────────────────────────────────────── */
+function PractitionerSettingsView({ prac, onUpdated, onLogout }) {
+  const [name, setName] = useState(prac?.name || '');
+  const [clinicName, setClinicName] = useState(prac?.clinicName || '');
+  const [credentials, setCredentials] = useState(prac?.credentials || '');
+  const [specialisation, setSpecialisation] = useState(
+    Array.isArray(prac?.specialisation) ? prac.specialisation.join(', ') : (prac?.specialisation || '')
+  );
+  const [languages, setLanguages] = useState(
+    Array.isArray(prac?.languages) ? prac.languages.join(', ') : (prac?.languages || 'English, Hindi')
+  );
+  const [remoteAvailable, setRemoteAvailable] = useState(prac?.remoteAvailable ?? true);
+  const [notes, setNotes] = useState(prac?.notes || '');
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState('');
+  const [saveError, setSaveError] = useState('');
+
+  // Sync if prac prop updates
+  useEffect(() => {
+    if (prac) {
+      if (prac.name) setName(prac.name);
+      if (prac.clinicName) setClinicName(prac.clinicName);
+      if (prac.credentials) setCredentials(prac.credentials);
+      if (prac.specialisation) {
+        setSpecialisation(Array.isArray(prac.specialisation) ? prac.specialisation.join(', ') : prac.specialisation);
+      }
+      if (prac.languages) {
+        setLanguages(Array.isArray(prac.languages) ? prac.languages.join(', ') : prac.languages);
+      }
+      if (prac.remoteAvailable !== undefined) setRemoteAvailable(prac.remoteAvailable);
+      if (prac.notes) setNotes(prac.notes);
+    }
+  }, [prac]);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setSaveSuccess('');
+    setSaveError('');
+
+    try {
+      const specs = specialisation.split(',').map((s) => s.trim()).filter(Boolean);
+      const langs = languages.split(',').map((l) => l.trim()).filter(Boolean);
+      const payload = {
+        name: name.trim(),
+        clinicName: clinicName.trim(),
+        credentials: credentials.trim(),
+        specialisation: specs,
+        languages: langs,
+        remoteAvailable,
+        notes: notes.trim(),
+      };
+      const res = await practitionerApi.updateMe(payload);
+      setSaveSuccess(res.message || 'Practitioner profile updated successfully.');
+      onUpdated({ ...prac, ...payload });
+      setTimeout(() => setSaveSuccess(''), 4000);
+    } catch (err) {
+      setSaveError(err.message || 'Failed to update practitioner profile.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-semibold mb-2">
+          <span className="material-symbols-outlined text-sm">tune</span>
+          Clinical Practice Configuration
+        </div>
+        <h1 className="font-editorial text-4xl sm:text-5xl text-brand-ink font-normal leading-tight">
+          Practitioner Settings
+        </h1>
+        <p className="text-brand-ink/60 text-sm mt-1 max-w-2xl">
+          Manage your professional details, credentials, clinical areas of focus, and patient intake availability.
+        </p>
+      </div>
+
+      {saveSuccess && (
+        <div className="p-4 rounded-2xl bg-brand-softerTeal text-brand-teal text-sm font-medium border border-brand-teal/20 flex items-center gap-2">
+          <span className="material-symbols-outlined text-lg">check_circle</span>
+          <span>{saveSuccess}</span>
+        </div>
+      )}
+
+      {saveError && (
+        <div className="p-4 rounded-2xl bg-brand-coralSoft text-brand-coral text-sm font-medium border border-brand-coral/20 flex items-center gap-2">
+          <span className="material-symbols-outlined text-lg">error</span>
+          <span>{saveError}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSave} className="space-y-6">
+        {/* Bento Grid layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Card 1: Professional Identity (Col span 2) */}
+          <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/70 shadow-card-lift space-y-5">
+            <div className="flex items-center justify-between border-b border-brand-border/40 pb-4">
+              <div>
+                <h2 className="font-editorial text-2xl text-brand-ink font-normal">
+                  Professional Identity
+                </h2>
+                <p className="text-xs text-brand-ink/50 mt-0.5">
+                  Visible to patients during clinician discovery and consultation matching.
+                </p>
+              </div>
+              <span className="material-symbols-outlined text-brand-teal text-2xl">badge</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Full Name &amp; Title
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Dr. Kavita Mehra"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Clinic or Practice Affiliation
+                </label>
+                <input
+                  type="text"
+                  value={clinicName}
+                  onChange={(e) => setClinicName(e.target.value)}
+                  placeholder="e.g. Horizons Behavioral Health"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Credentials, Degrees &amp; Council Registration
+                </label>
+                <input
+                  type="text"
+                  value={credentials}
+                  onChange={(e) => setCredentials(e.target.value)}
+                  placeholder="e.g. MD, MCI Registered Psychiatrist · ERP Specialist"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                  required
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Practice Philosophy &amp; Patient Notes
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Describe your therapeutic modality, approach to ERP between sessions, or consultation criteria."
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink resize-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Practitioner Registry & License Badge (Col span 1) */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/70 shadow-card-lift flex flex-col justify-between space-y-5">
+            <div>
+              <div className="flex items-center justify-between border-b border-brand-border/40 pb-4 mb-4">
+                <div>
+                  <h2 className="font-editorial text-2xl text-brand-ink font-normal">
+                    Verified Registry
+                  </h2>
+                  <p className="text-xs text-brand-ink/50 mt-0.5">
+                    Synthetic demo credential status
+                  </p>
+                </div>
+                <span className="material-symbols-outlined text-brand-lavender text-2xl">verified</span>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-brand-softerTeal/70 border border-brand-teal/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-brand-teal">
+                    Registry ID
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-brand-teal text-white text-[9px] font-bold">
+                    VERIFIED
+                  </span>
+                </div>
+                <div className="font-mono text-base font-bold text-brand-ink">
+                  {prac?.govCertId || 'MCI-2024-KM-7741'}
+                </div>
+                <p className="text-[11px] text-brand-ink/65 leading-relaxed pt-1 border-t border-brand-teal/20">
+                  Practitioner identity verified for simulated clinical continuity. In production, verified against national medical councils.
+                </p>
+              </div>
+
+              <div className="mt-4 p-4 rounded-2xl bg-brand-canvas border border-brand-border/60 space-y-1.5">
+                <div className="text-xs font-semibold text-brand-ink">
+                  Registered Account Email
+                </div>
+                <div className="font-mono text-xs text-brand-ink/60">
+                  {prac?.email || 'kavita@betweensessions.com'}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-brand-coralSoft/70 border border-brand-coral/20 text-brand-coral text-[11px] flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">support</span>
+              <span>Tele-MANAS crisis link remains active on all views (14416).</span>
+            </div>
+          </div>
+
+          {/* Card 3: Clinical Focus & Consultation Mode (Col span 2) */}
+          <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/70 shadow-card-lift space-y-5">
+            <div className="flex items-center justify-between border-b border-brand-border/40 pb-4">
+              <div>
+                <h2 className="font-editorial text-2xl text-brand-ink font-normal">
+                  Clinical Focus &amp; Consultation Mode
+                </h2>
+                <p className="text-xs text-brand-ink/50 mt-0.5">
+                  Configure areas of therapeutic focus and accepted consultation modalities.
+                </p>
+              </div>
+              <span className="material-symbols-outlined text-brand-teal text-2xl">psychology</span>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Specialization Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={specialisation}
+                  onChange={(e) => setSpecialisation(e.target.value)}
+                  placeholder="e.g. OCD, Anxiety Disorders, ERP, Phobias"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                />
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {specialisation.split(',').map((tag, idx) => {
+                    const trimmed = tag.trim();
+                    if (!trimmed) return null;
+                    return (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-medium border border-brand-teal/20"
+                      >
+                        {trimmed}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Languages Spoken (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={languages}
+                  onChange={(e) => setLanguages(e.target.value)}
+                  placeholder="e.g. English, Hindi, Marathi"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                />
+              </div>
+
+              {/* Remote availability toggle */}
+              <div className="flex items-center justify-between p-4 bg-brand-canvas rounded-2xl border border-brand-border/60">
+                <div>
+                  <div className="text-xs font-bold text-brand-ink">
+                    Tele-Consultation / Remote Availability
+                  </div>
+                  <div className="text-[11px] text-brand-ink/60">
+                    Allow consented patients across regions to request remote asynchronous monitoring and review.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRemoteAvailable(!remoteAvailable)}
+                  className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
+                    remoteAvailable ? 'bg-brand-teal' : 'bg-brand-border'
+                  }`}
+                >
+                  <span
+                    className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform ${
+                      remoteAvailable ? 'translate-x-6' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4: Session Security & Sign Out (Col span 1) */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/70 shadow-card-lift flex flex-col justify-between space-y-5">
+            <div>
+              <div className="flex items-center justify-between border-b border-brand-border/40 pb-4 mb-4">
+                <div>
+                  <h2 className="font-editorial text-2xl text-brand-ink font-normal">
+                    Session Security
+                  </h2>
+                  <p className="text-xs text-brand-ink/50 mt-0.5">
+                    Encrypted practitioner session
+                  </p>
+                </div>
+                <span className="material-symbols-outlined text-brand-amber text-2xl">security</span>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div className="p-3 rounded-xl bg-brand-canvas border border-brand-border/60 flex items-center justify-between">
+                  <span className="text-brand-ink/60">Session Token:</span>
+                  <span className="font-mono text-[11px] text-brand-teal font-bold">Encrypted JWT</span>
+                </div>
+                <div className="p-3 rounded-xl bg-brand-canvas border border-brand-border/60 flex items-center justify-between">
+                  <span className="text-brand-ink/60">Cookie Security:</span>
+                  <span className="font-mono text-[11px] text-brand-ink">SameSite=Lax</span>
+                </div>
+                <div className="p-3 rounded-xl bg-brand-canvas border border-brand-border/60 flex items-center justify-between">
+                  <span className="text-brand-ink/60">Consent Boundary:</span>
+                  <span className="font-mono text-[11px] text-brand-teal font-bold">Enforced</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-brand-border/50">
+              <button
+                type="button"
+                onClick={onLogout}
+                className="w-full py-2.5 rounded-xl border border-brand-coral/40 text-brand-coral font-bold text-xs hover:bg-brand-coralSoft transition-colors flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-base">logout</span>
+                Sign Out of Practitioner Session
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Action button bar */}
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-brand-border/50">
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="px-8 py-3 rounded-full bg-brand-teal text-white font-bold text-xs hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center gap-2 disabled:opacity-60"
+          >
+            <span className="material-symbols-outlined text-base">save</span>
+            <span>{isSaving ? 'Saving Profile…' : 'Save Practitioner Profile'}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
 /*  Main page                                                                  */
 /* ─────────────────────────────────────────────────────────────────────────── */
 export default function PractitionerDashboardPage() {
@@ -742,6 +1102,7 @@ export default function PractitionerDashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem('bs_prac_token');
     localStorage.removeItem('bs_prac_user');
+    document.cookie = 'bs_prac_token=; path=/; max-age=0; SameSite=Lax';
     navigate('/practitioner/login', { replace: true });
   };
 
@@ -935,9 +1296,23 @@ export default function PractitionerDashboardPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════════ */}
+          {/* VIEW: practitioner settings                                  */}
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {view === 'dashboard' && navItem === 'settings' && (
+            <PractitionerSettingsView
+              prac={prac}
+              onUpdated={(updatedPrac) => {
+                setPrac(updatedPrac);
+                localStorage.setItem('bs_prac_user', JSON.stringify(updatedPrac));
+              }}
+              onLogout={handleLogout}
+            />
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════ */}
           {/* VIEW: dashboard                                             */}
           {/* ═══════════════════════════════════════════════════════════ */}
-          {view === 'dashboard' && (
+          {view === 'dashboard' && navItem !== 'settings' && (
             <>
               {/* ── Welcome header ────────────────────────────────────── */}
               <header>
@@ -1259,20 +1634,6 @@ export default function PractitionerDashboardPage() {
                   </div>
                 )}
               </section>
-
-              {/* ── Settings stub ─────────────────────────────────────── */}
-              {navItem === 'settings' && (
-                <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-                  <div className="flex items-center gap-2 text-brand-lavender mb-4">
-                    <span className="text-xs font-bold uppercase tracking-widest">
-                      Settings
-                    </span>
-                  </div>
-                  <p className="text-brand-ink/50 text-sm">
-                    Practitioner account settings coming soon.
-                  </p>
-                </section>
-              )}
             </>
           )}
 

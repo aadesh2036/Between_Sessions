@@ -286,6 +286,10 @@ export const practitionerApi = {
   /** Get the currently authenticated practitioner's profile (alias) */
   getMe: () => pracFetch('/practitioner/me'),
 
+  /** Update practitioner profile and settings */
+  updateMe: (payload) =>
+    pracFetch('/practitioner/me', { method: 'PUT', body: JSON.stringify(payload) }),
+
   /** Get all pending connection requests */
   getRequests: () => pracFetch('/practitioner/requests'),
 
