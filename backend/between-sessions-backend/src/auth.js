@@ -110,23 +110,154 @@ exports.handler = async (event) => {
     }
 
     if (path.includes('/user/update')) {
-      // Very basic user update (in reality we should check Authorization JWT here)
+      // Require a valid JWT bearer token to authorise the update
+      const authHeader = event.headers?.authorization || event.headers?.Authorization || '';
+      const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+      if (!bearerToken) {
+        return { statusCode: 401, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'UNAUTHORIZED', message: 'Missing bearer token.' }) };
+      }
+      let decoded;
+      try {
+        decoded = jwt.verify(bearerToken, JWT_SECRET);
+      } catch {
+        return { statusCode: 401, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'UNAUTHORIZED', message: 'Invalid or expired token.' }) };
+      }
+
+      // Only allow users to update their own profile
+      if (decoded.email && email && decoded.email !== email) {
+        return { statusCode: 403, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'FORBIDDEN', message: 'You may only update your own profile.' }) };
+      }
+
+      const targetEmail = decoded.email || email;
+      if (!targetEmail) {
+        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'VALIDATION_ERROR', message: 'Email is required.' }) };
+      }
+
       const { name, password, onboardingComplete } = body;
       const updateExpr = [];
       const exprVals = {};
-      if (name) { updateExpr.push("name = :n"); exprVals[":n"] = name; }
+      const exprNames = {};
+      // 'name' is a DynamoDB reserved keyword — must alias it
+      if (name) { updateExpr.push("#nm = :n"); exprVals[":n"] = name; exprNames["#nm"] = "name"; }
       if (password) { updateExpr.push("password = :p"); exprVals[":p"] = password; }
       if (onboardingComplete !== undefined) { updateExpr.push("onboardingComplete = :oc"); exprVals[":oc"] = onboardingComplete; }
-      
       if (updateExpr.length > 0) {
         await docClient.send(new UpdateCommand({
           TableName: TABLE_NAME,
-          Key: { PK: `USER#${email}`, SK: `PROFILE` },
+          Key: { PK: `USER#${targetEmail}`, SK: `PROFILE` },
           UpdateExpression: "SET " + updateExpr.join(", "),
-          ExpressionAttributeValues: exprVals
+          ExpressionAttributeValues: exprVals,
+          ...(Object.keys(exprNames).length > 0 ? { ExpressionAttributeNames: exprNames } : {})
         }));
       }
       return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'User updated successfully.' }) };
+    }
+
+    if (path.includes('/auth/practitioner-login')) {
+      const { password, practitionerId: govCertId } = body;
+      if (!email || !password) return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Email and password required' }) };
+
+      // Practitioners are keyed by email under PK = PRACTITIONER#email
+      const res = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `PRACTITIONER#${email}`, SK: `PROFILE` } }));
+      const prac = res.Item;
+
+      if (!prac || prac.password !== password) {
+        return { statusCode: 401, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Invalid credentials' }) };
+      }
+
+      // Mock Practitioner ID / Government Certification ID validation
+      // In production this would verify against a certified medical registry API.
+      // For demo: the stored govCertId must match what the practitioner enters.
+      if (govCertId !== undefined && govCertId !== null && govCertId !== '') {
+        if (prac.govCertId && prac.govCertId !== govCertId.trim().toUpperCase()) {
+          return {
+            statusCode: 401,
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ error: 'Practitioner ID does not match our records. Please check your government certification number.' })
+          };
+        }
+      } else if (!govCertId || govCertId.trim() === '') {
+        // Practitioner ID is required
+        return {
+          statusCode: 400,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ error: 'Practitioner ID (government certification number) is required.' })
+        };
+      }
+
+      const token = jwt.sign(
+        { practitionerId: prac.id, email, role: 'practitioner', name: prac.name, isVerified: prac.isVerified },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          token,
+          practitioner: {
+            id: prac.id,
+            email: prac.email,
+            name: prac.name,
+            isVerified: prac.isVerified,
+            credentials: prac.credentials,
+            specialisation: prac.specialisation,
+            govCertId: prac.govCertId,
+            role: 'practitioner',
+          },
+        }),
+      };
+    }
+
+    if (path.includes('/auth/forgot-password')) {
+      if (!email) return { statusCode: 400, body: JSON.stringify({ error: 'Email required' }) };
+
+      // Check user exists (don't reveal whether they do or not — always 200)
+      const res2 = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `USER#${email}`, SK: 'PROFILE' } }));
+      if (res2.Item) {
+        const resetToken = jwt.sign({ email, purpose: 'reset' }, JWT_SECRET, { expiresIn: '1h' });
+        const transporter = nodemailer.createTransport({
+          host: process.env.MAILTRAP_SMTP_HOST || 'sandbox.smtp.mailtrap.io',
+          port: process.env.MAILTRAP_SMTP_PORT || 2525,
+          auth: { user: process.env.MAILTRAP_SMTP_USER, pass: process.env.MAILTRAP_SMTP_PASS },
+        });
+        const emailBody = {
+          body: {
+            name: email.split('@')[0],
+            intro: 'We received a request to reset your password.',
+            action: {
+              instructions: 'Click the button below to set a new password. This link expires in 1 hour.',
+              button: { color: '#176B67', text: 'Reset Password', link: `http://localhost:5173/login?reset=${resetToken}` },
+            },
+            outro: 'If you did not request this, you can ignore this email.',
+          },
+        };
+        await transporter.sendMail({
+          from: 'sanctuary@betweensessions.com',
+          to: email,
+          subject: 'Reset your Between Sessions password',
+          html: mailGenerator.generate(emailBody),
+        });
+      }
+      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'If that address is registered, you will receive a reset link shortly.' }) };
+    }
+
+    if (path.includes('/auth/reset-password')) {
+      const { token, newPassword } = body;
+      if (!token || !newPassword) return { statusCode: 400, body: JSON.stringify({ error: 'token and newPassword are required.' }) };
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.purpose !== 'reset') throw new Error('Invalid token type');
+        await docClient.send(new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `USER#${decoded.email}`, SK: 'PROFILE' },
+          UpdateExpression: 'SET password = :p',
+          ExpressionAttributeValues: { ':p': newPassword },
+        }));
+        return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'Password updated successfully.' }) };
+      } catch {
+        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Invalid or expired reset token.' }) };
+      }
     }
 
     return { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };

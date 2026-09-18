@@ -60,7 +60,7 @@ export default function LandingPage() {
           Continuity Layers
         </a>
         <Link className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" to="/login" onClick={() => setMobileMenuOpen(false)}>For Individuals</Link>
-<Link className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" to="/login" onClick={() => setMobileMenuOpen(false)}>For Practitioners</Link>
+<Link className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" to="/practitioner/login" onClick={() => setMobileMenuOpen(false)}>For Practitioners</Link>
         <a 
           onClick={() => setMobileMenuOpen(false)}
           className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" 
@@ -101,7 +101,7 @@ export default function LandingPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </Link>
           
-          <Link className="px-6 py-3.5 rounded-full bg-white text-brand-ink font-semibold text-sm hover:bg-[#F0F5F4] transition-all shadow-sm flex items-center gap-2" to="/login">
+          <Link className="px-6 py-3.5 rounded-full bg-white text-brand-ink font-semibold text-sm hover:bg-[#F0F5F4] transition-all shadow-sm flex items-center gap-2" to="/practitioner/login">
             <span>Clinician Access</span>
             <span className="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
           </Link>
@@ -362,7 +362,7 @@ export default function LandingPage() {
 </div>
 <div className="flex flex-wrap items-center gap-6 font-medium text-brand-ink/80">
 <Link className="hover:text-brand-teal transition-colors" to="/login">For Individuals</Link>
-<Link className="hover:text-brand-teal transition-colors" to="/login">For Practitioners</Link>
+<Link className="hover:text-brand-teal transition-colors" to="/practitioner/login">For Practitioners</Link>
 <a className="hover:text-brand-teal transition-colors" href="#architecture">Continuity Layers</a>
 <a className="hover:text-brand-teal transition-colors" href="#safety-boundary">Clinical Boundaries</a>
 <a className="hover:text-brand-teal transition-colors" href="tel:14416">Tele-MANAS (14416)</a>

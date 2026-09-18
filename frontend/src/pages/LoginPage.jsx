@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { practitionerApi } from '../services/api';
 import Logo from '../components/Logo';
 
-export default function LoginPage() {
+export default function LoginPage({ practitionerMode = false }) {
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [govCertId, setGovCertId] = useState('');
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [needsVerification, setNeedsVerification] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showEntryAnimation, setShowEntryAnimation] = useState(false);
-  
+
   const { login, register, verifyEmail, resendEmail } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,39 +26,55 @@ export default function LoginPage() {
     const params = new URLSearchParams(location.search);
     const token = params.get('verify');
     if (token) {
-      verifyEmail(token).then(() => {
-        setSuccessMsg("Email verified! You may now sign in.");
-        setIsRegister(false);
-      }).catch(err => {
-        setError(err.message || "Verification failed or token expired.");
-      });
+      verifyEmail(token)
+        .then(() => {
+          setSuccessMsg('Email verified! You may now sign in.');
+          setIsRegister(false);
+        })
+        .catch((err) => {
+          setError(err.message || 'Verification failed or token expired.');
+        });
     }
   }, [location.search]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); setSuccessMsg(''); setNeedsVerification(false);
-    
+    setError('');
+    setSuccessMsg('');
+    setNeedsVerification(false);
+
     if (!email || !password) {
       setError('Please enter both email and password.');
+      return;
+    }
+    if (practitionerMode && !govCertId.trim()) {
+      setError('Please enter your Practitioner ID.');
       return;
     }
 
     setIsLoading(true);
     try {
-      await login(email, password);
-      setTimeout(() => navigate(from, { replace: true }), 100);
+      if (practitionerMode) {
+        const data = await practitionerApi.login(email, password, govCertId);
+        localStorage.setItem('bs_prac_token', data.token);
+        localStorage.setItem('bs_prac_user', JSON.stringify(data.practitioner));
+        setTimeout(() => navigate('/practitioner', { replace: true }), 100);
+      } else {
+        await login(email, password);
+        setTimeout(() => navigate(from, { replace: true }), 100);
+      }
     } catch (err) {
       if (err.message.includes('Email not verified')) setNeedsVerification(true);
-      setError(err.message || 'Error connecting to sanctuary. Please try again.');
+      setError(err.message || 'Sign in failed. Please check your credentials and try again.');
       setIsLoading(false);
     }
   };
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    setError(''); setSuccessMsg('');
-    
+    setError('');
+    setSuccessMsg('');
+
     if (!email || !password || !name) {
       setError('Please fill in all fields.');
       return;
@@ -68,9 +86,9 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const res = await register(email, password, name); // pass name if backend updated
+      const res = await register(email, password, name);
       setSuccessMsg(res.message);
-      setIsRegister(false); // flip back to sign in
+      setIsRegister(false);
     } catch (err) {
       setError(err.message || 'Error creating account.');
     } finally {
@@ -81,34 +99,185 @@ export default function LoginPage() {
   const handleResend = async () => {
     try {
       await resendEmail(email);
-      setSuccessMsg("Verification email resent. Check your inbox.");
+      setSuccessMsg('Verification email resent. Check your inbox.');
       setNeedsVerification(false);
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const triggerBreathingPacer = () => {
-    alert("Breathe in for 4 seconds... Hold gently for 7... Exhale slowly for 8. Notice: Thoughts are just visitors; there is no urgency right now.");
-  };
+  // ─── PRACTITIONER MODE ────────────────────────────────────────────────────
+  if (practitionerMode) {
+    return (
+      <div
+        className={`min-h-screen bg-brand-canvas text-brand-ink font-sans flex flex-col justify-between transition-all duration-700 ease-out ${showEntryAnimation ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+      >
+        {/* Practitioner Navbar */}
+        <header className="w-full px-6 py-4 bg-white border-b border-brand-border flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center gap-3">
+            <Logo />
+            <span className="text-xs font-semibold text-brand-ink/60 border-l border-brand-border pl-3 ml-1">
+              Practitioner Portal
+            </span>
+          </div>
+          <a
+            href="tel:14416"
+            className="flex items-center gap-2 text-xs text-brand-coral font-semibold hover:underline"
+          >
+            <span className="w-2 h-2 rounded-full bg-brand-coral animate-pulse" />
+            Tele-MANAS 14416
+          </a>
+        </header>
 
+        {/* Centered Form */}
+        <main className="flex-1 flex items-center justify-center px-4 py-12">
+          <div className="w-full max-w-md bg-white rounded border border-brand-border shadow-card-lift p-8 sm:p-10 space-y-6">
+            {/* Header */}
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal text-[11px] font-semibold mb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-teal" />
+                Clinician Portal
+              </div>
+              <h1 className="font-editorial text-3xl text-brand-ink font-normal leading-snug">
+                Clinician Sign In
+              </h1>
+              <p className="text-xs text-brand-ink/60">
+                Access your patient dashboard and consent-controlled summaries.
+              </p>
+            </div>
+
+            {/* Success / Error banners */}
+            {successMsg && (
+              <div className="px-4 py-3 rounded bg-brand-softerTeal text-brand-teal text-xs font-medium">
+                {successMsg}
+              </div>
+            )}
+            {error && (
+              <div className="px-4 py-3 rounded bg-brand-coralSoft text-brand-coral text-xs font-medium">
+                {error}
+              </div>
+            )}
+
+            {/* Form */}
+            <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+              {/* Email */}
+              <div>
+                <label htmlFor="prac-email" className="block text-xs font-semibold text-brand-ink mb-1">
+                  Email address
+                </label>
+                <input
+                  id="prac-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="kavita@betweensessions.com"
+                  className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                  required
+                  autoComplete="email"
+                />
+              </div>
+
+              {/* Password */}
+              <div>
+                <label htmlFor="prac-password" className="block text-xs font-semibold text-brand-ink mb-1">
+                  Password
+                </label>
+                <input
+                  id="prac-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-2.5 text-sm rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+
+              {/* Practitioner ID */}
+              <div>
+                <label htmlFor="prac-gov-id" className="block text-xs font-semibold text-brand-ink mb-1">
+                  Practitioner ID
+                </label>
+                <input
+                  id="prac-gov-id"
+                  type="text"
+                  value={govCertId}
+                  onChange={(e) => setGovCertId(e.target.value)}
+                  placeholder="e.g. MCI-2024-KM-7741"
+                  className="w-full px-4 py-2.5 text-sm font-mono rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                  required
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+                <p className="mt-1.5 text-[11px] text-brand-ink/55 leading-relaxed">
+                  Your government medical certification number. This is verified against your registration.
+                </p>
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 rounded bg-brand-teal text-white font-semibold text-sm hover:bg-brand-tealDark transition-colors flex items-center justify-center gap-2 mt-1 disabled:opacity-60"
+              >
+                {isLoading ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                    Verifying…
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </button>
+            </form>
+
+            {/* Mock verification note */}
+            <p className="text-[11px] text-brand-ink/45 leading-relaxed border-t border-brand-border pt-4">
+              Practitioner ID is a mock verification against your stored government certification number. In production, this connects to MCI / state medical council APIs.
+            </p>
+          </div>
+        </main>
+
+        {/* Safety footer */}
+        <footer className="w-full px-6 py-4 text-center text-xs text-brand-ink/50 border-t border-brand-border">
+          <span>
+            Between Sessions Health Inc. •{' '}
+            <a href="tel:14416" className="text-brand-coral font-semibold hover:underline">
+              Tele-MANAS 14416
+            </a>{' '}
+            •{' '}
+            <a href="tel:18008914416" className="text-brand-coral hover:underline">
+              1800-891-4416
+            </a>{' '}
+            (free, 24/7)
+          </span>
+        </footer>
+      </div>
+    );
+  }
+
+  // ─── USER MODE ────────────────────────────────────────────────────────────
   return (
-    <div className={`min-h-screen bg-brand-canvas text-brand-ink selection:bg-brand-coral selection:text-white flex flex-col justify-between font-sans transition-all duration-700 ease-out transform ${showEntryAnimation ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-      
+    <div
+      className={`min-h-screen bg-brand-canvas text-brand-ink selection:bg-brand-teal selection:text-white flex flex-col justify-between font-sans transition-all duration-700 ease-out transform ${showEntryAnimation ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+    >
       <style>{`
-        /* Slider Card Animation Logic */
+        /* ── Slider Card Animation ── */
         .auth-container {
           position: relative;
           width: 1000px;
           max-width: 100%;
           min-height: 640px;
           background: #FFFFFF;
-          border-radius: 36px;
+          border-radius: 4px;
           box-shadow: 0 25px 60px -15px rgba(23, 50, 58, 0.12), 0 4px 25px rgba(23, 50, 58, 0.05);
           overflow: hidden;
         }
 
-        /* Form containers */
         .form-container {
           position: absolute;
           top: 0;
@@ -129,7 +298,6 @@ export default function LoginPage() {
           z-index: 1;
         }
 
-        /* When Register Active */
         .auth-container.right-panel-active .sign-in-container {
           transform: translateX(100%);
           opacity: 0;
@@ -145,10 +313,9 @@ export default function LoginPage() {
 
         @keyframes show {
           0%, 49.99% { opacity: 0; z-index: 1; }
-          50%, 100% { opacity: 1; z-index: 5; }
+          50%, 100%  { opacity: 1; z-index: 5; }
         }
 
-        /* Overlay sliding container */
         .overlay-container {
           position: absolute;
           top: 0;
@@ -164,7 +331,6 @@ export default function LoginPage() {
           transform: translateX(-100%);
         }
 
-        /* Overlay inner gradient background */
         .overlay {
           background: linear-gradient(135deg, #176B67 0%, #0F4845 50%, #17323A 100%);
           position: relative;
@@ -212,19 +378,16 @@ export default function LoginPage() {
           transform: translateX(20%);
         }
 
-        /* Mascot subtle breathing & pulse */
         @keyframes floatSlow {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-8px) rotate(1deg); }
+          50%       { transform: translateY(-8px) rotate(1deg); }
         }
         .animate-float {
           animation: floatSlow 5s ease-in-out infinite;
         }
-        
+
         @media (max-width: 768px) {
-          .sign-in-container, .sign-up-container {
-            width: 100%;
-          }
+          .sign-in-container, .sign-up-container { width: 100%; }
           .auth-container.right-panel-active .sign-in-container {
             transform: translateX(-100%);
           }
@@ -234,285 +397,352 @@ export default function LoginPage() {
         }
       `}</style>
 
-      {/* TOP CONTEXT NAVBAR */}
+      {/* TOP NAVBAR */}
       <header className="w-full px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <Logo />
 
-        {/* Calming Somatic Emergency / Grounding Bar */}
         <div className="hidden sm:flex items-center gap-3">
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse"></span>
-            <span>Sanctuary Rhythm: No timeouts, no rush</span>
+            <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse" />
+            Between Sessions works at your pace
           </div>
-          <button onClick={triggerBreathingPacer} className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-brand-ink text-xs font-medium hover:bg-brand-sand transition-colors flex items-center gap-1.5">
-            <svg className="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-              <path d="M12 3a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9" strokeLinecap="round"></path>
-              <circle cx="12" cy="12" r="4"></circle>
-            </svg>
-            <span>4–7–8 Somatic Pause</span>
-          </button>
         </div>
 
         <div className="flex items-center gap-2 text-xs">
-          <span className="text-brand-ink/60 hidden md:inline">Need care?</span>
-          <a href="tel:988" className="text-brand-coral font-bold hover:underline flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-coral"></span>
-            Crisis Lifeline (988)
+          <span className="text-brand-ink/60 hidden md:inline">Need support?</span>
+          <a href="tel:14416" className="text-brand-coral font-bold hover:underline flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-coral" />
+            Tele-MANAS 14416
           </a>
         </div>
       </header>
 
-      {/* MAIN ANIMATED SLIDING SANCTUARY CONTAINER */}
+      {/* MAIN SLIDING CONTAINER */}
       <main className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className={`auth-container ${isRegister ? 'right-panel-active' : ''}`} id="authContainer">
-          
-          {/* ================= 1. SIGN IN FORM CONTAINER ================= */}
+        <div className={`auth-container ${isRegister ? 'right-panel-active' : ''}`}>
+
+          {/* ── 1. SIGN IN FORM ── */}
           <div className="form-container sign-in-container flex flex-col justify-center px-8 sm:px-14 py-10 bg-white">
             <div className="w-full max-w-md mx-auto space-y-5">
-              
+
               {/* Header */}
               <div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal text-[11px] font-semibold mb-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
-                  Zero-Pressure Threshold
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-teal" />
+                  Your account
                 </div>
                 <h2 className="font-editorial text-3xl sm:text-4xl text-brand-ink font-normal leading-tight">
-                  Welcome back to <span className="italic text-brand-teal">quiet</span>.
+                  Welcome back
                 </h2>
                 <p className="text-xs text-brand-ink/65 mt-1">
-                  Access your private urge log, grounding pace, and exposure ladder.
+                  Sign in to your Between Sessions account
                 </p>
               </div>
 
-              {/* Form Elements */}
-              <form className="space-y-3.5" onSubmit={handleSubmit}>
+              {/* Success / verification banners */}
+              {successMsg && (
+                <div className="px-3.5 py-2.5 rounded bg-brand-softerTeal text-brand-teal text-xs font-medium">
+                  {successMsg}
+                </div>
+              )}
+              {needsVerification && (
+                <div className="px-3.5 py-2.5 rounded bg-brand-amberSoft text-brand-amber text-xs font-medium flex items-center justify-between">
+                  <span>Your email isn't verified yet.</span>
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    className="ml-3 underline font-semibold hover:no-underline"
+                  >
+                    Resend link
+                  </button>
+                </div>
+              )}
+
+              {/* Form */}
+              <form className="space-y-3.5" onSubmit={handleSubmit} noValidate>
                 <div>
-                  <label className="block text-xs font-semibold text-brand-ink mb-1">Sanctuary Email</label>
-                  <div className="relative">
-                    <input 
-                      type="email" 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="e.g. confidential@email.com" 
-                      className="w-full px-4 py-2.5 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
-                      required
-                    />
-                  </div>
+                  <label htmlFor="user-email" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Email address
+                  </label>
+                  <input
+                    id="user-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full px-4 py-2.5 text-xs rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                    autoComplete="email"
+                  />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-brand-ink">Sanctuary Passphrase (Mocked)</label>
-                    <button type="button" className="text-[11px] text-brand-teal hover:underline font-medium">Forgot key?</button>
+                    <label htmlFor="user-password" className="block text-xs font-semibold text-brand-ink">
+                      Password
+                    </label>
+                    <button
+                      type="button"
+                      className="text-[11px] text-brand-teal hover:underline font-medium"
+                    >
+                      Forgot password?
+                    </button>
                   </div>
-                  <div className="relative">
-                    <input 
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••••••" 
-                      className="w-full px-4 py-2.5 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
-                    />
-                  </div>
+                  <input
+                    id="user-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 text-xs rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                    autoComplete="current-password"
+                  />
                 </div>
 
                 {error && !isRegister && (
-                  <p className="text-xs text-brand-coral font-bold">{error}</p>
+                  <p className="text-xs text-brand-coral font-semibold">{error}</p>
                 )}
 
-                {/* OCD-friendly reassurance check */}
-                <div className="flex items-center justify-between text-[11px] pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded text-brand-teal focus:ring-brand-teal border-gray-300" />
-                    <span className="text-brand-ink/75">Keep me grounded on this trusted device</span>
+                {/* Remember device */}
+                <div className="flex items-center gap-2 text-[11px] pt-1">
+                  <input
+                    type="checkbox"
+                    id="remember"
+                    defaultChecked
+                    className="w-3.5 h-3.5 rounded text-brand-teal focus:ring-brand-teal border-brand-border"
+                  />
+                  <label htmlFor="remember" className="text-brand-ink/75 cursor-pointer select-none">
+                    Keep me signed in on this device
                   </label>
                 </div>
 
-                {/* Submit CTA */}
-                <button 
-                  type="submit" 
+                {/* Submit */}
+                <button
+                  type="submit"
                   disabled={isLoading}
                   className="w-full py-3 rounded-full bg-brand-teal text-white font-bold text-xs hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-70"
                 >
-                  <span>{isLoading ? 'Verifying...' : 'Enter Your Sanctuary'}</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"></path>
-                  </svg>
+                  <span>{isLoading ? 'Signing in…' : 'Sign in'}</span>
+                  {!isLoading && (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
                 </button>
               </form>
 
-              {/* Calming micro note */}
-              <div className="p-2.5 rounded-xl bg-brand-amberSoft text-brand-ink text-[10.5px] flex items-start gap-2">
+              {/* Calming ambient note */}
+              <div className="p-2.5 rounded bg-brand-amberSoft text-brand-ink text-[10.5px] flex items-start gap-2">
                 <span className="text-brand-amber font-bold text-xs mt-0.5">●</span>
-                <span><strong>Zero Urgency Protocol:</strong> If doubts arise about typing errors or verification, your space remains safe and locked without locks or strikes.</span>
+                <span>Between Sessions works at your pace. No time pressure, no streak penalties.</span>
               </div>
 
-              {/* Switch trigger for mobile */}
+              {/* Mobile switch */}
               <div className="text-center pt-2 md:hidden">
                 <p className="text-xs text-brand-ink/70">
-                  Don't have a sanctuary yet?
-                  <button type="button" onClick={() => setIsRegister(true)} className="font-bold text-brand-teal hover:underline ml-1">Begin here</button>
+                  Don't have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setIsRegister(true)}
+                    className="font-bold text-brand-teal hover:underline"
+                  >
+                    Create one
+                  </button>
                 </p>
               </div>
-
             </div>
           </div>
 
-
-          {/* ================= 2. REGISTER / CREATE ACCOUNT FORM CONTAINER ================= */}
+          {/* ── 2. REGISTER FORM ── */}
           <div className="form-container sign-up-container flex flex-col justify-center px-8 sm:px-14 py-10 bg-white">
             <div className="w-full max-w-md mx-auto space-y-4">
-              
+
               {/* Header */}
               <div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-coralSoft text-brand-coral text-[11px] font-semibold mb-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-coral"></span>
-                  Non-Judgmental Onboarding
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-coral" />
+                  New account
                 </div>
                 <h2 className="font-editorial text-3xl sm:text-4xl text-brand-ink font-normal leading-tight">
-                  Create your <span className="italic text-brand-coral">safe space</span>.
+                  Create your account
                 </h2>
                 <p className="text-xs text-brand-ink/65 mt-0.5">
                   Anonymous alias welcomed. No clinical labels or pressure to perform.
                 </p>
               </div>
 
-              {/* Form Elements */}
-              <form className="space-y-3" onSubmit={handleRegisterSubmit}>
-                {/* Pseudonym / Sanctuary Alias */}
+              {/* Form */}
+              <form className="space-y-3" onSubmit={handleRegisterSubmit} noValidate>
+                {/* Name / Alias */}
                 <div>
-                  <label className="block text-xs font-semibold text-brand-ink mb-1">Preferred Alias or Name</label>
-                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Alex, SkySeeker, or QuietHaven" className="w-full px-4 py-2 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink" required />
-                  <p className="text-[10px] text-brand-ink/50 mt-0.5">Legal name is never required. Privacy is guaranteed.</p>
+                  <label htmlFor="reg-name" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Preferred name or alias
+                  </label>
+                  <input
+                    id="reg-name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Alex or SkySeeker"
+                    className="w-full px-4 py-2 text-xs rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                    autoComplete="name"
+                  />
+                  <p className="text-[10px] text-brand-ink/50 mt-0.5">Legal name is never required.</p>
                 </div>
 
-                {/* Email or Vault Handle */}
+                {/* Email */}
                 <div>
-                  <label className="block text-xs font-semibold text-brand-ink mb-1">Email or Offline Vault Handle</label>
-                  <input 
-                    type="email" 
+                  <label htmlFor="reg-email" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Email address
+                  </label>
+                  <input
+                    id="reg-email"
+                    type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@peacefulmail.com" 
-                    className="w-full px-4 py-2 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    placeholder="you@example.com"
+                    className="w-full px-4 py-2 text-xs rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     required
+                    autoComplete="email"
                   />
                 </div>
 
-                {/* Passphrase with gentle strength guide */}
+                {/* Password */}
                 <div>
-                  <label className="block text-xs font-semibold text-brand-ink mb-1">Sanctuary Passphrase</label>
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a comforting, secure phrase (min 8 chars)" className="w-full px-4 py-2 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink" required />
-                  
-                  {/* Gentle non-punitive meter */}
+                  <label htmlFor="reg-password" className="block text-xs font-semibold text-brand-ink mb-1">
+                    Password
+                  </label>
+                  <input
+                    id="reg-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="At least 8 characters"
+                    className="w-full px-4 py-2 text-xs rounded bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                    required
+                    autoComplete="new-password"
+                  />
+                  {/* Gentle strength indicator */}
                   <div className="flex items-center gap-1.5 mt-1.5">
-                    <div className="h-1 flex-1 rounded-full bg-brand-teal"></div>
-                    <div className="h-1 flex-1 rounded-full bg-brand-teal"></div>
-                    <div className={`h-1 flex-1 rounded-full ${password.length >= 8 ? 'bg-brand-teal' : 'bg-brand-teal/30'}`}></div>
-                    <div className={`h-1 flex-1 rounded-full ${password.length >= 12 ? 'bg-brand-teal' : 'bg-brand-teal/20'}`}></div>
-                    <span className="text-[10px] font-mono text-brand-ink/60 ml-1">Calm & Resilient</span>
+                    <div className="h-1 flex-1 rounded-full bg-brand-teal" />
+                    <div className="h-1 flex-1 rounded-full bg-brand-teal" />
+                    <div className={`h-1 flex-1 rounded-full ${password.length >= 8 ? 'bg-brand-teal' : 'bg-brand-teal/30'}`} />
+                    <div className={`h-1 flex-1 rounded-full ${password.length >= 12 ? 'bg-brand-teal' : 'bg-brand-teal/20'}`} />
+                    <span className="text-[10px] text-brand-ink/60 ml-1">
+                      {password.length >= 12 ? 'Strong' : password.length >= 8 ? 'Good' : 'Min 8'}
+                    </span>
                   </div>
                 </div>
 
                 {error && isRegister && (
-                  <p className="text-xs text-brand-coral font-bold">{error}</p>
+                  <p className="text-xs text-brand-coral font-semibold">{error}</p>
                 )}
 
-                {/* Submit CTA */}
-                <button 
-                  type="submit" 
+                {/* Submit */}
+                <button
+                  type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 rounded-full bg-brand-coral text-white font-bold text-xs hover:opacity-90 shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 mt-1 disabled:opacity-70"
+                  className="w-full py-3 rounded-full bg-brand-teal text-white font-bold text-xs hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 mt-1 disabled:opacity-70"
                 >
-                  <span>{isLoading ? 'Creating...' : 'Begin Your Sanctuary'}</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"></path>
-                  </svg>
+                  <span>{isLoading ? 'Creating account…' : 'Create account'}</span>
+                  {!isLoading && (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
                 </button>
               </form>
 
-              <p className="text-[10.5px] text-center text-brand-ink/50 font-mono">
-                By continuing, you are wrapped in HIPAA Tier-4 client-side salted hashing.
-              </p>
-
-              {/* Switch trigger for mobile */}
+              {/* Mobile switch */}
               <div className="text-center pt-1 md:hidden">
                 <p className="text-xs text-brand-ink/70">
-                  Already have an account?
-                  <button type="button" onClick={() => setIsRegister(false)} className="font-bold text-brand-teal hover:underline ml-1">Sign in</button>
+                  Already have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setIsRegister(false)}
+                    className="font-bold text-brand-teal hover:underline"
+                  >
+                    Sign in
+                  </button>
                 </p>
               </div>
-
             </div>
           </div>
 
-
-          {/* ================= 3. ANIMATED SLIDING OVERLAY ================= */}
+          {/* ── 3. ANIMATED OVERLAY ── */}
           <div className="overlay-container hidden md:block pointer-events-none">
             <div className="overlay">
-              
-              {/* OVERLAY LEFT: Visible when Register Panel is active -> Invites to Sign In */}
+
+              {/* OVERLAY LEFT — shown when register panel is active, invites back to sign in */}
               <div className="overlay-panel overlay-left pointer-events-auto">
                 <div className="w-28 h-28 mb-3 animate-float">
                   <svg height="100%" viewBox="0 0 460 480" width="100%" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                      <linearGradient id="overlayMascot" x1="0%" x2="0%" y1="0%" y2="100%">
-                        <stop offset="0%" stopColor="#9ADBE8"></stop>
-                        <stop offset="100%" stopColor="#6DC4D6"></stop>
+                      <linearGradient id="overlayMascotL" x1="0%" x2="0%" y1="0%" y2="100%">
+                        <stop offset="0%" stopColor="#9ADBE8" />
+                        <stop offset="100%" stopColor="#6DC4D6" />
                       </linearGradient>
                     </defs>
-                    <circle cx="230" cy="240" fill="url(#overlayMascot)" r="120"></circle>
-                    <path d="M 180 230 C 190 215 205 215 215 230" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="7"></path>
-                    <path d="M 245 230 C 255 215 270 215 280 230" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="7"></path>
-                    <path d="M 205 265 Q 230 290 255 265" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="7"></path>
-                    <ellipse cx="170" cy="255" fill="#E8856C" opacity="0.5" rx="14" ry="9"></ellipse>
-                    <ellipse cx="290" cy="255" fill="#E8856C" opacity="0.5" rx="14" ry="9"></ellipse>
-                    <path d="M 230 120 C 230 90 205 80 190 85 C 185 105 215 113 230 120 Z" fill="#8DBFA4"></path>
-                    <path d="M 230 120 C 230 85 255 75 270 83 C 272 103 245 113 230 120 Z" fill="#F7C142"></path>
+                    <circle cx="230" cy="240" fill="url(#overlayMascotL)" r="120" />
+                    <path d="M180 230 C190 215 205 215 215 230" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="7" />
+                    <path d="M245 230 C255 215 270 215 280 230" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="7" />
+                    <path d="M205 265 Q230 290 255 265" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="7" />
+                    <ellipse cx="170" cy="255" fill="#E8856C" opacity="0.5" rx="14" ry="9" />
+                    <ellipse cx="290" cy="255" fill="#E8856C" opacity="0.5" rx="14" ry="9" />
                   </svg>
                 </div>
 
                 <h3 className="font-editorial text-3xl font-normal tracking-tight text-white mb-2">
-                  Welcome Home to <span className="italic text-[#F7DC78]">quiet</span>
+                  Welcome back.
                 </h3>
                 <p className="text-xs text-white/80 max-w-xs leading-relaxed mb-6">
-                  Already have an active sanctuary key or biometric session? Sign in to continue your gentle daily rhythm.
+                  Already have an account? Sign in to continue where you left off.
                 </p>
-                <button type="button" onClick={() => setIsRegister(false)} className="px-8 py-3 rounded-full border-2 border-white text-white font-bold text-xs uppercase tracking-wider hover:bg-white hover:text-brand-teal transition-all shadow-md">
+                <button
+                  type="button"
+                  onClick={() => setIsRegister(false)}
+                  className="px-8 py-3 rounded-full border-2 border-white text-white font-bold text-xs uppercase tracking-wider hover:bg-white hover:text-brand-teal transition-all shadow-md"
+                >
                   Sign In
                 </button>
               </div>
 
-              {/* OVERLAY RIGHT: Visible when Sign In is active -> Invites to Register */}
+              {/* OVERLAY RIGHT — shown when sign-in is active, invites to register */}
               <div className="overlay-panel overlay-right pointer-events-auto">
                 <div className="w-32 h-32 mb-2 animate-float">
                   <svg height="100%" viewBox="0 0 460 480" width="100%" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                      <linearGradient id="overlayMascot2" x1="0%" x2="0%" y1="0%" y2="100%">
-                        <stop offset="0%" stopColor="#9ADBE8"></stop>
-                        <stop offset="100%" stopColor="#6DC4D6"></stop>
+                      <linearGradient id="overlayMascotR" x1="0%" x2="0%" y1="0%" y2="100%">
+                        <stop offset="0%" stopColor="#9ADBE8" />
+                        <stop offset="100%" stopColor="#6DC4D6" />
                       </linearGradient>
                     </defs>
-                    <rect x="150" y="50" width="60" height="50" rx="8" fill="#1E3A4B"></rect>
-                    <rect x="230" y="50" width="60" height="50" rx="8" fill="#8DBFA4"></rect>
-                    <rect x="150" y="115" width="60" height="50" rx="8" fill="#F7DC78"></rect>
-                    <rect x="230" y="115" width="60" height="50" rx="8" fill="#E8856C"></rect>
-                    <circle cx="220" cy="270" fill="url(#overlayMascot2)" r="100"></circle>
-                    <path d="M 180 265 Q 195 275 210 265" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="6"></path>
-                    <path d="M 230 265 Q 245 275 260 265" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="6"></path>
-                    <path d="M 210 295 Q 220 300 230 295" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="5"></path>
-                    <ellipse cx="170" cy="280" fill="#E8856C" opacity="0.4" rx="12" ry="7"></ellipse>
-                    <ellipse cx="270" cy="280" fill="#E8856C" opacity="0.4" rx="12" ry="7"></ellipse>
+                    <rect x="150" y="50" width="60" height="50" rx="8" fill="#1E3A4B" />
+                    <rect x="230" y="50" width="60" height="50" rx="8" fill="#8DBFA4" />
+                    <rect x="150" y="115" width="60" height="50" rx="8" fill="#F7DC78" />
+                    <rect x="230" y="115" width="60" height="50" rx="8" fill="#E8856C" />
+                    <circle cx="220" cy="270" fill="url(#overlayMascotR)" r="100" />
+                    <path d="M180 265 Q195 275 210 265" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="6" />
+                    <path d="M230 265 Q245 275 260 265" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="6" />
+                    <path d="M210 295 Q220 300 230 295" fill="none" stroke="#17323A" strokeLinecap="round" strokeWidth="5" />
+                    <ellipse cx="170" cy="280" fill="#E8856C" opacity="0.4" rx="12" ry="7" />
+                    <ellipse cx="270" cy="280" fill="#E8856C" opacity="0.4" rx="12" ry="7" />
                   </svg>
                 </div>
 
                 <h3 className="font-editorial text-3xl font-normal tracking-tight text-white mb-2">
-                  Hello <span className="italic text-[#F7DC78]">World</span>.
+                  Hello, welcome.
                 </h3>
                 <p className="text-xs text-white/80 max-w-xs leading-relaxed mb-6">
-                  Sign up now and begin your sanctuary. Safe, dignified micro-tools to tame the loops without shame.
+                  Track patterns, practice structured exercises, share with your practitioner — at your pace.
                 </p>
-                <button type="button" onClick={() => setIsRegister(true)} className="px-8 py-3 rounded-full border-2 border-white text-white font-bold text-xs uppercase tracking-wider hover:bg-white hover:text-brand-ink transition-all shadow-md">
+                <button
+                  type="button"
+                  onClick={() => setIsRegister(true)}
+                  className="px-8 py-3 rounded-full border-2 border-white text-white font-bold text-xs uppercase tracking-wider hover:bg-white hover:text-brand-ink transition-all shadow-md"
+                >
                   Sign Up
                 </button>
               </div>
@@ -523,21 +753,23 @@ export default function LoginPage() {
         </div>
       </main>
 
-      {/* BOTTOM SUPPORT & CLINICAL TRUST FOOTER */}
+      {/* FOOTER */}
       <footer className="w-full px-6 py-4 max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-brand-ink/60">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full bg-brand-teal text-white flex items-center justify-center font-bold text-[9px]">BS</div>
+          <div className="w-5 h-5 rounded-full bg-brand-teal text-white flex items-center justify-center font-bold text-[9px]">
+            BS
+          </div>
           <span>Between Sessions Health Inc. • Zero Behavioral Ad Profiling</span>
         </div>
 
         <div className="flex items-center gap-6 text-[11px]">
-          <Link to="/login" className="hover:text-brand-teal transition-colors flex items-center gap-1">
-            <svg className="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-            <span>SOC2 Type-II & HIPAA Encrypted</span>
+          <a href="tel:14416" className="text-brand-coral font-semibold hover:underline flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-coral" />
+            Tele-MANAS 14416
+          </a>
+          <Link to="/practitioner/login" className="hover:text-brand-teal transition-colors font-medium">
+            Clinician Portal →
           </Link>
-          <Link to="/login" className="hover:text-brand-teal transition-colors font-medium">Clinician Terminal Portal →</Link>
         </div>
       </footer>
     </div>

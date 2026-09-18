@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { authApi } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -8,30 +9,24 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
+  // Restore session from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem('bs_user');
     const storedToken = localStorage.getItem('bs_token');
-    if (storedUser) setUser(JSON.parse(storedUser));
+    if (storedUser) {
+      try { setUser(JSON.parse(storedUser)); } catch { /* malformed */ }
+    }
     if (storedToken) setToken(storedToken);
     setIsLoading(false);
   }, []);
 
-  const _fetch = async (endpoint, body) => {
-    const res = await fetch(`http://localhost:3000/api/v1${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
-    return data;
-  };
+  /* ── Auth operations ────────────────────────────────────────────────── */
 
   const register = async (email, password, name) => {
     setIsLoading(true);
     try {
-      return await _fetch('/auth/register', { email, password, name });
+      return await authApi.register(email, password, name);
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setIsLoading(true);
     try {
-      const data = await _fetch('/auth/login', { email, password });
+      const data = await authApi.login(email, password);
       localStorage.setItem('bs_token', data.token);
       localStorage.setItem('bs_user', JSON.stringify(data.user));
       setToken(data.token);
@@ -54,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   const verifyEmail = async (verificationToken) => {
     setIsLoading(true);
     try {
-      return await _fetch('/auth/verify', { token: verificationToken });
+      return await authApi.verifyEmail(verificationToken);
     } finally {
       setIsLoading(false);
     }
@@ -63,17 +58,24 @@ export const AuthProvider = ({ children }) => {
   const resendEmail = async (email) => {
     setIsLoading(true);
     try {
-      return await _fetch('/auth/resend', { email });
+      return await authApi.resendVerification(email);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const updateUser = async (email, updates) => {
+  /**
+   * Update the authenticated user's profile.
+   * Uses the JWT bearer token — the api.js layer attaches it automatically.
+   * @param {object} updates  e.g. { name, password, onboardingComplete }
+   */
+  const updateUser = async (updates) => {
     setIsLoading(true);
     try {
-      await _fetch('/user/update', { email, ...updates });
-      const updatedUser = { ...user, ...updates };
+      await authApi.updateUser(updates);
+      // Reflect non-sensitive changes in local state
+      const { password: _p, ...safeUpdates } = updates;
+      const updatedUser = { ...user, ...safeUpdates };
       localStorage.setItem('bs_user', JSON.stringify(updatedUser));
       setUser(updatedUser);
     } finally {
@@ -83,11 +85,16 @@ export const AuthProvider = ({ children }) => {
 
   const completeOnboarding = async () => {
     if (user) {
-      const updatedUser = { ...user, onboardingComplete: true };
-      await updateUser(user.email, { onboardingComplete: true });
-      localStorage.setItem('bs_user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
+      await updateUser({ onboardingComplete: true });
     }
+  };
+
+  const forgotPassword = async (email) => {
+    return authApi.forgotPassword(email);
+  };
+
+  const resetPassword = async (token, newPassword) => {
+    return authApi.resetPassword(token, newPassword);
   };
 
   const logout = () => {
@@ -98,8 +105,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = {
-    user, token, isLoading,
-    register, login, logout, verifyEmail, resendEmail, updateUser, completeOnboarding
+    user,
+    token,
+    isLoading,
+    register,
+    login,
+    logout,
+    verifyEmail,
+    resendEmail,
+    updateUser,
+    completeOnboarding,
+    forgotPassword,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

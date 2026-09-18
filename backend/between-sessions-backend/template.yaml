@@ -2,23 +2,27 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
   between-sessions-backend
-  Serverless backend for Between Sessions with Cedar Auth and DynamoDB Single Table Design.
+  Serverless backend for Between Sessions — single-table DynamoDB, JWT auth, Cedar policies.
 
 Globals:
   Function:
     Timeout: 10
-    MemorySize: 128
+    MemorySize: 256
     Runtime: nodejs20.x
     Architectures:
       - x86_64
     Environment:
       Variables:
         TABLE_NAME: !Ref MainTable
-        MAILTRAP_USER: "demo"
-        MAILTRAP_PASS: "demo"
         JWT_SECRET: "between-sessions-secret-key-2026"
+        MAILTRAP_SMTP_HOST: "sandbox.smtp.mailtrap.io"
+        MAILTRAP_SMTP_PORT: "2525"
+        MAILTRAP_SMTP_USER: "9a1e374c409f43"
+        MAILTRAP_SMTP_PASS: "848727f20872a7"
 
 Resources:
+
+  # ── DynamoDB Single Table ────────────────────────────────────────────────────
   MainTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -34,7 +38,10 @@ Resources:
           KeyType: HASH
         - AttributeName: SK
           KeyType: RANGE
+      SSESpecification:
+        SSEEnabled: true
 
+  # ── Auth & User ──────────────────────────────────────────────────────────────
   AuthFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -44,12 +51,85 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref MainTable
       Events:
+        Register:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/register
+            Method: post
+        Login:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/login
+            Method: post
         VerifyEmail:
           Type: Api
           Properties:
             Path: /api/v1/auth/verify
             Method: post
+        ResendVerification:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/resend
+            Method: post
+        ForgotPassword:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/forgot-password
+            Method: post
+        ResetPassword:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/reset-password
+            Method: post
+        UpdateUser:
+          Type: Api
+          Properties:
+            Path: /api/v1/user/update
+            Method: put
 
+  # ── Checkins ─────────────────────────────────────────────────────────────────
+  CheckinsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: checkins.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        CreateCheckin:
+          Type: Api
+          Properties:
+            Path: /api/v1/checkins
+            Method: post
+        GetCheckins:
+          Type: Api
+          Properties:
+            Path: /api/v1/checkins
+            Method: get
+
+  # ── Journal ──────────────────────────────────────────────────────────────────
+  JournalFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: journal.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        CreateJournal:
+          Type: Api
+          Properties:
+            Path: /api/v1/journal
+            Method: post
+        GetJournal:
+          Type: Api
+          Properties:
+            Path: /api/v1/journal
+            Method: get
+
+  # ── Practice (legacy behavioral events) ─────────────────────────────────────
   PracticeFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -64,7 +144,113 @@ Resources:
           Properties:
             Path: /api/v1/practice
             Method: post
-            
+
+  # ── Dashboard ────────────────────────────────────────────────────────────────
+  DashboardFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: dashboard.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        GetDashboard:
+          Type: Api
+          Properties:
+            Path: /api/v1/dashboard
+            Method: get
+
+  # ── Progress ─────────────────────────────────────────────────────────────────
+  ProgressFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: progress.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        GetProgress:
+          Type: Api
+          Properties:
+            Path: /api/v1/progress
+            Method: get
+
+  # ── AI Weekly Summary ────────────────────────────────────────────────────────
+  AiSummaryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: aiSummary.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        GenerateSummary:
+          Type: Api
+          Properties:
+            Path: /api/v1/ai/weekly-summary
+            Method: post
+        GetSummary:
+          Type: Api
+          Properties:
+            Path: /api/v1/ai/weekly-summary
+            Method: get
+
+  # ── Consents ─────────────────────────────────────────────────────────────────
+  ConsentsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: consents.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        GetConsents:
+          Type: Api
+          Properties:
+            Path: /api/v1/consents
+            Method: get
+        UpdateConsent:
+          Type: Api
+          Properties:
+            Path: /api/v1/consents/{consentId}
+            Method: put
+        CreateConsent:
+          Type: Api
+          Properties:
+            Path: /api/v1/consents
+            Method: put
+
+  # ── Connections ──────────────────────────────────────────────────────────────
+  ConnectionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: connections.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        CreateConnection:
+          Type: Api
+          Properties:
+            Path: /api/v1/connections
+            Method: post
+        GetConnections:
+          Type: Api
+          Properties:
+            Path: /api/v1/connections
+            Method: get
+        DeleteConnection:
+          Type: Api
+          Properties:
+            Path: /api/v1/connections/{id}
+            Method: delete
+
+  # ── Practitioner (Cedar auth demo) ───────────────────────────────────────────
   PractitionerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -84,3 +270,6 @@ Outputs:
   ApiEndpoint:
     Description: "API Gateway endpoint URL"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/api/v1/"
+  MainTableName:
+    Description: "DynamoDB table name"
+    Value: !Ref MainTable
