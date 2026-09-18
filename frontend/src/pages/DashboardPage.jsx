@@ -1,787 +1,584 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import Logo from '../components/Logo';
-import { dashboardApi, checkinsApi, practiceApi, aiSummaryApi, connectionsApi, recommendationsApi } from '../services/api';
-
-/* ── Helpers ──────────────────────────────────────────────────────────────── */
+import DashboardShell from '../components/DashboardShell';
+import CheckinModal from '../components/CheckinModal';
+import LogPracticeModal from '../components/LogPracticeModal';
+import {
+  dashboardApi,
+  practiceApi,
+  aiSummaryApi,
+  connectionsApi,
+  recommendationsApi,
+  valuesApi,
+  toolkitApi,
+} from '../services/api';
 
 const SUDS_LABELS = {
   0: 'None', 1: 'Minimal', 2: 'Mild', 3: 'Mild+', 4: 'Moderate',
   5: 'Moderate', 6: 'High', 7: 'Significant', 8: 'Severe', 9: 'Extreme', 10: 'Peak',
 };
 
-const RESPONSE_TYPE_META = {
-  delay:     { label: 'Delay',        color: 'brand-amber',   bg: 'brand-amberSoft' },
-  resist:    { label: 'Resist',       color: 'brand-teal',    bg: 'brand-softerTeal' },
-  return:    { label: 'Return',       color: 'brand-lavender',bg: 'brand-lavenderSoft' },
-  continue:  { label: 'Continue',     color: 'brand-coral',   bg: 'brand-coralSoft' },
-  compulsion:{ label: 'Compulsion',   color: 'brand-coral',   bg: 'brand-coralSoft' },
-  avoidance: { label: 'Avoidance',    color: 'brand-amber',   bg: 'brand-amberSoft' },
-  reassurance:{label: 'Reassurance',  color: 'brand-lavender',bg: 'brand-lavenderSoft' },
-  no_response:{label: 'No Response',  color: 'brand-ink',     bg: 'brand-canvas' },
-};
-
-function RelativeTime({ iso }) {
-  if (!iso) return null;
-  const d = new Date(iso);
-  const diff = Date.now() - d.getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 2) return <span className="text-[10px] text-brand-ink/40 font-mono">just now</span>;
-  if (mins < 60) return <span className="text-[10px] text-brand-ink/40 font-mono">{mins}m ago</span>;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return <span className="text-[10px] text-brand-ink/40 font-mono">{hrs}h ago</span>;
-  const days = Math.floor(hrs / 24);
-  return <span className="text-[10px] text-brand-ink/40 font-mono">{days}d ago</span>;
-}
-
-/* ── SUDS Check-in Modal ─────────────────────────────────────────────────── */
-function CheckinModal({ onClose, onSaved }) {
-  const [score, setScore] = useState(5);
-  const [urge, setUrge] = useState(5);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSave = async () => {
-    setSaving(true);
-    setError('');
-    try {
-      await checkinsApi.create({ sudsScore: score, urgeScore: urge });
-      onSaved({ sudsScore: score, urgeScore: urge });
-      onClose();
-    } catch (err) {
-      setError(err.message || 'Failed to save check-in.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-dashboard w-full max-w-sm mx-4 p-8 relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-brand-ink/30 hover:text-brand-ink transition-colors">
-          <span className="material-symbols-outlined text-[20px]">close</span>
-        </button>
-        <div className="flex items-center gap-2 text-brand-teal mb-4">
-          <span className="material-symbols-outlined text-[20px]">monitor_heart</span>
-          <span className="text-xs font-bold uppercase tracking-widest">Daily Check-in</span>
-        </div>
-        <h2 className="font-editorial text-3xl text-brand-ink mb-1">How distressed do you feel right now?</h2>
-        <p className="text-brand-ink/50 text-xs mb-6">SUDS: Subjective Units of Distress Scale (0 = none, 10 = peak)</p>
-
-        <div className="space-y-6">
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-xs font-bold text-brand-ink uppercase tracking-wider">Distress (SUDS)</label>
-              <span className="font-mono text-2xl font-medium text-brand-ink">{score}
-                <span className="text-xs text-brand-ink/50 font-sans ml-1">{SUDS_LABELS[score]}</span>
-              </span>
-            </div>
-            <input
-              type="range" min={0} max={10} value={score}
-              onChange={e => setScore(Number(e.target.value))}
-              className="w-full accent-brand-teal"
-            />
-            <div className="flex justify-between text-[10px] text-brand-ink/40 font-mono mt-1">
-              <span>0</span><span>5</span><span>10</span>
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-xs font-bold text-brand-ink uppercase tracking-wider">Urge Intensity</label>
-              <span className="font-mono text-2xl font-medium text-brand-ink">{urge}</span>
-            </div>
-            <input
-              type="range" min={0} max={10} value={urge}
-              onChange={e => setUrge(Number(e.target.value))}
-              className="w-full accent-brand-coral"
-            />
-          </div>
-        </div>
-
-        {error && <p className="mt-3 text-brand-coral text-xs">{error}</p>}
-
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="mt-6 w-full py-3 rounded-full bg-brand-ink text-white text-sm font-bold hover:bg-brand-teal transition-colors shadow-sm disabled:opacity-60"
-        >
-          {saving ? 'Saving...' : 'Save Check-in'}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* ── Log Practice Modal ─────────────────────────────────────────────────── */
-function LogPracticeModal({ onClose, onSaved, userId }) {
-  const [trigger, setTrigger] = useState('');
-  const [urge, setUrge] = useState(5);
-  const [responseType, setResponseType] = useState('delay');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSave = async () => {
-    if (!responseType) { setError('Please select a response type.'); return; }
-    setSaving(true);
-    setError('');
-    try {
-      // Legacy practice endpoint for quick log
-      await practiceApi.logEvent(userId, responseType);
-      onSaved();
-      onClose();
-    } catch (err) {
-      setError(err.message || 'Failed to save.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-dashboard w-full max-w-sm mx-4 p-8 relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-brand-ink/30 hover:text-brand-ink transition-colors">
-          <span className="material-symbols-outlined text-[20px]">close</span>
-        </button>
-        <div className="flex items-center gap-2 text-brand-coral mb-4">
-          <span className="material-symbols-outlined text-[20px]">psychology</span>
-          <span className="text-xs font-bold uppercase tracking-widest">Log Practice</span>
-        </div>
-        <h2 className="font-editorial text-3xl text-brand-ink mb-5">What just happened?</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-brand-ink mb-1 uppercase tracking-wider">Urge Intensity</label>
-            <div className="flex items-center gap-3">
-              <input type="range" min={0} max={10} value={urge} onChange={e => setUrge(Number(e.target.value))} className="flex-1 accent-brand-coral" />
-              <span className="font-mono text-lg w-6 text-center">{urge}</span>
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-brand-ink mb-2 uppercase tracking-wider">Response Chosen</label>
-            <div className="grid grid-cols-2 gap-2">
-              {['delay', 'resist', 'return', 'continue'].map(rt => {
-                const meta = RESPONSE_TYPE_META[rt];
-                const active = responseType === rt;
-                return (
-                  <button
-                    key={rt}
-                    onClick={() => setResponseType(rt)}
-                    className={`py-2.5 px-4 rounded-2xl text-xs font-bold transition-all border ${
-                      active
-                        ? `bg-brand-ink text-white border-brand-ink`
-                        : `bg-brand-canvas text-brand-ink/70 border-brand-border hover:border-brand-ink/40`
-                    }`}
-                  >
-                    {meta.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-brand-ink mb-1 uppercase tracking-wider">Brief note (optional)</label>
-            <input
-              type="text"
-              value={trigger}
-              onChange={e => setTrigger(e.target.value)}
-              placeholder="What triggered this?"
-              className="w-full px-4 py-2 bg-brand-canvas border border-brand-border rounded-xl text-sm text-brand-ink outline-none focus:border-brand-teal"
-            />
-          </div>
-        </div>
-        {error && <p className="mt-2 text-brand-coral text-xs">{error}</p>}
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="mt-5 w-full py-3 rounded-full bg-brand-ink text-white text-sm font-bold hover:bg-brand-teal transition-colors shadow-sm disabled:opacity-60"
-        >
-          {saving ? 'Saving...' : 'Save Practice Log'}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* ── Main Dashboard ─────────────────────────────────────────────────────── */
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   // Modals
   const [showCheckinModal, setShowCheckinModal] = useState(false);
   const [showPracticeModal, setShowPracticeModal] = useState(false);
+  const [selectedPlanForModal, setSelectedPlanForModal] = useState(null);
 
-  // Dashboard data
+  // Data states
   const [stats, setStats] = useState(null);
-  const [loadingStats, setLoadingStats] = useState(true);
-  const [statsError, setStatsError] = useState('');
-
-  // AI Summary
-  const [aiSummary, setAiSummary] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState('');
-  const [aiGenerated, setAiGenerated] = useState(false);
-
-  // Clinical recommendations authored by connected practitioner
+  const [loading, setLoading] = useState(true);
   const [recommendations, setRecommendations] = useState([]);
+  const [practicePlans, setPracticePlans] = useState([]);
+  const [valuesData, setValuesData] = useState({ values: [], suggestedActions: [] });
+  const [completedActions, setCompletedActions] = useState([]);
+  const [aiSummary, setAiSummary] = useState(null);
+  const [hasConnection, setHasConnection] = useState(null);
 
-  // Pause & Choose tool
-  const [pauseStep, setPauseStep] = useState('idle');
-  const [selectedResponse, setSelectedResponse] = useState(null);
+  // Interactive Quick Tool inline state (Pause & Choose on Dashboard)
+  const [inlinePauseStep, setInlinePauseStep] = useState('idle'); // idle | notice | allow | choose | committed
+  const [chosenAction, setChosenAction] = useState(null);
 
-  // Practitioner discovery banner
-  const [hasConnection, setHasConnection] = useState(null); // null=loading, true/false
-
-  // Load dashboard data on mount
-  const loadDashboard = useCallback(async () => {
-    setLoadingStats(true);
-    setStatsError('');
+  const loadAllData = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await dashboardApi.get();
-      setStats(res.data);
-    } catch (err) {
-      setStatsError(err.message || 'Could not load dashboard data.');
+      const [statsRes, plansRes, recsRes, valuesRes, actionsRes, connsRes] = await Promise.allSettled([
+        dashboardApi.get(),
+        practiceApi.getPlans(),
+        recommendationsApi.list(),
+        valuesApi.get(),
+        valuesApi.listActions(),
+        connectionsApi.list(),
+      ]);
+
+      if (statsRes.status === 'fulfilled') setStats(statsRes.value.data);
+      if (plansRes.status === 'fulfilled') {
+        const plans = plansRes.value.data;
+        const all = [...(plans.clinicianPlans || []), ...(plans.selfGuidedPlans || [])];
+        setPracticePlans(all);
+      }
+      if (recsRes.status === 'fulfilled') setRecommendations(recsRes.value.data || []);
+      if (valuesRes.status === 'fulfilled') setValuesData(valuesRes.value.data || { values: [], suggestedActions: [] });
+      if (actionsRes.status === 'fulfilled') {
+        const acts = (actionsRes.value.data || []).map((a) => a.actionTitle);
+        setCompletedActions(acts);
+      }
+      if (connsRes.status === 'fulfilled') {
+        const active = (connsRes.value.data || []).filter((c) => ['ACTIVE', 'active', 'pending', 'PENDING'].includes(c.status));
+        setHasConnection(active.length > 0);
+      }
+    } catch {
+      // safe fallback
     } finally {
-      setLoadingStats(false);
+      setLoading(false);
     }
   }, []);
 
-  // Load AI summary (non-blocking)
   const loadAiSummary = useCallback(async () => {
     try {
       const res = await aiSummaryApi.get();
       setAiSummary(res.data);
     } catch {
-      // No summary for this week yet — that's fine
-    }
-  }, []);
-
-  // Load clinician recommendations
-  const loadRecommendations = useCallback(async () => {
-    try {
-      const res = await recommendationsApi.list();
-      setRecommendations(res.data || []);
-    } catch {
-      setRecommendations([]);
-    }
-  }, []);
-
-  // Check connections for discovery banner
-  const loadConnections = useCallback(async () => {
-    try {
-      const res = await connectionsApi.list();
-      const active = (res.data || []).filter(c => ['ACTIVE', 'active', 'pending', 'PENDING'].includes(c.status));
-      setHasConnection(active.length > 0);
-    } catch {
-      setHasConnection(false);
+      // summary non-blocking
     }
   }, []);
 
   useEffect(() => {
-    loadDashboard();
+    loadAllData();
     loadAiSummary();
-    loadRecommendations();
-    loadConnections();
-  }, [loadDashboard, loadAiSummary, loadRecommendations, loadConnections]);
+  }, [loadAllData, loadAiSummary]);
 
-  // Generate AI summary on demand
-  const handleGenerateSummary = async () => {
-    setAiLoading(true);
-    setAiError('');
+  // Complete a value action directly on dashboard
+  const handleToggleAction = async (action) => {
+    const isDone = completedActions.includes(action.title);
+    if (isDone) return; // already completed today
+
     try {
-      const res = await aiSummaryApi.generate();
-      setAiSummary(res.data);
-      setAiGenerated(true);
-    } catch (err) {
-      setAiError(err.message || 'Could not generate summary.');
-    } finally {
-      setAiLoading(false);
+      await valuesApi.logAction({
+        value: action.value,
+        actionTitle: action.title,
+        durationMinutes: action.minutes || 15,
+      });
+      setCompletedActions((prev) => [...prev, action.title]);
+    } catch {
+      // optimistic fallback
+      setCompletedActions((prev) => [...prev, action.title]);
     }
   };
 
-  // Pause & Choose
-  const handlePauseFlow = (step) => {
-    setPauseStep(step);
-    if (step === 'idle') setSelectedResponse(null);
+  // Inline Pause & Choose execution
+  const handleInlinePauseChoice = async (responseType) => {
+    setChosenAction(responseType);
+    setInlinePauseStep('committed');
+    try {
+      await practiceApi.logEvent(user?.id, responseType);
+      await toolkitApi.logInteraction({
+        toolId: 'pause-choose',
+        actionChosen: responseType,
+        details: 'Logged from Home Dashboard quick tool',
+      });
+    } catch { /* best effort */ }
+
+    setTimeout(() => {
+      setInlinePauseStep('idle');
+      setChosenAction(null);
+      loadAllData();
+    }, 2400);
   };
 
-  const handleResponse = async (response) => {
-    setSelectedResponse(response);
-    try {
-      await practiceApi.logEvent(user?.id, response);
-    } catch { /* best effort */ }
-    setTimeout(() => {
-      setPauseStep('idle');
-      loadDashboard(); // refresh stats after logging
-    }, 2000);
+  const activePractice = practicePlans[0] || {
+    title: 'Delay checking ritual by 20 minutes',
+    type: 'self-guided',
+    instructions: 'When the urge to check arises, set a timer and return to your activity.',
   };
 
   return (
-    <div className="min-h-screen bg-brand-canvas text-brand-ink font-sans flex flex-col md:flex-row overflow-x-hidden selection:bg-brand-teal/20">
-
-      {/* MODALS */}
+    <DashboardShell onDataRefresh={loadAllData}>
+      {/* Modals */}
       {showCheckinModal && (
         <CheckinModal
           onClose={() => setShowCheckinModal(false)}
-          onSaved={() => loadDashboard()}
+          onSaved={() => loadAllData()}
         />
       )}
       {showPracticeModal && (
         <LogPracticeModal
           userId={user?.id}
-          onClose={() => setShowPracticeModal(false)}
-          onSaved={() => loadDashboard()}
+          initialPlan={selectedPlanForModal}
+          onClose={() => {
+            setShowPracticeModal(false);
+            setSelectedPlanForModal(null);
+          }}
+          onSaved={() => loadAllData()}
         />
       )}
 
-      {/* ── STICKY SIDEBAR ──────────────────────────────────────────────── */}
-      <aside className="w-full md:w-[260px] lg:w-[280px] bg-white border-r border-brand-border/40 shrink-0 flex flex-col md:sticky md:top-0 md:h-screen z-20">
-        <div className="p-6 md:p-8 shrink-0">
-          <Logo />
-        </div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-6">
 
-        <div className="flex-1 px-4 md:px-6 overflow-y-auto pb-6 space-y-8">
-          <div className="space-y-3">
-            <span className="px-2 text-[10px] font-bold uppercase tracking-widest text-brand-ink/40">Sanctuary</span>
-            <nav className="flex flex-col gap-1.5">
-              <Link className="flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-brand-softerTeal text-brand-teal font-bold shadow-sm" to="/app">
-                <div className="w-8 h-8 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal">
-                  <span className="material-symbols-outlined text-[18px]">home</span>
-                </div>
-                <span className="text-[14px]">Home</span>
-                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
-              </Link>
-              <Link className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-brand-ink/60 hover:bg-white hover:text-brand-ink transition-all shadow-sm" to="/app/practice">
-                <div className="w-8 h-8 rounded-full bg-brand-coralSoft flex items-center justify-center text-brand-coral">
-                  <span className="material-symbols-outlined text-[18px]">history</span>
-                </div>
-                <span className="text-[14px] font-medium">Practice History</span>
-              </Link>
-            </nav>
-          </div>
-          <div className="space-y-3">
-            <span className="px-2 text-[10px] font-bold uppercase tracking-widest text-brand-ink/40">Care Continuity</span>
-            <nav className="flex flex-col gap-1.5">
-              <Link className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-brand-ink/60 hover:bg-white hover:text-brand-ink transition-all shadow-sm group" to="/app/clinician">
-                <div className="w-8 h-8 rounded-full bg-brand-canvas flex items-center justify-center text-brand-ink/60 group-hover:text-brand-ink">
-                  <span className="material-symbols-outlined text-[18px]">medical_services</span>
-                </div>
-                <span className="text-[14px] font-medium">Clinician Connect</span>
-              </Link>
-            </nav>
+        {/* ── Top Sanctuary Header ────────────────────────────────────────── */}
+        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-brand-teal text-xs font-semibold uppercase tracking-wider mb-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+              <span>Here is what may help you today</span>
+            </div>
+            <h1 className="font-editorial text-3xl sm:text-4xl text-brand-ink font-medium leading-tight">
+              {user?.name ? (
+                <>Good day, <span className="italic text-brand-teal">{user.name.split(' ')[0]}.</span></>
+              ) : (
+                <>Make room for <span className="italic text-brand-teal">what matters today.</span></>
+              )}
+            </h1>
           </div>
 
-          {/* Quick check-in CTA in sidebar */}
-          <div className="px-2">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => setShowCheckinModal(true)}
-              className="w-full py-2.5 rounded-full bg-brand-ink text-white text-[11px] font-bold hover:bg-brand-teal transition-colors shadow-sm flex items-center justify-center gap-1.5"
+              className="px-3.5 py-2 rounded border border-brand-border bg-brand-paper hover:bg-brand-canvas text-brand-ink text-xs font-medium transition-colors shadow-xs flex items-center gap-1.5"
             >
-              <span className="material-symbols-outlined text-[14px]">monitor_heart</span>
-              Daily Check-in
+              <span className="material-symbols-outlined text-[16px] text-brand-teal">monitor_heart</span>
+              <span>Check-in</span>
             </button>
-          </div>
-        </div>
-
-        <div className="p-4 md:p-6 shrink-0 mt-auto border-t border-brand-border/40">
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-9 h-9 rounded-full bg-brand-ink text-white flex items-center justify-center text-xs font-bold shadow-sm">
-              {user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <div className="text-xs font-bold text-brand-ink truncate">{user?.name || user?.email}</div>
-              <div className="text-[10px] text-brand-ink/50 font-mono mt-0.5 truncate">ID: {user?.id}</div>
-            </div>
-            <Link to="/app/settings" className="p-2 text-brand-ink/40 hover:text-brand-teal transition-colors">
-              <span className="material-symbols-outlined text-[18px]">settings</span>
-            </Link>
-            <button onClick={logout} className="p-2 text-brand-ink/40 hover:text-brand-coral transition-colors">
-              <span className="material-symbols-outlined text-[18px]">logout</span>
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0 relative">
-        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-brand-softerTeal blur-[120px] opacity-70 pointer-events-none z-0"></div>
-        <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full bg-brand-coralSoft blur-[140px] opacity-70 pointer-events-none z-0"></div>
-
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
-
-          {/* ── Header ─────────────────────────────────────────────────── */}
-          <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-fade-in">
-            <div>
-              <p className="text-brand-teal font-bold text-xs uppercase tracking-widest mb-2">Welcome Back</p>
-              <h1 className="font-editorial text-4xl sm:text-5xl text-brand-ink font-normal leading-tight">
-                {user?.name ? <>Welcome, <span className="italic text-brand-teal">{user.name.split(' ')[0]}.</span></> : <>Make more room <span className="italic text-brand-teal">for life outside the loop.</span></>}
-              </h1>
-            </div>
             <button
-              onClick={() => setShowPracticeModal(true)}
-              className="self-start sm:self-end px-5 py-2.5 rounded-full bg-brand-ink text-white text-xs font-bold shadow-sm hover:bg-brand-teal transition-colors flex items-center gap-2"
+              onClick={() => {
+                setSelectedPlanForModal(activePractice);
+                setShowPracticeModal(true);
+              }}
+              className="px-4 py-2 rounded bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-xs flex items-center gap-1.5"
             >
-              <span className="material-symbols-outlined text-[16px]">add</span>
+              <span className="material-symbols-outlined text-[16px]">add_task</span>
               <span>Log Practice</span>
             </button>
-          </header>
+          </div>
+        </header>
 
-          {/* ── Email verification banner ───────────────────────────────── */}
-          {user && !user.isVerified && (
-            <div className="p-4 bg-brand-amberSoft border border-brand-amber/30 rounded-2xl flex items-center justify-between text-brand-ink shadow-sm animate-fade-in">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-brand-amber">mail</span>
-                <div>
-                  <h4 className="text-xs font-bold">Verify your email address</h4>
-                  <p className="text-[11px] opacity-80 mt-0.5">Please click the link in the email we sent you to secure your sanctuary.</p>
-                </div>
+        {/* ── Practitioner Discovery Banner (if unconnected) ──────────────── */}
+        {hasConnection === false && (
+          <div className="p-4 bg-brand-softerTeal/70 border border-brand-teal/20 rounded flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-fade-in shadow-xs">
+            <div className="flex items-start sm:items-center gap-3">
+              <div className="w-8 h-8 rounded bg-brand-teal text-white flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[18px]">medical_services</span>
+              </div>
+              <div>
+                <span className="font-semibold text-brand-ink block">Consultation Sanctuary Available</span>
+                <span className="text-brand-ink/70">
+                  Connect with verified ERP clinicians like Dr. Kavita Mehra for structured, consent-gated review.
+                </span>
               </div>
             </div>
-          )}
+            <Link
+              to="/app/care"
+              className="self-start sm:self-auto px-3 py-1.5 rounded bg-brand-teal text-white font-medium hover:bg-brand-tealDark transition-colors shrink-0"
+            >
+              Find Practitioner →
+            </Link>
+          </div>
+        )}
 
-          {/* ── Practitioner discovery banner ───────────────────────────── */}
-          {hasConnection === false && (
-            <div className="p-5 bg-brand-lavenderSoft border border-brand-lavender/20 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in shadow-sm">
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-brand-lavender text-[22px] shrink-0 mt-0.5">person_search</span>
-                <div>
-                  <h4 className="text-sm font-bold text-brand-ink">Connect with a verified practitioner</h4>
-                  <p className="text-xs text-brand-ink/60 mt-0.5 max-w-md">Dr. Kavita Mehra (MD, MCI Registered · ERP Specialist) is available for consent-controlled behavioral review. You decide exactly what data they see.</p>
-                </div>
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* INTERLOCKED BENTO GRID                                             */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+
+          {/* ── Bento Card 1: Today's Gentle Focus (Col 1-8) ──────────────── */}
+          <div className="md:col-span-8 bg-brand-amberSoft border border-brand-amber/30 rounded p-6 shadow-card-lift relative overflow-hidden flex flex-col justify-between">
+            <div className="relative z-10 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-amber/20">
+                  Daily Grounding Focus
+                </span>
+                <span className="text-xs font-mono text-brand-ink/50">
+                  {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                </span>
               </div>
-              <Link to="/app/clinician" className="shrink-0 px-5 py-2 rounded-full bg-brand-lavender text-white text-xs font-bold hover:opacity-90 transition-colors whitespace-nowrap">
-                View Clinician Connect →
+
+              <h2 className="font-editorial text-2xl sm:text-3xl text-brand-ink leading-snug font-medium">
+                “You do not need to solve the doubt to continue living your life.”
+              </h2>
+
+              <p className="text-xs sm:text-sm text-brand-ink/75 leading-relaxed max-w-xl">
+                In OCD, the brain treats uncertainty as an urgent life-or-death puzzle. Today’s gentle practice is allowing the question to remain unanswered while you direct your attention to what genuinely matters.
+              </p>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-brand-amber/20 flex flex-wrap items-center gap-3 text-xs">
+              <Link
+                to="/app/learn"
+                className="font-medium text-brand-ink hover:text-brand-teal flex items-center gap-1 transition-colors"
+              >
+                <span>Read 'Embracing Maybe, Maybe Not'</span>
+                <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
               </Link>
+              <span className="text-brand-amber/40">•</span>
+              <span className="text-brand-ink/60 text-[11px]">Brain Lock & ERP Clinical Framework</span>
             </div>
-          )}
+          </div>
 
-          {/* ── Stats row ─────────────────────────────────────────────── */}
-          {loadingStats ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-pulse">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-20 bg-white rounded-2xl border border-brand-border/30"></div>
-              ))}
-            </div>
-          ) : statsError ? (
-            <div className="p-4 bg-brand-coralSoft border border-brand-coral/20 rounded-2xl text-brand-coral text-xs">
-              {statsError}
-            </div>
-          ) : stats ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-fade-up">
-              <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">Practice (7d)</div>
-                <div className="font-mono text-3xl font-medium text-brand-ink">{stats.thisWeekPractice ?? 0}<span className="text-base text-brand-ink/40 ml-1">sessions</span></div>
-              </div>
-              <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">Check-ins (7d)</div>
-                <div className="font-mono text-3xl font-medium text-brand-ink">{stats.checkinCountThisWeek ?? stats.checkinStreak ?? 0}<span className="text-base text-brand-ink/40 ml-1">logged</span></div>
-              </div>
-              <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">Avg SUDS (7d)</div>
-                <div className="font-mono text-3xl font-medium text-brand-ink">
-                  {stats.avgSudsThisWeek != null ? stats.avgSudsThisWeek : '—'}
-                </div>
-              </div>
-              <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">Journal entries</div>
-                <div className="font-mono text-3xl font-medium text-brand-ink">{stats.totalJournalThisWeek ?? 0}</div>
-              </div>
-            </div>
-          ) : null}
-
-          {/* ── Active Clinical Recommendations ─────────────────────────── */}
-          {recommendations.length > 0 && (
-            <section className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-brand-teal/20 shadow-dashboard animate-fade-up relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-5 border-b border-brand-border/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-brand-softerTeal flex items-center justify-center text-brand-teal shrink-0">
-                    <span className="material-symbols-outlined text-[22px]">clinical_notes</span>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold uppercase tracking-widest text-brand-teal">Curated Structured Practice</span>
-                      <span className="px-2 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal text-[10px] font-bold">Human-Authored Note</span>
-                    </div>
-                    <h3 className="font-editorial text-2xl text-brand-ink mt-0.5">
-                      {recommendations[0].practitionerName ? `Recommendation from ${recommendations[0].practitionerName}` : 'Clinical Recommendation'}
-                    </h3>
-                  </div>
-                </div>
-                <div className="text-left sm:text-right sm:self-center">
-                  <div className="text-xs font-bold text-brand-ink/80">{recommendations[0].practitionerCredentials || 'Verified Clinician'}</div>
-                  <div className="text-[11px] text-brand-ink/40 font-mono">
-                    {recommendations[0].authoredAt ? new Date(recommendations[0].authoredAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recent'}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Recommended Next Step / Practice */}
-                <div className="p-5 rounded-2xl bg-brand-softerTeal/60 border border-brand-teal/20 space-y-2">
-                  <div className="flex items-center gap-2 text-brand-teal text-xs font-bold uppercase tracking-wider">
-                    <span className="material-symbols-outlined text-[16px]">task_alt</span>
-                    Recommended Practice Window
-                  </div>
-                  <p className="text-sm font-medium text-brand-ink leading-relaxed">
-                    {recommendations[0].nextStep}
-                  </p>
-                </div>
-
-                {/* Clinical Observation */}
-                {recommendations[0].observation && (
-                  <div className="p-5 rounded-2xl bg-brand-canvas border border-brand-border/40 space-y-2">
-                    <div className="flex items-center gap-2 text-brand-ink/60 text-xs font-bold uppercase tracking-wider">
-                      <span className="material-symbols-outlined text-[16px]">visibility</span>
-                      Clinical Observation
-                    </div>
-                    <p className="text-sm text-brand-ink/80 leading-relaxed italic">
-                      "{recommendations[0].observation}"
-                    </p>
-                  </div>
+          {/* ── Bento Card 2: Continue Practice (Col 9-12) ────────────────── */}
+          <div className="md:col-span-4 bg-brand-coralSoft border border-brand-coral/30 rounded p-6 shadow-card-lift flex flex-col justify-between">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-coral/20">
+                  {activePractice.type === 'clinician-assigned' ? 'Clinician-Assigned' : 'Active Practice'}
+                </span>
+                {activePractice.practitionerName && (
+                  <span className="text-[10px] font-medium text-brand-teal">Dr. Mehra</span>
                 )}
               </div>
 
-              {/* Direct Note to User */}
-              {recommendations[0].noteToUser && (
-                <div className="mt-4 p-4 rounded-2xl bg-brand-amberSoft/60 border border-brand-amber/20 flex items-start gap-3">
-                  <span className="material-symbols-outlined text-brand-amber text-[18px] shrink-0 mt-0.5">edit_note</span>
-                  <div className="text-xs text-brand-ink/80 leading-relaxed">
-                    <span className="font-bold text-brand-ink">Note from practitioner: </span>
-                    {recommendations[0].noteToUser}
+              <div>
+                <h3 className="font-editorial text-xl text-brand-ink font-medium leading-snug mb-1">
+                  {activePractice.title}
+                </h3>
+                <p className="text-xs text-brand-ink/70 line-clamp-3 leading-relaxed">
+                  {activePractice.instructions}
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded bg-white/70 border border-brand-coral/20 flex items-center justify-between text-xs font-mono text-brand-ink/80">
+                <span>Target Response:</span>
+                <span className="font-sans font-semibold text-brand-coral">Delay or Resist</span>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-2">
+              <button
+                onClick={() => {
+                  setSelectedPlanForModal(activePractice);
+                  setShowPracticeModal(true);
+                }}
+                className="w-full py-2 px-3 rounded bg-brand-ink hover:bg-brand-coral text-white text-xs font-medium transition-colors shadow-xs flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[16px]">play_circle</span>
+                <span>Begin Exposure</span>
+              </button>
+            </div>
+          </div>
+
+          {/* ── Bento Card 3: Quick Tools Sanctuary (Col 1-7) ──────────────── */}
+          <div className="md:col-span-7 bg-brand-paper border border-brand-border rounded p-6 shadow-card-lift space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-editorial text-xl text-brand-ink font-medium">Quick Calm Tools</h3>
+                <p className="text-xs text-brand-ink/60">Gentle regulation aids — not rituals to sanitize obsessions.</p>
+              </div>
+              <Link to="/app/toolkit" className="text-xs font-medium text-brand-teal hover:underline flex items-center gap-0.5">
+                <span>View All</span>
+                <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+              </Link>
+            </div>
+
+            {/* Inline Pause & Choose Tool Interactive Box */}
+            <div className="p-4 rounded bg-brand-lavenderSoft border border-brand-lavender/30 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-brand-lavender"></span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
+                    Pause & Choose
+                  </span>
+                </div>
+                <span className="text-[11px] text-brand-ink/50">4-Step Hesitation</span>
+              </div>
+
+              {inlinePauseStep === 'idle' && (
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs text-brand-ink/75">
+                    Feeling the urge to check, replay, or seek reassurance right now?
+                  </p>
+                  <button
+                    onClick={() => setInlinePauseStep('notice')}
+                    className="px-3 py-1.5 rounded bg-brand-lavender text-white text-xs font-medium hover:bg-brand-lavender/90 transition-colors shrink-0"
+                  >
+                    Pause 30s
+                  </button>
+                </div>
+              )}
+
+              {inlinePauseStep === 'notice' && (
+                <div className="space-y-2 animate-fade-in">
+                  <p className="text-xs font-medium text-brand-ink">
+                    1. Notice: "I notice an intrusive thought and an urge to ritualize."
+                  </p>
+                  <p className="text-[11px] text-brand-ink/70">
+                    Acknowledge the urge without agreeing with the thought or arguing against it.
+                  </p>
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button
+                      onClick={() => setInlinePauseStep('idle')}
+                      className="px-2.5 py-1 text-xs text-brand-ink/60 hover:text-brand-ink"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => setInlinePauseStep('choose')}
+                      className="px-3 py-1 rounded bg-brand-lavender text-white text-xs font-medium"
+                    >
+                      Next: Choose Action →
+                    </button>
                   </div>
                 </div>
               )}
 
-              <div className="mt-5 pt-4 border-t border-brand-border/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] text-brand-ink/40">
-                <span>This structured practice is authored by your clinician based on your shared logs. Not an automated diagnosis.</span>
-                <Link to="/app/clinician" className="text-brand-teal font-bold hover:underline shrink-0">
-                  Manage Sharing &amp; Clinician →
-                </Link>
-              </div>
-            </section>
-          )}
-
-          {/* ── Bento Grid ─────────────────────────────────────────────── */}
-          <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-up" style={{ animationDelay: '100ms' }}>
-
-            {/* LEFT column */}
-            <div className="lg:col-span-7 space-y-6">
-
-              {/* Recent Journal ─────────────────────────────────────────── */}
-              <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-2 text-brand-teal">
-                    <span className="material-symbols-outlined text-[20px]">psychology_alt</span>
-                    <span className="text-xs font-bold uppercase tracking-widest">Recent Patterns</span>
-                  </div>
-                  <Link to="/app/practice" className="text-[11px] text-brand-ink/50 hover:text-brand-teal font-bold transition-colors flex items-center gap-1">
-                    View all <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                  </Link>
-                </div>
-
-                {loadingStats ? (
-                  <div className="space-y-3 animate-pulse">
-                    {[...Array(3)].map((_, i) => <div key={i} className="h-14 bg-brand-canvas rounded-2xl"></div>)}
-                  </div>
-                ) : stats?.recentJournal?.length > 0 ? (
-                  <div className="space-y-3">
-                    {stats.recentJournal.map(entry => {
-                      const meta = RESPONSE_TYPE_META[entry.responseType] || RESPONSE_TYPE_META.no_response;
-                      return (
-                        <div key={entry.entryId} className="flex items-center gap-4 p-4 rounded-2xl bg-brand-canvas">
-                          <div className={`w-10 h-10 rounded-full bg-${meta.bg} flex items-center justify-center shrink-0`}>
-                            <span className={`text-[10px] font-bold text-${meta.color} uppercase`}>{meta.label.slice(0, 3)}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-bold text-brand-ink truncate">{entry.trigger || 'No trigger noted'}</div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className={`text-[10px] font-bold text-${meta.color}`}>{meta.label}</span>
-                              {entry.urge != null && (
-                                <span className="text-[10px] text-brand-ink/40 font-mono">urge: {entry.urge}</span>
-                              )}
-                              {entry.tags?.slice(0, 2).map(t => (
-                                <span key={t} className="px-2 py-0.5 rounded-full bg-white border border-brand-border text-[9px] font-bold text-brand-ink/50">{t}</span>
-                              ))}
-                            </div>
-                          </div>
-                          <RelativeTime iso={entry.createdAt} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center py-6 text-brand-ink/40 text-sm">
-                    No journal entries this week yet.
-                    <Link to="/app/practice" className="block mt-2 text-brand-teal text-xs font-bold hover:underline">Start logging →</Link>
-                  </div>
-                )}
-              </section>
-
-              {/* Pause & Choose Tool ─────────────────────────────────────── */}
-              <section className={`rounded-3xl p-6 sm:p-8 border border-brand-border/30 transition-colors duration-500 ${
-                pauseStep === 'idle'   ? 'bg-brand-ink text-white' :
-                pauseStep === 'pause'  ? 'bg-brand-amber text-white' :
-                pauseStep === 'allow'  ? 'bg-brand-lavender text-white' : 'bg-brand-teal text-white'
-              }`}>
-                {pauseStep === 'idle' && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div>
-                      <h2 className="font-editorial text-3xl mb-2">Pause &amp; Choose</h2>
-                      <p className="text-white/70 text-sm">A brief intervention when an urge hits. You don't need to make the urge disappear.</p>
-                    </div>
-                    <button onClick={() => handlePauseFlow('pause')} className="shrink-0 w-16 h-16 rounded-full bg-white text-brand-ink flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
-                      <span className="material-symbols-outlined text-[28px]">play_arrow</span>
-                    </button>
-                  </div>
-                )}
-                {pauseStep === 'pause' && (
-                  <div className="text-center py-6 animate-fade-in">
-                    <h2 className="font-editorial text-4xl mb-4">An urge is here.</h2>
-                    <p className="text-white/80 text-sm mb-8">Notice it. It is just a temporary neurochemical event.</p>
-                    <button onClick={() => handlePauseFlow('allow')} className="px-8 py-3 rounded-full bg-white text-brand-amber font-bold text-sm shadow-md hover:scale-105 transition-transform">Continue</button>
-                  </div>
-                )}
-                {pauseStep === 'allow' && (
-                  <div className="text-center py-6 animate-fade-in">
-                    <h2 className="font-editorial text-4xl mb-4">I allow this feeling.</h2>
-                    <p className="text-white/80 text-sm mb-8">I don't need to fix it. I don't need to make it disappear.</p>
-                    <button onClick={() => handlePauseFlow('choose')} className="px-8 py-3 rounded-full bg-white text-brand-lavender font-bold text-sm shadow-md hover:scale-105 transition-transform">Make a choice</button>
-                  </div>
-                )}
-                {pauseStep === 'choose' && !selectedResponse && (
-                  <div className="animate-fade-in">
-                    <h2 className="font-editorial text-3xl mb-6 text-center">What response fits the direction I want to move in?</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {['delay', 'resist', 'return', 'continue'].map(rt => (
-                        <button key={rt} onClick={() => handleResponse(rt)} className="p-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 transition-colors text-left">
-                          <div className="font-bold text-sm mb-1">{RESPONSE_TYPE_META[rt].label}</div>
-                          <div className="text-xs text-white/70">
-                            {rt === 'delay' && 'I will wait 10 minutes.'}
-                            {rt === 'resist' && 'I will not perform the ritual.'}
-                            {rt === 'return' && 'I am going back to what I was doing.'}
-                            {rt === 'continue' && 'I will stay in this situation.'}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {pauseStep === 'choose' && selectedResponse && (
-                  <div className="text-center py-6 animate-fade-up">
-                    <div className="w-16 h-16 mx-auto rounded-full bg-white flex items-center justify-center text-brand-teal shadow-lg mb-4">
-                      <span className="material-symbols-outlined text-[32px]">check</span>
-                    </div>
-                    <h2 className="font-editorial text-3xl mb-2">Response logged.</h2>
-                    <p className="text-white/80 text-sm">You are building new neuroplastic pathways.</p>
-                  </div>
-                )}
-              </section>
-            </div>
-
-            {/* RIGHT column */}
-            <div className="lg:col-span-5 space-y-6">
-
-              {/* Active patterns ────────────────────────────────────────── */}
-              <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-                <div className="flex items-center gap-2 text-brand-teal mb-4">
-                  <span className="material-symbols-outlined text-[20px]">pattern</span>
-                  <span className="text-xs font-bold uppercase tracking-widest">Active Patterns</span>
-                </div>
-                {stats?.activePatterns?.length > 0 ? (
-                  <div className="space-y-3">
-                    {stats.activePatterns.map(({ type, count }) => {
-                      const meta = RESPONSE_TYPE_META[type] || RESPONSE_TYPE_META.no_response;
-                      return (
-                        <div key={type} className="flex items-center justify-between p-4 rounded-2xl bg-brand-canvas">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full bg-${meta.bg} flex items-center justify-center`}>
-                              <span className="material-symbols-outlined text-[18px] text-brand-ink/60">repeat</span>
-                            </div>
-                            <div>
-                              <div className="text-sm font-bold text-brand-ink capitalize">{meta.label}</div>
-                              <div className="text-xs text-brand-ink/50">This week</div>
-                            </div>
-                          </div>
-                          <div className="font-mono text-xl font-medium text-brand-ink">{count}×</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="py-6 text-center text-brand-ink/40 text-sm">No patterns logged this week.</div>
-                )}
-              </section>
-
-              {/* AI Weekly Summary ──────────────────────────────────────── */}
-              <section className="bg-brand-canvas rounded-3xl p-6 sm:p-8 border border-brand-border/40 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2 text-brand-lavender">
-                    <span className="material-symbols-outlined text-[20px]">auto_awesome</span>
-                    <span className="text-xs font-bold uppercase tracking-widest">Weekly Insight</span>
-                  </div>
-                  {stats?.lastSummaryDate && (
-                    <span className="text-[10px] text-brand-ink/40 font-mono">Week of {stats.lastSummaryDate}</span>
-                  )}
-                </div>
-
-                {aiSummary ? (
-                  <div>
-                    <p className="text-brand-ink/80 text-sm leading-relaxed mb-3">{aiSummary.summary}</p>
-                    <p className="text-[10px] text-brand-ink/40 italic">{aiSummary.disclaimer}</p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-brand-ink/50 text-sm mb-4">
-                      Generate a grounded summary of your week based on your logs.
-                    </p>
-                    {aiError && <p className="text-brand-coral text-xs mb-3">{aiError}</p>}
+              {inlinePauseStep === 'choose' && (
+                <div className="space-y-2.5 animate-fade-in">
+                  <p className="text-xs font-medium text-brand-ink">
+                    2. Choose: How will you respond to this urge?
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
                     <button
-                      onClick={handleGenerateSummary}
-                      disabled={aiLoading}
-                      className="px-5 py-2.5 rounded-full bg-brand-ink text-white text-xs font-bold hover:bg-brand-lavender transition-colors shadow-sm disabled:opacity-60 flex items-center gap-2"
+                      onClick={() => handleInlinePauseChoice('delay')}
+                      className="p-2 rounded border border-brand-amber/40 bg-white hover:bg-brand-amberSoft text-brand-ink text-center transition-colors"
                     >
-                      {aiLoading
-                        ? <><span className="material-symbols-outlined text-[14px] animate-spin">progress_activity</span> Generating...</>
-                        : <><span className="material-symbols-outlined text-[14px]">auto_awesome</span> Generate Insight</>
-                      }
+                      <span className="font-semibold block text-[11px] text-brand-amber">Delay</span>
+                      <span className="text-[10px] text-brand-ink/60">Wait 15m</span>
+                    </button>
+                    <button
+                      onClick={() => handleInlinePauseChoice('resist')}
+                      className="p-2 rounded border border-brand-teal/40 bg-white hover:bg-brand-softerTeal text-brand-ink text-center transition-colors"
+                    >
+                      <span className="font-semibold block text-[11px] text-brand-teal">Resist</span>
+                      <span className="text-[10px] text-brand-ink/60">No Ritual</span>
+                    </button>
+                    <button
+                      onClick={() => handleInlinePauseChoice('return')}
+                      className="p-2 rounded border border-brand-lavender/40 bg-white hover:bg-brand-lavenderSoft text-brand-ink text-center transition-colors"
+                    >
+                      <span className="font-semibold block text-[11px] text-brand-lavender">Return</span>
+                      <span className="text-[10px] text-brand-ink/60">To Activity</span>
+                    </button>
+                    <button
+                      onClick={() => handleInlinePauseChoice('compulsion')}
+                      className="p-2 rounded border border-brand-coral/40 bg-white hover:bg-brand-coralSoft text-brand-ink text-center transition-colors"
+                    >
+                      <span className="font-semibold block text-[11px] text-brand-coral">Gave In</span>
+                      <span className="text-[10px] text-brand-ink/60">Honest Log</span>
                     </button>
                   </div>
-                )}
-
-                {aiGenerated && (
-                  <button
-                    onClick={handleGenerateSummary}
-                    disabled={aiLoading}
-                    className="mt-3 text-[10px] text-brand-ink/40 hover:text-brand-lavender transition-colors font-bold underline"
-                  >
-                    Regenerate
-                  </button>
-                )}
-              </section>
-
-              {/* Values / Life outside ─────────────────────────────────── */}
-              <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-                <div className="flex items-center gap-2 text-brand-lavender mb-4">
-                  <span className="material-symbols-outlined text-[20px]">explore</span>
-                  <span className="text-xs font-bold uppercase tracking-widest">Life Outside OCD</span>
                 </div>
-                <h2 className="font-editorial text-2xl text-brand-ink mb-1">More room for:</h2>
-                <p className="text-brand-ink/50 text-xs mb-5">Your chosen values acting as your compass.</p>
-                <div className="flex flex-wrap gap-2">
-                  {(user?.values && user.values.length > 0 ? user.values : ['Add your values in settings']).map(val => (
-                    <span key={val} className="px-4 py-2 rounded-full bg-brand-canvas text-brand-ink text-sm font-medium shadow-sm border border-brand-border/30">{val}</span>
-                  ))}
+              )}
+
+              {inlinePauseStep === 'committed' && (
+                <div className="p-2 rounded bg-white text-center text-xs font-medium text-brand-teal animate-fade-in">
+                  ✓ Response choice recorded. Returning to your sanctuary...
                 </div>
-              </section>
+              )}
             </div>
-          </main>
 
-          {/* ── Safety Footer ──────────────────────────────────────────── */}
-          <footer className="border-t border-brand-border/40 pt-6 text-center text-[11px] text-brand-ink/40">
-            <span className="font-bold text-brand-coral">Need immediate support?</span>
-            {' '}Tele-MANAS: <span className="font-mono">14416</span> · <span className="font-mono">1800-891-4416</span>
-          </footer>
+            {/* Quick Tool Shortcut Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+              <Link
+                to="/app/toolkit?tool=grounding"
+                className="p-3 rounded border border-brand-border/80 bg-brand-softerTeal/40 hover:bg-brand-softerTeal transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1 text-brand-teal">
+                  <span className="material-symbols-outlined text-[18px]">spa</span>
+                  <span className="text-xs font-bold uppercase tracking-wider">Grounding</span>
+                </div>
+                <p className="text-[11px] text-brand-ink/70">5-4-3-2-1 sensory anchor back to the physical room.</p>
+              </Link>
+
+              <Link
+                to="/app/toolkit?tool=breathing"
+                className="p-3 rounded border border-brand-border/80 bg-brand-amberSoft/40 hover:bg-brand-amberSoft transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1 text-brand-amber">
+                  <span className="material-symbols-outlined text-[18px]">air</span>
+                  <span className="text-xs font-bold uppercase tracking-wider">Paced Breath</span>
+                </div>
+                <p className="text-[11px] text-brand-ink/70">Gentle, unhurried pacing aid to steady the body.</p>
+              </Link>
+
+              <Link
+                to="/app/toolkit?tool=reassurance"
+                className="p-3 rounded border border-brand-border/80 bg-brand-coralSoft/40 hover:bg-brand-coralSoft transition-all group"
+              >
+                <div className="flex items-center gap-2 mb-1 text-brand-coral">
+                  <span className="material-symbols-outlined text-[18px]">help_center</span>
+                  <span className="text-xs font-bold uppercase tracking-wider">Interrupter</span>
+                </div>
+                <p className="text-[11px] text-brand-ink/70">"Am I checking?" Catch digital & cognitive certainty traps.</p>
+              </Link>
+            </div>
+          </div>
+
+          {/* ── Bento Card 4: Life Outside OCD (Col 8-12) ──────────────────── */}
+          <div className="md:col-span-5 bg-brand-paper border border-brand-border rounded p-6 shadow-card-lift flex flex-col justify-between space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-2 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
+                  Life Outside OCD
+                </span>
+                <span className="text-xs font-mono text-brand-ink/50">Values Actions</span>
+              </div>
+              <h3 className="font-editorial text-xl text-brand-ink font-medium">Daily Value Steps</h3>
+              <p className="text-xs text-brand-ink/60 mb-3">
+                Recovery is not just reducing OCD; it is expanding what you care about.
+              </p>
+
+              <div className="space-y-2">
+                {(valuesData.suggestedActions || []).slice(0, 3).map((act) => {
+                  const isDone = completedActions.includes(act.title);
+                  return (
+                    <div
+                      key={act.id || act.title}
+                      onClick={() => handleToggleAction(act)}
+                      className={`p-2.5 rounded border transition-all cursor-pointer flex items-start gap-2.5 ${
+                        isDone
+                          ? 'bg-brand-softSuccess/40 border-brand-teal/30 opacity-80'
+                          : 'bg-brand-canvas/60 border-brand-border hover:border-brand-teal/40'
+                      }`}
+                    >
+                      <span
+                        className={`material-symbols-outlined text-[18px] shrink-0 mt-0.5 ${
+                          isDone ? 'text-brand-teal' : 'text-brand-ink/30'
+                        }`}
+                      >
+                        {isDone ? 'check_circle' : 'radio_button_unchecked'}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className={`text-xs font-medium ${isDone ? 'line-through text-brand-ink/60' : 'text-brand-ink'}`}>
+                            {act.title}
+                          </span>
+                          <span className="text-[10px] font-mono text-brand-ink/40 shrink-0">
+                            {act.minutes}m
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-brand-teal font-medium uppercase tracking-wider block mt-0.5">
+                          {act.value}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-brand-border/40 text-[11px] text-brand-ink/60 flex items-center justify-between">
+              <span>{completedActions.length} value actions completed</span>
+              <span className="text-brand-teal font-medium">One step is enough</span>
+            </div>
+          </div>
+
+          {/* ── Bento Card 5: Gentle Plan for Today (Col 1-6) ──────────────── */}
+          <div className="md:col-span-6 bg-[#E8F3EE] border border-brand-border rounded p-6 shadow-card-lift space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold tracking-widest text-clinical-success px-2.5 py-0.5 rounded-full bg-white/80 border border-clinical-success/20">
+                Gentle Rhythm
+              </span>
+              <span className="text-xs font-mono text-brand-ink/50">Anti-Gamified</span>
+            </div>
+
+            <h3 className="font-editorial text-2xl text-brand-ink font-medium">
+              Today's Balanced Plan
+            </h3>
+
+            <p className="text-xs text-brand-ink/75 leading-relaxed">
+              You do not need to do everything every day. A balanced recovery day consists of three simple anchors:
+            </p>
+
+            <div className="grid grid-cols-3 gap-2 pt-1 text-center">
+              <div className="p-2.5 rounded bg-white/80 border border-brand-border/40">
+                <span className="font-mono text-lg font-bold text-brand-coral block">1</span>
+                <span className="text-[11px] font-medium text-brand-ink">Practice</span>
+                <span className="text-[9px] text-brand-ink/50 block">Exposure trial</span>
+              </div>
+              <div className="p-2.5 rounded bg-white/80 border border-brand-border/40">
+                <span className="font-mono text-lg font-bold text-brand-teal block">1</span>
+                <span className="text-[11px] font-medium text-brand-ink">Life Action</span>
+                <span className="text-[9px] text-brand-ink/50 block">Value outside OCD</span>
+              </div>
+              <div className="p-2.5 rounded bg-white/80 border border-brand-border/40">
+                <span className="font-mono text-lg font-bold text-brand-lavender block">1</span>
+                <span className="text-[11px] font-medium text-brand-ink">Calm Tool</span>
+                <span className="text-[9px] text-brand-ink/50 block">Pause or Ground</span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-brand-ink/60 italic pt-1">
+              "No streaks, no points, no pressure. Simply gentle consistency."
+            </p>
+          </div>
+
+          {/* ── Bento Card 6: Secondary AI & Longitudinal Synthesis (Col 7-12) */}
+          <div className="md:col-span-6 bg-brand-paper border border-brand-border rounded p-6 shadow-card-lift flex flex-col justify-between space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px] text-brand-teal">auto_awesome</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">Weekly Synthesis</span>
+                </div>
+                <span className="text-[10px] font-mono text-brand-ink/50">Deterministic Summary</span>
+              </div>
+
+              {aiSummary?.summary ? (
+                <div className="p-3.5 rounded bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/80 leading-relaxed">
+                  {aiSummary.summary}
+                </div>
+              ) : stats ? (
+                <div className="p-3.5 rounded bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/80 leading-relaxed">
+                  You logged <span className="font-mono font-semibold text-brand-ink">{stats.checkinCountThisWeek ?? 0}</span> check-ins across the last 7 days. Average pre-distress was <span className="font-mono font-semibold text-brand-ink">{stats.avgSudsThisWeek ? Number(stats.avgSudsThisWeek).toFixed(1) : '—'}</span> out of 10. Most common response strategy logged: <span className="font-semibold text-brand-teal">{stats.primaryPattern || 'delay'}</span>.
+                </div>
+              ) : (
+                <div className="p-3.5 rounded bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/50 italic">
+                  Log a check-in and practice session to view your weekly behavioral summary.
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-brand-border/40 flex items-center justify-between text-[11px] text-brand-ink/50">
+              <span className="italic">Synthesized from your logs — not medical advice.</span>
+              <Link to="/app/practice" className="font-medium text-brand-teal hover:underline">
+                View History →
+              </Link>
+            </div>
+          </div>
+
         </div>
+
       </div>
-    </div>
+    </DashboardShell>
   );
 }

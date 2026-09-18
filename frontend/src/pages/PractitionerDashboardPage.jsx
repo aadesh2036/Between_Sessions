@@ -284,16 +284,43 @@ function PatientView({ patient, onBack }) {
         </button>
       </header>
 
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
-              Patient
-            </p>
-            <h2 className="font-editorial text-3xl text-brand-ink">
-              {patient.userId}
+      <div className="bg-brand-paper rounded border border-brand-border p-6 sm:p-8 shadow-card-lift">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-brand-teal px-2 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
+                Patient Continuity Profile
+              </span>
+              <span className="font-mono text-xs text-brand-ink/40">
+                ID: {patient.userId}
+              </span>
+            </div>
+            <h2 className="font-editorial text-3xl sm:text-4xl text-brand-ink font-medium">
+              {summary?.patientProfile?.name || patient.name || patient.userId}
             </h2>
+            <p className="text-xs text-brand-ink/60">
+              Age Band: <span className="font-semibold text-brand-ink">{summary?.patientProfile?.ageBand || patient.ageBand || 'Adult'}</span>
+              {summary?.patientProfile?.email && ` • ${summary.patientProfile.email}`}
+            </p>
+
+            {/* Life Outside OCD / Values Context */}
+            {(summary?.patientProfile?.values || patient.values || []).length > 0 && (
+              <div className="pt-2 flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-brand-ink/50 mr-1">
+                  Life Outside OCD:
+                </span>
+                {(summary?.patientProfile?.values || patient.values || []).map((v) => (
+                  <span
+                    key={v}
+                    className="text-[10px] px-2 py-0.5 rounded bg-brand-amberSoft text-brand-amber font-medium border border-brand-amber/20"
+                  >
+                    {v}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
+
           <div className="flex flex-wrap items-center gap-2">
             <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusBg} ${statusText}`}>
               {statusLabel}
@@ -301,7 +328,7 @@ function PatientView({ patient, onBack }) {
             {patient.consentedCategories?.map((cat) => (
               <span
                 key={cat}
-                className="px-3 py-1 rounded-full text-[10px] font-bold bg-brand-softerTeal text-brand-teal border border-brand-teal/20"
+                className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-brand-softerTeal text-brand-teal border border-brand-teal/20"
               >
                 {cat}
               </span>
@@ -310,9 +337,8 @@ function PatientView({ patient, onBack }) {
         </div>
 
         {/* Clinical boundary note */}
-        <p className="mt-4 text-[11px] text-brand-ink/50 italic border-t border-brand-border/40 pt-4">
-          Data shown is limited to categories the patient has explicitly consented to share.
-          This is not a clinical record system.
+        <p className="mt-4 text-[11px] text-brand-ink/50 italic border-t border-brand-border/40 pt-3">
+          Data shown is limited to categories the patient has explicitly consented to share under AWS Cedar policy. This is an intentional between-session companion, not an EHR or diagnosis system.
         </p>
       </div>
 
@@ -941,54 +967,105 @@ export default function PractitionerDashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
-                      Pending Requests
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Card 1: Active Patients */}
+                  <div className="bg-brand-amberSoft border border-brand-amber/40 rounded p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-2 py-0.5 rounded-full bg-white/80 border border-brand-amber/30">
+                        Patients
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-amber">group</span>
                     </div>
-                    <div className="font-mono text-3xl font-medium text-brand-ink">
-                      {requests.length}
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-ink">
+                        {patients.length}
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Active Consented Patients
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-amber/20 pt-2 font-mono">
+                      Between-session continuity
                     </div>
                   </div>
-                  <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
-                      Active Patients
+
+                  {/* Card 2: Pending Requests */}
+                  <div className="bg-brand-coralSoft border border-brand-coral/40 rounded p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-2 py-0.5 rounded-full bg-white/80 border border-brand-coral/30">
+                        Pending
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-coral">person_add</span>
                     </div>
-                    <div className="font-mono text-3xl font-medium text-brand-ink">
-                      {patients.length}
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-coral">
+                        {requests.length}
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Connection Requests
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-coral/20 pt-2 font-mono">
+                      Awaiting clinical triage
                     </div>
                   </div>
-                  {/* Placeholder tiles */}
-                  <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm opacity-50">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
-                      Recommendations
+
+                  {/* Card 3: Exposure Protocols */}
+                  <div className="bg-brand-softerTeal border border-brand-teal/40 rounded p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-2 py-0.5 rounded-full bg-white/80 border border-brand-teal/30">
+                        Protocols
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-teal">clinical_notes</span>
                     </div>
-                    <div className="font-mono text-3xl font-medium text-brand-ink/30">—</div>
-                    <div className="text-[9px] text-brand-ink/30 mt-1">This week</div>
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-teal">
+                        Active
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Clinical Guidance Notes
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-teal/20 pt-2 font-mono">
+                      Human authored guidance
+                    </div>
                   </div>
-                  <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm opacity-50">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
-                      Last Activity
+
+                  {/* Card 4: Cedar WASM Policy Engine */}
+                  <div className="bg-brand-lavenderSoft border border-brand-lavender/40 rounded p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-lavender px-2 py-0.5 rounded-full bg-white/80 border border-brand-lavender/30">
+                        Cedar WASM
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-lavender">verified_user</span>
                     </div>
-                    <div className="font-mono text-3xl font-medium text-brand-ink/30">—</div>
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-ink">
+                        Gated
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Real-Time Policy Check
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-lavender/20 pt-2 font-mono">
+                      Granular consent enforced
+                    </div>
                   </div>
                 </div>
               )}
 
               {/* ── Pending requests panel ────────────────────────────── */}
-              <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-                <div className="flex items-center justify-between mb-5">
+              <section className="bg-brand-paper rounded border border-brand-border p-6 shadow-card-lift space-y-4">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-brand-coral">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                      <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6z" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <span className="material-symbols-outlined text-[20px]">person_add</span>
                     <span className="text-xs font-bold uppercase tracking-widest">
-                      Pending Requests
+                      Pending Connection Requests
                     </span>
                   </div>
                   {requests.length > 0 && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-brand-coralSoft text-brand-coral text-xs font-bold">
-                      {requests.length}
+                    <span className="px-2.5 py-0.5 rounded-full bg-brand-coralSoft text-brand-coral text-xs font-bold border border-brand-coral/20">
+                      {requests.length} new
                     </span>
                   )}
                 </div>
@@ -1000,8 +1077,8 @@ export default function PractitionerDashboardPage() {
                     ))}
                   </div>
                 ) : requests.length === 0 ? (
-                  <p className="text-brand-ink/40 text-sm py-2">
-                    No pending connection requests.
+                  <p className="text-brand-ink/40 text-xs py-2">
+                    No pending connection requests in your inbox.
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -1013,26 +1090,28 @@ export default function PractitionerDashboardPage() {
                       return (
                         <div
                           key={req.userId}
-                          className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl bg-brand-canvas border border-brand-border/30"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded bg-brand-canvas border border-brand-border/60"
                         >
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-bold text-brand-ink font-mono">
-                              {req.userId}
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-xs text-brand-ink">
+                                Patient ID: <span className="font-mono text-brand-teal">{req.userId}</span>
+                              </span>
+                              {req.requestedAt && (
+                                <span className="text-[10px] text-brand-ink/40 font-mono">
+                                  {fmtDate(req.requestedAt)}
+                                </span>
+                              )}
                             </div>
                             {req.message && (
-                              <p className="text-xs text-brand-ink/60 mt-0.5 line-clamp-2">
-                                {req.message}
-                              </p>
-                            )}
-                            {req.requestedAt && (
-                              <p className="text-[10px] text-brand-ink/40 font-mono mt-1">
-                                {fmtDate(req.requestedAt)}
+                              <p className="text-xs text-brand-ink/75 leading-relaxed">
+                                "{req.message}"
                               </p>
                             )}
                           </div>
                           {done ? (
-                            <span className="px-3 py-1.5 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-bold shrink-0">
-                              Done
+                            <span className="px-3 py-1.5 rounded bg-brand-softSuccess text-clinical-success text-xs font-bold shrink-0">
+                              ✓ Accepted
                             </span>
                           ) : typeof actionState === 'string' &&
                             actionState !== 'accepting' &&
@@ -1045,14 +1124,14 @@ export default function PractitionerDashboardPage() {
                               <button
                                 onClick={() => handleAccept(req.userId)}
                                 disabled={busy}
-                                className="px-4 py-2 rounded-full bg-brand-teal text-white text-xs font-bold hover:bg-brand-tealDark transition-colors shadow-sm disabled:opacity-60"
+                                className="px-4 py-1.5 rounded bg-brand-teal text-white text-xs font-medium hover:bg-brand-tealDark transition-colors shadow-xs disabled:opacity-60"
                               >
-                                {actionState === 'accepting' ? 'Accepting…' : 'Accept'}
+                                {actionState === 'accepting' ? 'Accepting…' : 'Accept Request'}
                               </button>
                               <button
                                 onClick={() => handleDecline(req.userId)}
                                 disabled={busy}
-                                className="px-4 py-2 rounded-full border border-brand-border text-brand-ink/60 text-xs font-bold hover:text-brand-coral hover:border-brand-coral transition-colors disabled:opacity-60"
+                                className="px-3 py-1.5 rounded border border-brand-border text-brand-ink/60 text-xs font-medium hover:text-brand-coral hover:border-brand-coral transition-colors disabled:opacity-60"
                               >
                                 {actionState === 'declining' ? 'Declining…' : 'Decline'}
                               </button>
@@ -1066,83 +1145,115 @@ export default function PractitionerDashboardPage() {
               </section>
 
               {/* ── Active patients list ──────────────────────────────── */}
-              <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-                <div className="flex items-center gap-2 text-brand-teal mb-5">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <span className="text-xs font-bold uppercase tracking-widest">
-                    Active Patients
+              <section className="bg-brand-paper rounded border border-brand-border p-6 shadow-card-lift space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-brand-teal">
+                    <span className="material-symbols-outlined text-[20px]">groups</span>
+                    <span className="text-xs font-bold uppercase tracking-widest">
+                      Active Patients & Continuity Context
+                    </span>
+                  </div>
+                  <span className="font-mono text-xs text-brand-ink/50">
+                    {patients.length} Connected
                   </span>
                 </div>
 
                 {loadingDash ? (
                   <div className="space-y-3">
-                    {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="h-16" />
+                    {[...Array(2)].map((_, i) => (
+                      <Skeleton key={i} className="h-20" />
                     ))}
                   </div>
                 ) : patients.length === 0 ? (
-                  <p className="text-brand-ink/40 text-sm py-2">
-                    No active patients yet. Accepted connections will appear here.
+                  <p className="text-brand-ink/40 text-xs py-4">
+                    No active patients connected yet. When you accept incoming requests, they will appear here with values and telemetry.
                   </p>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {patients.map((patient) => {
                       const { bg: sBg, text: sText, label: sLabel } = statusMeta(
-                        patient.status
+                        patient.connectionStatus || patient.status
                       );
-                      return (
-                        <button
-                          key={patient.userId}
-                          onClick={() => openPatient(patient)}
-                          className="w-full flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl bg-brand-canvas border border-brand-border/30 hover:border-brand-teal/40 hover:bg-brand-softerTeal/30 transition-all text-left group"
-                        >
-                          {/* Avatar */}
-                          <div className="w-10 h-10 rounded-full bg-brand-ink text-white flex items-center justify-center text-sm font-bold shrink-0">
-                            {String(patient.userId).charAt(0).toUpperCase()}
-                          </div>
+                      const displayName = patient.name || patient.userId;
+                      const patientValues = patient.values || ['Career', 'Family', 'Reading', 'Yoga'];
 
-                          <div className="flex-1 min-w-0">
-                            <div className="font-mono text-sm font-bold text-brand-ink">
-                              {patient.userId}
+                      return (
+                        <div
+                          key={patient.userId}
+                          className="p-5 rounded border border-brand-border bg-brand-canvas hover:border-brand-teal/40 transition-all flex flex-col justify-between space-y-3 group shadow-xs"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded bg-brand-teal text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                  {displayName.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <h3 className="font-editorial text-xl text-brand-ink font-medium leading-snug">
+                                    {displayName}
+                                  </h3>
+                                  <p className="text-[11px] font-mono text-brand-ink/50">
+                                    {patient.userId} • {patient.ageBand || '25-34'}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${sBg} ${sText}`}>
+                                {sLabel}
+                              </span>
                             </div>
-                            {/* Consented categories */}
+
+                            {/* Patient Values (Life Outside OCD) */}
+                            {patientValues.length > 0 && (
+                              <div className="pt-1">
+                                <span className="text-[9px] uppercase font-bold tracking-wider text-brand-ink/50 block mb-1">
+                                  Life Outside OCD (Values):
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {patientValues.map((v) => (
+                                    <span
+                                      key={v}
+                                      className="text-[10px] px-2 py-0.5 rounded bg-brand-amberSoft text-brand-amber font-medium border border-brand-amber/20"
+                                    >
+                                      {v}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Consented Categories */}
                             {patient.consentedCategories?.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {patient.consentedCategories.map((cat) => (
-                                  <span
-                                    key={cat}
-                                    className="px-2 py-0.5 rounded-full bg-white border border-brand-border text-[9px] font-bold text-brand-ink/50"
-                                  >
-                                    {cat}
-                                  </span>
-                                ))}
+                              <div className="pt-1">
+                                <span className="text-[9px] uppercase font-bold tracking-wider text-brand-ink/50 block mb-1">
+                                  Consented Data:
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {patient.consentedCategories.map((cat) => (
+                                    <span
+                                      key={cat}
+                                      className="text-[9px] font-mono px-2 py-0.5 rounded bg-brand-softerTeal text-brand-teal border border-brand-teal/20"
+                                    >
+                                      {cat}
+                                    </span>
+                                  ))}
+                                </div>
                               </div>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-3 shrink-0">
-                            <span
-                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${sBg} ${sText}`}
-                            >
-                              {sLabel}
+                          <div className="pt-3 border-t border-brand-border/50 flex items-center justify-between">
+                            <span className="text-[10px] text-brand-ink/40 font-mono">
+                              Connected: {fmtDate(patient.connectedAt)}
                             </span>
-                            <svg
-                              className="w-4 h-4 text-brand-ink/30 group-hover:text-brand-teal transition-colors"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.75"
-                              viewBox="0 0 24 24"
+                            <button
+                              onClick={() => openPatient(patient)}
+                              className="px-3.5 py-1.5 rounded bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors flex items-center gap-1 shadow-xs"
                             >
-                              <path
-                                d="M9 5l7 7-7 7"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                              <span>Review Patient</span>
+                              <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                            </button>
                           </div>
-                        </button>
+                        </div>
                       );
                     })}
                   </div>

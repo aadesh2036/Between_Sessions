@@ -113,12 +113,53 @@ export const journalApi = {
   },
 };
 
-// ── Practice ─────────────────────────────────────────────────────────────────
+// ── Practice & Exposure ───────────────────────────────────────────────────────
 
 export const practiceApi = {
   /** Legacy behavioral event log (Pause & Choose) */
   logEvent: (userId, responseType) =>
     apiFetch('/practice', { method: 'POST', body: JSON.stringify({ userId, responseType }) }),
+
+  /** Create practice / exposure log */
+  create: (payload) =>
+    apiFetch('/practice', { method: 'POST', body: JSON.stringify(payload) }),
+
+  /** Retrieve practice logs */
+  list: () => apiFetch('/practice'),
+
+  /** Retrieve active clinician-assigned & self-guided practice plans */
+  getPlans: () => apiFetch('/practice/plans'),
+};
+
+// ── Toolkit (Grounding, Breathing, Pause & Choose, Reassurance, Focus) ─────────
+
+export const toolkitApi = {
+  logInteraction: (payload) =>
+    apiFetch('/toolkit/interactions', { method: 'POST', body: JSON.stringify(payload) }),
+
+  listInteractions: () => apiFetch('/toolkit/interactions'),
+};
+
+// ── Values (Life Outside OCD) ────────────────────────────────────────────────
+
+export const valuesApi = {
+  get: () => apiFetch('/values'),
+
+  logAction: (payload) =>
+    apiFetch('/values/actions', { method: 'POST', body: JSON.stringify(payload) }),
+
+  listActions: () => apiFetch('/values/actions'),
+};
+
+// ── Learn (Curated Library & Progress) ───────────────────────────────────────
+
+export const learnApi = {
+  getModules: () => apiFetch('/learn/modules'),
+
+  getProgress: () => apiFetch('/learn/progress'),
+
+  saveProgress: (chapterId, bookId, completed = true) =>
+    apiFetch('/learn/progress', { method: 'POST', body: JSON.stringify({ chapterId, bookId, completed }) }),
 };
 
 // ── Progress ─────────────────────────────────────────────────────────────────

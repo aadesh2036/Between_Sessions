@@ -366,6 +366,54 @@ async function seed() {
   });
   console.log('  ✓  Dr. Mehra recommendation for Priya');
 
+  // Priya — Toolkit Interactions
+  await put({
+    PK: `USER#${PRIYA_ID}`, SK: `TOOLKIT#${ago(2, 16)}#TK_PRIYA_1`,
+    entityType: 'ToolkitInteraction', interactionId: 'TK_PRIYA_1', userId: PRIYA_ID,
+    toolId: 'grounding', durationSeconds: 120, actionChosen: '5-4-3-2-1 completed',
+    notes: 'Completed full sensory grounding sequence', createdAt: ago(2, 16),
+  });
+  await put({
+    PK: `USER#${PRIYA_ID}`, SK: `TOOLKIT#${ago(1, 10)}#TK_PRIYA_2`,
+    entityType: 'ToolkitInteraction', interactionId: 'TK_PRIYA_2', userId: PRIYA_ID,
+    toolId: 'breathing', durationSeconds: 120, actionChosen: '2-min paced breathing',
+    notes: 'Steadied body cadence during stove urge', createdAt: ago(1, 10),
+  });
+
+  // Priya — Values Actions (Life Outside OCD)
+  await put({
+    PK: `USER#${PRIYA_ID}`, SK: `VALUE_ACTION#${ago(2, 17)}#VA_PRIYA_1`,
+    entityType: 'ValueAction', actionId: 'VA_PRIYA_1', userId: PRIYA_ID,
+    value: 'Yoga', actionTitle: '15-minute gentle restorative movement',
+    durationMinutes: 15, reflection: 'Present in body without checking thoughts',
+    completedAt: ago(2, 17), createdAt: ago(2, 17),
+  });
+  await put({
+    PK: `USER#${PRIYA_ID}`, SK: `VALUE_ACTION#${ago(1, 14)}#VA_PRIYA_2`,
+    entityType: 'ValueAction', actionId: 'VA_PRIYA_2', userId: PRIYA_ID,
+    value: 'Reading', actionTitle: 'Read 1 full chapter for enjoyment without re-reading sentences',
+    durationMinutes: 20, reflection: 'Tolerated uncertainty of missing small details',
+    completedAt: ago(1, 14), createdAt: ago(1, 14),
+  });
+
+  // Priya — Learning Progress
+  await put({
+    PK: `USER#${PRIYA_ID}`, SK: 'LEARN#b1-c1',
+    entityType: 'LearningProgress', userId: PRIYA_ID, chapterId: 'b1-c1',
+    bookId: 'book-1', completed: true, completedAt: ago(18),
+  });
+  await put({
+    PK: `USER#${PRIYA_ID}`, SK: 'LEARN#b1-c2',
+    entityType: 'LearningProgress', userId: PRIYA_ID, chapterId: 'b1-c2',
+    bookId: 'book-1', completed: true, completedAt: ago(15),
+  });
+  await put({
+    PK: `USER#${PRIYA_ID}`, SK: 'LEARN#b2-c1',
+    entityType: 'LearningProgress', userId: PRIYA_ID, chapterId: 'b2-c1',
+    bookId: 'book-2', completed: true, completedAt: ago(10),
+  });
+  console.log('    ✓  Priya toolkit, values actions, and learning progress seeded');
+
   // ══════════════════════════════════════════════════════════════════════════
   // USER 2 — Alex Chen (new user, 3 days, no connection)
   // ══════════════════════════════════════════════════════════════════════════
@@ -436,6 +484,31 @@ async function seed() {
     createdAt: ago(0, 11),
   });
   console.log('    ✓  2 journal entries');
+
+  // Alex — Toolkit Interactions
+  await put({
+    PK: `USER#${ALEX_ID}`, SK: `TOOLKIT#${ago(1, 19)}#TK_ALEX_1`,
+    entityType: 'ToolkitInteraction', interactionId: 'TK_ALEX_1', userId: ALEX_ID,
+    toolId: 'pause-choose', durationSeconds: 60, actionChosen: 'delay',
+    notes: 'Paused when wanting to re-read assignment email', createdAt: ago(1, 19),
+  });
+
+  // Alex — Values Actions (Life Outside OCD)
+  await put({
+    PK: `USER#${ALEX_ID}`, SK: `VALUE_ACTION#${ago(1, 20)}#VA_ALEX_1`,
+    entityType: 'ValueAction', actionId: 'VA_ALEX_1', userId: ALEX_ID,
+    value: 'Gaming', actionTitle: 'Play 30 minutes of a game purely for leisure with friends',
+    durationMinutes: 30, reflection: 'Had fun without worrying about homework precision',
+    completedAt: ago(1, 20), createdAt: ago(1, 20),
+  });
+
+  // Alex — Learning Progress
+  await put({
+    PK: `USER#${ALEX_ID}`, SK: 'LEARN#b1-c1',
+    entityType: 'LearningProgress', userId: ALEX_ID, chapterId: 'b1-c1',
+    bookId: 'book-1', completed: true, completedAt: ago(2),
+  });
+  console.log('    ✓  Alex toolkit, values actions, and learning progress seeded');
   console.log('  ✓  Alex has NO practitioner connection — will see discovery banner');
 
   // ══════════════════════════════════════════════════════════════════════════

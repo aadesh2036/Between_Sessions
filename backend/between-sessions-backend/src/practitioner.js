@@ -254,8 +254,21 @@ exports.handler = async (event) => {
         }));
         if (connRes.Item) {
           const s = connRes.Item.status;
+          let uProfile = {};
+          try {
+            const uRes = await docClient.send(new GetCommand({
+              TableName: TABLE_NAME,
+              Key: { PK: `USER#${uid}`, SK: 'PROFILE' },
+            }));
+            if (uRes.Item) uProfile = uRes.Item;
+          } catch { /* proceed */ }
+
           patients.push({
             userId: uid,
+            name: uProfile.name || uid,
+            email: uProfile.email || '',
+            values: uProfile.values || [],
+            ageBand: uProfile.ageBand || 'Adult',
             connectionStatus: s,
             consentedCategories: connRes.Item.consentedCategories || [],
             connectedAt: connRes.Item.createdAt,
@@ -372,6 +385,22 @@ exports.handler = async (event) => {
         trigger: j.trigger,
       }));
 
+      let patientProfile = {};
+      try {
+        const uRes = await docClient.send(new GetCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: pk, SK: 'PROFILE' },
+        }));
+        if (uRes.Item) {
+          patientProfile = {
+            name: uRes.Item.name,
+            email: uRes.Item.email,
+            values: uRes.Item.values || [],
+            ageBand: uRes.Item.ageBand || 'Adult',
+          };
+        }
+      } catch { /* proceed */ }
+
       const sudsValues = checkins.map(c => c.sudsScore).filter(n => typeof n === 'number');
       const avgSuds = sudsValues.length
         ? (sudsValues.reduce((a, b) => a + b, 0) / sudsValues.length).toFixed(1)
@@ -383,6 +412,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           data: {
             userId,
+            patientProfile,
             practitionerId: decoded.practitionerId,
             consentedCategories: [...consentedCategories],
             period: { from: fromISO, to: now },

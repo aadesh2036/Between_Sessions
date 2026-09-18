@@ -27,6 +27,9 @@ const progressHandler = require('./progress').handler;
 const aiSummaryHandler = require('./aiSummary').handler;
 const consentsHandler = require('./consents').handler;
 const connectionsHandler = require('./connections').handler;
+const toolkitHandler = require('./toolkit').handler;
+const valuesHandler = require('./values').handler;
+const learningHandler = require('./learning').handler;
 
 const app = express();
 app.use(cors());
@@ -83,8 +86,24 @@ app.put('/api/v1/user/update', bridge(authHandler));
 // Also support POST for backward compat with existing AuthContext call
 app.post('/api/v1/user/update', bridge(authHandler));
 
-// ── Practice (legacy behavioral events) ─────────────────────────────────────
+// ── Practice & Exposure Plans ───────────────────────────────────────────────
 app.post('/api/v1/practice', bridge(practiceHandler));
+app.get('/api/v1/practice', bridge(practiceHandler));
+app.get('/api/v1/practice/plans', bridge(practiceHandler));
+
+// ── Toolkit (Grounding, Breathing, Pause&Choose, Reassurance, Focus) ─────────
+app.post('/api/v1/toolkit/interactions', bridge(toolkitHandler));
+app.get('/api/v1/toolkit/interactions', bridge(toolkitHandler));
+
+// ── Values & Life Outside OCD ────────────────────────────────────────────────
+app.get('/api/v1/values', bridge(valuesHandler));
+app.get('/api/v1/values/actions', bridge(valuesHandler));
+app.post('/api/v1/values/actions', bridge(valuesHandler));
+
+// ── Learn (Books, Chapters, Masterclasses, Resources) ─────────────────────────
+app.get('/api/v1/learn/modules', bridge(learningHandler));
+app.get('/api/v1/learn/progress', bridge(learningHandler));
+app.post('/api/v1/learn/progress', bridge(learningHandler));
 
 // ── Checkins ─────────────────────────────────────────────────────────────────
 app.post('/api/v1/checkins', bridge(checkinsHandler));

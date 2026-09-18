@@ -11,6 +11,7 @@ async function req(path, options = {}) {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
       ...(options.headers || {}),
     },
   });
@@ -290,6 +291,88 @@ async function run() {
   assert(
     badIdReg.status === 400 && badIdReg.data?.error?.code === 'INVALID_PRACTITIONER_ID',
     'Invalid practitioner ID is rejected with 400 INVALID_PRACTITIONER_ID'
+  );
+
+  // ── TEST 11: Practice Plans & Exposure Retrieval ──
+  const plansRes = await req('/practice/plans', { token: priyaToken });
+  assert(
+    plansRes.ok && plansRes.data?.data?.selfGuidedPlans?.length >= 3,
+    'Practice plans endpoint returns curated self-guided ERP exposure plans'
+  );
+  assert(
+    plansRes.ok && Array.isArray(plansRes.data?.data?.clinicianPlans),
+    'Practice plans endpoint returns clinician-assigned guidelines'
+  );
+
+  // ── TEST 12: Toolkit Interactions Logging (Grounding / Reassurance / Pacing) ──
+  const tkPost = await req('/toolkit/interactions', {
+    method: 'POST',
+    token: priyaToken,
+    body: JSON.stringify({
+      toolId: 'grounding',
+      durationSeconds: 120,
+      actionChosen: '5-4-3-2-1 completed',
+      notes: 'Grounded back into physical room without ritualizing',
+    }),
+  });
+  assert(
+    tkPost.status === 201 && tkPost.data?.data?.toolId === 'grounding',
+    'Priya logs grounding session in Toolkit'
+  );
+
+  const tkGet = await req('/toolkit/interactions', { token: priyaToken });
+  assert(
+    tkGet.ok && tkGet.data?.data?.length > 0 && tkGet.data?.data[0].toolId === 'grounding',
+    'Priya retrieves toolkit interaction history'
+  );
+
+  // ── TEST 13: Life Outside OCD (Values Actions) ──
+  const valGet = await req('/values', { token: priyaToken });
+  assert(
+    valGet.ok && valGet.data?.data?.values?.includes('Yoga') && valGet.data?.data?.suggestedActions?.length > 0,
+    'Priya receives values and curated Life Outside OCD actions'
+  );
+
+  const valPost = await req('/values/actions', {
+    method: 'POST',
+    token: priyaToken,
+    body: JSON.stringify({
+      value: 'Yoga',
+      actionTitle: '15-minute gentle restorative movement',
+      durationMinutes: 15,
+      reflection: 'Enjoyed movement with full bodily presence',
+    }),
+  });
+  assert(
+    valPost.status === 201 && valPost.data?.data?.actionTitle === '15-minute gentle restorative movement',
+    'Priya logs completed Life Outside OCD values action'
+  );
+
+  // ── TEST 14: Learning Curriculum & Progress ──
+  const learnMods = await req('/learn/modules');
+  assert(
+    learnMods.ok && learnMods.data?.data?.books?.length === 3 && learnMods.data?.data?.masterclasses?.length === 3,
+    'Curated educational library returns 3 Books and 3 Clinical Masterclasses'
+  );
+
+  const learnPost = await req('/learn/progress', {
+    method: 'POST',
+    token: priyaToken,
+    body: JSON.stringify({
+      chapterId: 'b1-c1',
+      bookId: 'book-1',
+      completed: true,
+    }),
+  });
+  assert(
+    learnPost.ok && learnPost.data?.data?.chapterId === 'b1-c1',
+    'Priya records completion of Book 1, Chapter 1'
+  );
+
+  const learnProg = await req('/learn/progress', { token: priyaToken });
+  assert(
+    learnProg.ok && learnProg.data?.data?.completedChapters?.includes('b1-c1'),
+    'Priya retrieves updated reading progress'
   );
 
   console.log('\n====================================================');
