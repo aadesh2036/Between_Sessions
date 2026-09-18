@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import DashboardShell from '../components/DashboardShell';
 import CheckinModal from '../components/CheckinModal';
 import LogPracticeModal from '../components/LogPracticeModal';
+import DoubtGroundingAnimation from '../components/DoubtGroundingAnimation';
 import {
   dashboardApi,
   practiceApi,
@@ -224,26 +225,34 @@ export default function DashboardPage() {
 
           {/* ── Bento Card 1: Today's Gentle Focus (Cols 1-8, Rows 1-2) ─────── */}
           <div className="lg:col-span-8 lg:row-span-2 bg-brand-amberSoft border border-brand-amber/30 rounded-3xl p-6 sm:p-8 shadow-card-lift relative overflow-hidden flex flex-col justify-between">
-            <div className="relative z-10 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-3 py-1 rounded-full bg-white/80 border border-brand-amber/20 shadow-2xs">
-                  Daily Grounding Focus
-                </span>
-                <span className="text-xs font-mono text-brand-ink/50">
-                  {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </span>
-              </div>
+            {/* Top Bar */}
+            <div className="relative z-10 flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-3 py-1 rounded-full bg-white/80 border border-brand-amber/20 shadow-2xs">
+                Daily Grounding Focus
+              </span>
+              <span className="text-xs font-mono text-brand-ink/50">
+                {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              </span>
+            </div>
 
+            {/* Middle Section: Grounding Quote on Left, Ambient Doubt SVG Animation on Desktop Right */}
+            <div className="relative z-10 my-auto py-3 max-w-full md:max-w-[60%] lg:max-w-[62%] space-y-3.5">
               <h2 className="font-editorial text-2xl sm:text-3xl text-brand-ink leading-snug font-medium">
                 “You do not need to solve the doubt to continue living your life.”
               </h2>
 
-              <p className="text-xs sm:text-sm text-brand-ink/75 leading-relaxed max-w-xl">
+              <p className="text-xs sm:text-sm text-brand-ink/75 leading-relaxed">
                 In OCD, the brain treats uncertainty as an urgent life-or-death puzzle. Today’s gentle practice is allowing the question to remain unanswered while you direct your attention to what genuinely matters.
               </p>
             </div>
 
-            <div className="pt-4 mt-6 border-t border-brand-amber/20 flex flex-wrap items-center gap-3 text-xs">
+            {/* Desktop-only Ambient Doubt & Soft Shapes Animation */}
+            <div className="hidden md:flex absolute -right-2 lg:right-2 top-1/2 -translate-y-1/2 pointer-events-none select-none z-0">
+              <DoubtGroundingAnimation />
+            </div>
+
+            {/* Footer Bar */}
+            <div className="pt-4 mt-6 border-t border-brand-amber/20 flex flex-wrap items-center gap-3 text-xs relative z-10">
               <Link
                 to="/app/learn"
                 className="font-medium text-brand-ink hover:text-brand-teal flex items-center gap-1.5 transition-colors"

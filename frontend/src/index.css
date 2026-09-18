@@ -356,3 +356,111 @@ body {
   background: rgba(23, 50, 58, 0.15);
   border-radius: 4px;
 }
+
+/* ================= DOUBT & GROUNDING SOFT SHAPE ANIMATIONS ================= */
+@keyframes doubt-blob-drift {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translate(-3px, -5px) rotate(3deg) scale(1.025);
+  }
+  66% {
+    transform: translate(3px, -2px) rotate(-2deg) scale(0.985);
+  }
+}
+
+@keyframes doubt-pebble-drift {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1);
+  }
+  40% {
+    transform: translate(3px, 4px) rotate(-4deg) scale(1.02);
+  }
+  75% {
+    transform: translate(-2px, 2px) rotate(2deg) scale(0.99);
+  }
+}
+
+@keyframes doubt-arc-breathe {
+  0%, 100% {
+    transform: scale(1) translate(0px, 0px);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.03) translate(2px, -2px);
+    opacity: 0.6;
+  }
+}
+
+@keyframes doubt-mark-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(-1.5deg);
+  }
+}
+
+@keyframes doubt-pulse-soft {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.75;
+  }
+}
+
+@keyframes doubt-drift-dots {
+  0%, 100% {
+    transform: translateX(0px);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(4px);
+    opacity: 0.85;
+  }
+}
+
+.anim-doubt-blob {
+  animation: doubt-blob-drift 11s ease-in-out infinite;
+  transform-origin: 105px 120px;
+}
+
+.anim-doubt-pebble {
+  animation: doubt-pebble-drift 13s ease-in-out infinite;
+  transform-origin: 220px 120px;
+}
+
+.anim-doubt-arc {
+  animation: doubt-arc-breathe 15s ease-in-out infinite;
+  transform-origin: 295px 120px;
+}
+
+.anim-doubt-mark {
+  animation: doubt-mark-float 6.5s ease-in-out infinite;
+  transform-origin: 105px 120px;
+}
+
+.anim-doubt-pulse {
+  animation: doubt-pulse-soft 8.5s ease-in-out infinite;
+  transform-origin: 165px 120px;
+}
+
+.anim-doubt-drift {
+  animation: doubt-drift-dots 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-doubt-blob,
+  .anim-doubt-pebble,
+  .anim-doubt-arc,
+  .anim-doubt-mark,
+  .anim-doubt-pulse,
+  .anim-doubt-drift {
+    animation: none !important;
+  }
+}
+
