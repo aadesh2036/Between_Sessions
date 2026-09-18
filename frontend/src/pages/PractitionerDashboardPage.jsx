@@ -13,6 +13,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import MobileBottomNav from '../components/MobileBottomNav';
 import { practitionerApi } from '../services/api';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -1106,27 +1107,62 @@ export default function PractitionerDashboardPage() {
     navigate('/practitioner/login', { replace: true });
   };
 
-  /* ── Sidebar nav helper ─────────────────────────────────────────────── */
+  /* ── Patient search state ───────────────────────────────────────────── */
+  const [patientSearch, setPatientSearch] = useState('');
+
+  /* ── Sidebar & mobile nav helper ─────────────────────────────────────── */
   const navClick = (item) => {
     setNavItem(item);
-    if (item === 'dashboard') {
-      setView('dashboard');
-      setSelectedPatient(null);
-    } else if (item === 'patients') {
-      setView('dashboard'); // patients list is inside dashboard view
-      setSelectedPatient(null);
-    }
-    // settings / requests are sections within the dashboard view
+    setView('dashboard');
+    setSelectedPatient(null);
   };
 
   const pendingCount = requests.length;
+
+  const filteredPatients = patients.filter((p) => {
+    if (!patientSearch.trim()) return true;
+    const q = patientSearch.toLowerCase();
+    const name = (p.name || '').toLowerCase();
+    const id = (p.userId || '').toLowerCase();
+    return name.includes(q) || id.includes(q);
+  });
 
   /* ─────────────────────────────────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-brand-canvas text-brand-ink font-sans flex flex-col md:flex-row overflow-x-hidden selection:bg-brand-teal/20">
 
-      {/* ── SIDEBAR ───────────────────────────────────────────────────── */}
-      <aside className="w-full md:w-[260px] bg-white border-r border-brand-border/40 shrink-0 flex flex-col md:sticky md:top-0 md:h-screen z-20">
+      {/* ── Mobile Top Bar (Clinician) ─────────────────────────────────── */}
+      <div className="md:hidden flex items-center justify-between px-4 py-2.5 bg-white/95 backdrop-blur-md border-b border-brand-border/60 sticky top-0 z-30 shadow-xs">
+        <div className="flex items-center gap-2">
+          <Logo />
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20">
+            Clinician
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Shortened Tele-MANAS crisis button on mobile */}
+          <a
+            href="tel:14416"
+            className="px-2.5 py-1 rounded-full bg-brand-coralSoft text-brand-coral border border-brand-coral/30 hover:bg-brand-coral hover:text-white text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-xs"
+            title="Tele-MANAS 24/7 Free Crisis Telephony"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-coral animate-pulse" />
+            <span>14416</span>
+          </a>
+          <button
+            onClick={() => navClick('settings')}
+            className={`w-7 h-7 rounded-full bg-brand-canvas border border-brand-border flex items-center justify-center transition-all ${
+              navItem === 'settings' ? 'text-brand-teal border-brand-teal bg-brand-softerTeal' : 'text-brand-ink/70 hover:text-brand-teal'
+            }`}
+            title="Settings"
+          >
+            <span className="material-symbols-outlined text-[16px]">tune</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── SIDEBAR (Desktop) ──────────────────────────────────────────── */}
+      <aside className="hidden md:flex w-[260px] bg-white border-r border-brand-border/40 shrink-0 flex-col md:sticky md:top-0 md:h-screen z-20">
         {/* Logo */}
         <div className="p-6 md:p-8 shrink-0">
           <Logo />
@@ -1286,7 +1322,7 @@ export default function PractitionerDashboardPage() {
         <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-brand-softerTeal blur-[120px] opacity-60 pointer-events-none z-0" />
         <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full bg-brand-coralSoft blur-[140px] opacity-50 pointer-events-none z-0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 pb-28 md:pb-12 space-y-8">
 
           {/* ═══════════════════════════════════════════════════════════ */}
           {/* VIEW: patient detail                                        */}
@@ -1310,151 +1346,62 @@ export default function PractitionerDashboardPage() {
           )}
 
           {/* ═══════════════════════════════════════════════════════════ */}
-          {/* VIEW: dashboard                                             */}
+          {/* VIEW: requests (Inbound Triage)                             */}
           {/* ═══════════════════════════════════════════════════════════ */}
-          {view === 'dashboard' && navItem !== 'settings' && (
-            <>
-              {/* ── Welcome header ────────────────────────────────────── */}
+          {view === 'dashboard' && navItem === 'requests' && (
+            <div className="space-y-6 animate-fade-in">
               <header>
-                <p className="text-brand-teal font-bold text-xs uppercase tracking-widest mb-2">
-                  Clinician Dashboard
-                </p>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-coralSoft text-brand-coral text-xs font-semibold mb-2">
+                  <span className="material-symbols-outlined text-sm">person_add</span>
+                  Inbound Clinical Intake
+                </div>
                 <h1 className="font-editorial text-4xl sm:text-5xl text-brand-ink font-normal leading-tight">
-                  {prac?.name ? `Dr. ${prac.name.split(' ').slice(-1)[0]}` : 'Welcome'}
+                  Connection Requests
                 </h1>
-                <p className="text-brand-ink/50 text-sm mt-1">
-                  {prac?.name ?? 'Clinician'} — Between Sessions Clinician Portal
+                <p className="text-brand-ink/60 text-sm mt-1 max-w-2xl">
+                  Review patients requesting clinical connection and consent-governed longitudinal oversight between sessions.
                 </p>
               </header>
 
-              {/* ── Error banner ──────────────────────────────────────── */}
+              {/* Error banner */}
               {dashError && (
                 <div className="p-4 bg-brand-coralSoft border border-brand-coral/20 rounded-2xl text-brand-coral text-sm">
                   {dashError}
                 </div>
               )}
 
-              {/* ── Stats row ─────────────────────────────────────────── */}
-              {loadingDash ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-24" />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Card 1: Active Patients */}
-                  <div className="bg-brand-amberSoft border border-brand-amber/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-amber/30">
-                        Patients
-                      </span>
-                      <span className="material-symbols-outlined text-[18px] text-brand-amber">group</span>
-                    </div>
-                    <div>
-                      <div className="font-mono text-3xl font-bold text-brand-ink">
-                        {patients.length}
-                      </div>
-                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
-                        Active Consented Patients
-                      </div>
-                    </div>
-                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-amber/20 pt-2 font-mono">
-                      Between-session continuity
-                    </div>
-                  </div>
-
-                  {/* Card 2: Pending Requests */}
-                  <div className="bg-brand-coralSoft border border-brand-coral/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-coral/30">
-                        Pending
-                      </span>
-                      <span className="material-symbols-outlined text-[18px] text-brand-coral">person_add</span>
-                    </div>
-                    <div>
-                      <div className="font-mono text-3xl font-bold text-brand-coral">
-                        {requests.length}
-                      </div>
-                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
-                        Connection Requests
-                      </div>
-                    </div>
-                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-coral/20 pt-2 font-mono">
-                      Awaiting clinical triage
-                    </div>
-                  </div>
-
-                  {/* Card 3: Exposure Protocols */}
-                  <div className="bg-brand-softerTeal border border-brand-teal/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-teal/30">
-                        Protocols
-                      </span>
-                      <span className="material-symbols-outlined text-[18px] text-brand-teal">clinical_notes</span>
-                    </div>
-                    <div>
-                      <div className="font-mono text-3xl font-bold text-brand-teal">
-                        Active
-                      </div>
-                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
-                        Clinical Guidance Notes
-                      </div>
-                    </div>
-                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-teal/20 pt-2 font-mono">
-                      Human authored guidance
-                    </div>
-                  </div>
-
-                  {/* Card 4: Cedar WASM Policy Engine */}
-                  <div className="bg-brand-lavenderSoft border border-brand-lavender/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-lavender px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-lavender/30">
-                        Cedar WASM
-                      </span>
-                      <span className="material-symbols-outlined text-[18px] text-brand-lavender">verified_user</span>
-                    </div>
-                    <div>
-                      <div className="font-mono text-3xl font-bold text-brand-ink">
-                        Gated
-                      </div>
-                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
-                        Real-Time Policy Check
-                      </div>
-                    </div>
-                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-lavender/20 pt-2 font-mono">
-                      Granular consent enforced
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* ── Pending requests panel ────────────────────────────── */}
+              {/* Pending requests panel */}
               <section className="bg-brand-paper rounded-3xl border border-brand-border/60 p-6 sm:p-8 shadow-card-lift space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between border-b border-brand-border/40 pb-4">
                   <div className="flex items-center gap-2 text-brand-coral">
-                    <span className="material-symbols-outlined text-[20px]">person_add</span>
+                    <span className="material-symbols-outlined text-[20px]">mark_email_unread</span>
                     <span className="text-xs font-bold uppercase tracking-widest">
-                      Pending Connection Requests
+                      Inbound Patient Inquiries
                     </span>
                   </div>
-                  {requests.length > 0 && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-brand-coralSoft text-brand-coral text-xs font-bold border border-brand-coral/20">
-                      {requests.length} new
-                    </span>
-                  )}
+                  <span className="px-2.5 py-0.5 rounded-full bg-brand-coralSoft text-brand-coral text-xs font-bold border border-brand-coral/20">
+                    {requests.length} pending
+                  </span>
                 </div>
 
                 {loadingDash ? (
                   <div className="space-y-3">
                     {[...Array(2)].map((_, i) => (
-                      <Skeleton key={i} className="h-16" />
+                      <Skeleton key={i} className="h-20" />
                     ))}
                   </div>
                 ) : requests.length === 0 ? (
-                  <p className="text-brand-ink/40 text-xs py-2">
-                    No pending connection requests in your inbox.
-                  </p>
+                  <div className="py-12 text-center space-y-2">
+                    <div className="w-12 h-12 rounded-full bg-brand-softerTeal text-brand-teal flex items-center justify-center mx-auto mb-2">
+                      <span className="material-symbols-outlined text-2xl">all_inbox</span>
+                    </div>
+                    <p className="text-brand-ink font-semibold text-sm">
+                      All connection requests triaged
+                    </p>
+                    <p className="text-brand-ink/50 text-xs max-w-md mx-auto">
+                      New patient requests will appear here when patients share their logs using your Practitioner ID (<span className="font-mono text-brand-teal">{prac?.govCertId || 'MCI-2024-KM-7741'}</span>).
+                    </p>
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     {requests.map((req) => {
@@ -1465,28 +1412,41 @@ export default function PractitionerDashboardPage() {
                       return (
                         <div
                           key={req.userId}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-brand-canvas border border-brand-border/60"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-brand-canvas border border-brand-border/60 hover:border-brand-teal/30 transition-all shadow-xs"
                         >
-                          <div className="flex-1 min-w-0 space-y-1">
-                            <div className="flex items-center gap-2">
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-bold text-xs text-brand-ink">
                                 Patient ID: <span className="font-mono text-brand-teal">{req.userId}</span>
                               </span>
                               {req.requestedAt && (
                                 <span className="text-[10px] text-brand-ink/40 font-mono">
-                                  {fmtDate(req.requestedAt)}
+                                  Requested: {fmtDate(req.requestedAt)}
                                 </span>
                               )}
+                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-brand-amberSoft text-brand-amber font-semibold border border-brand-amber/20">
+                                Pending Triage
+                              </span>
                             </div>
+
                             {req.message && (
-                              <p className="text-xs text-brand-ink/75 leading-relaxed">
+                              <p className="text-xs text-brand-ink/80 leading-relaxed bg-white/80 p-3 rounded-xl border border-brand-border/40">
                                 "{req.message}"
                               </p>
                             )}
+
+                            <div className="flex items-center gap-1.5 text-[10px] text-brand-ink/50 font-mono pt-0.5">
+                              <span>Requested scope:</span>
+                              <span className="text-brand-teal bg-brand-softerTeal px-1.5 py-0.5 rounded">Practice Logs</span>
+                              <span className="text-brand-teal bg-brand-softerTeal px-1.5 py-0.5 rounded">Check-ins (SUDS)</span>
+                              <span className="text-brand-teal bg-brand-softerTeal px-1.5 py-0.5 rounded">Journal Reflection</span>
+                            </div>
                           </div>
+
                           {done ? (
-                            <span className="px-3 py-1.5 rounded-full bg-brand-softSuccess text-clinical-success text-xs font-bold shrink-0">
-                              ✓ Accepted
+                            <span className="px-3.5 py-1.5 rounded-full bg-brand-softSuccess text-clinical-success text-xs font-bold shrink-0 flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[16px]">check</span>
+                              Accepted
                             </span>
                           ) : typeof actionState === 'string' &&
                             actionState !== 'accepting' &&
@@ -1499,14 +1459,15 @@ export default function PractitionerDashboardPage() {
                               <button
                                 onClick={() => handleAccept(req.userId)}
                                 disabled={busy}
-                                className="px-4 py-1.5 rounded-xl bg-brand-teal text-white text-xs font-medium hover:bg-brand-tealDark transition-colors shadow-xs disabled:opacity-60"
+                                className="px-4 py-2 rounded-xl bg-brand-teal text-white text-xs font-semibold hover:bg-brand-tealDark transition-colors shadow-xs disabled:opacity-60 flex items-center gap-1.5"
                               >
-                                {actionState === 'accepting' ? 'Accepting…' : 'Accept Request'}
+                                <span className="material-symbols-outlined text-[16px]">check</span>
+                                <span>{actionState === 'accepting' ? 'Accepting…' : 'Accept Connection'}</span>
                               </button>
                               <button
                                 onClick={() => handleDecline(req.userId)}
                                 disabled={busy}
-                                className="px-3 py-1.5 rounded-xl border border-brand-border text-brand-ink/60 text-xs font-medium hover:text-brand-coral hover:border-brand-coral transition-colors disabled:opacity-60"
+                                className="px-3.5 py-2 rounded-xl border border-brand-border text-brand-ink/60 text-xs font-medium hover:text-brand-coral hover:border-brand-coral transition-colors disabled:opacity-60"
                               >
                                 {actionState === 'declining' ? 'Declining…' : 'Decline'}
                               </button>
@@ -1518,18 +1479,56 @@ export default function PractitionerDashboardPage() {
                   </div>
                 )}
               </section>
+            </div>
+          )}
 
-              {/* ── Active patients list ──────────────────────────────── */}
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {/* VIEW: patients (Consented Patient Roster)                    */}
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {view === 'dashboard' && navItem === 'patients' && (
+            <div className="space-y-6 animate-fade-in">
+              <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-semibold mb-2">
+                    <span className="material-symbols-outlined text-sm">groups</span>
+                    Active Clinical Roster
+                  </div>
+                  <h1 className="font-editorial text-4xl sm:text-5xl text-brand-ink font-normal leading-tight">
+                    Patient Roster
+                  </h1>
+                  <p className="text-brand-ink/60 text-sm mt-1">
+                    {patients.length} consented patients with longitudinal telemetry and journal access.
+                  </p>
+                </div>
+
+                {/* Patient search input */}
+                <div className="w-full sm:w-72">
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-brand-ink/40 text-[18px]">
+                      search
+                    </span>
+                    <input
+                      type="text"
+                      value={patientSearch}
+                      onChange={(e) => setPatientSearch(e.target.value)}
+                      placeholder="Search patients by name or ID..."
+                      className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-white border border-brand-border focus:border-brand-teal focus:outline-none transition-colors text-brand-ink shadow-xs"
+                    />
+                  </div>
+                </div>
+              </header>
+
+              {/* Active patients grid */}
               <section className="bg-brand-paper rounded-3xl border border-brand-border/60 p-6 sm:p-8 shadow-card-lift space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between border-b border-brand-border/40 pb-4">
                   <div className="flex items-center gap-2 text-brand-teal">
-                    <span className="material-symbols-outlined text-[20px]">groups</span>
+                    <span className="material-symbols-outlined text-[20px]">clinical_notes</span>
                     <span className="text-xs font-bold uppercase tracking-widest">
-                      Active Patients & Continuity Context
+                      Consented Between-Session Telemetry
                     </span>
                   </div>
                   <span className="font-mono text-xs text-brand-ink/50">
-                    {patients.length} Connected
+                    {filteredPatients.length} of {patients.length} Showing
                   </span>
                 </div>
 
@@ -1539,13 +1538,21 @@ export default function PractitionerDashboardPage() {
                       <Skeleton key={i} className="h-20" />
                     ))}
                   </div>
-                ) : patients.length === 0 ? (
-                  <p className="text-brand-ink/40 text-xs py-4">
-                    No active patients connected yet. When you accept incoming requests, they will appear here with values and telemetry.
-                  </p>
+                ) : filteredPatients.length === 0 ? (
+                  <div className="py-12 text-center space-y-2">
+                    <div className="w-12 h-12 rounded-full bg-brand-canvas text-brand-ink/40 flex items-center justify-center mx-auto mb-2">
+                      <span className="material-symbols-outlined text-2xl">person_search</span>
+                    </div>
+                    <p className="text-brand-ink font-semibold text-sm">
+                      No matching patients found
+                    </p>
+                    <p className="text-brand-ink/50 text-xs">
+                      Try searching with a different name or patient identifier.
+                    </p>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {patients.map((patient) => {
+                    {filteredPatients.map((patient) => {
                       const { bg: sBg, text: sText, label: sLabel } = statusMeta(
                         patient.connectionStatus || patient.status
                       );
@@ -1624,10 +1631,228 @@ export default function PractitionerDashboardPage() {
                               onClick={() => openPatient(patient)}
                               className="px-3.5 py-1.5 rounded-xl bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors flex items-center gap-1 shadow-xs"
                             >
-                              <span>Review Patient</span>
+                              <span>Review Patient &amp; Journal</span>
                               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                             </button>
                           </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {/* VIEW: dashboard (Clinical Overview)                         */}
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {view === 'dashboard' && navItem === 'dashboard' && (
+            <>
+              {/* ── Welcome header ────────────────────────────────────── */}
+              <header>
+                <p className="text-brand-teal font-bold text-xs uppercase tracking-widest mb-2">
+                  Clinician Dashboard
+                </p>
+                <h1 className="font-editorial text-4xl sm:text-5xl text-brand-ink font-normal leading-tight">
+                  {prac?.name ? `Dr. ${prac.name.split(' ').slice(-1)[0]}` : 'Welcome'}
+                </h1>
+                <p className="text-brand-ink/50 text-sm mt-1">
+                  {prac?.name ?? 'Clinician'} — Between Sessions Clinician Portal
+                </p>
+              </header>
+
+              {/* ── Error banner ──────────────────────────────────────── */}
+              {dashError && (
+                <div className="p-4 bg-brand-coralSoft border border-brand-coral/20 rounded-2xl text-brand-coral text-sm">
+                  {dashError}
+                </div>
+              )}
+
+              {/* ── Stats row ─────────────────────────────────────────── */}
+              {loadingDash ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} className="h-24" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Card 1: Active Patients */}
+                  <div
+                    onClick={() => navClick('patients')}
+                    className="bg-brand-amberSoft border border-brand-amber/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3 cursor-pointer hover:border-brand-amber transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-amber/30">
+                        Patients
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-amber">group</span>
+                    </div>
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-ink">
+                        {patients.length}
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Active Consented Patients
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-amber font-bold border-t border-brand-amber/20 pt-2 flex items-center justify-between">
+                      <span>View Roster</span>
+                      <span>→</span>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Pending Requests */}
+                  <div
+                    onClick={() => navClick('requests')}
+                    className="bg-brand-coralSoft border border-brand-coral/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3 cursor-pointer hover:border-brand-coral transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-coral/30">
+                        Pending
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-coral">person_add</span>
+                    </div>
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-coral">
+                        {requests.length}
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Connection Requests
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-coral font-bold border-t border-brand-coral/20 pt-2 flex items-center justify-between">
+                      <span>Review Inbox</span>
+                      <span>→</span>
+                    </div>
+                  </div>
+
+                  {/* Card 3: Exposure Protocols */}
+                  <div className="bg-brand-softerTeal border border-brand-teal/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-teal/30">
+                        Protocols
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-teal">clinical_notes</span>
+                    </div>
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-teal">
+                        Active
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Clinical Guidance Notes
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-teal/20 pt-2 font-mono">
+                      Human authored guidance
+                    </div>
+                  </div>
+
+                  {/* Card 4: Cedar WASM Policy Engine */}
+                  <div className="bg-brand-lavenderSoft border border-brand-lavender/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-lavender px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-lavender/30">
+                        Cedar WASM
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-lavender">verified_user</span>
+                    </div>
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-ink">
+                        Gated
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Real-Time Policy Check
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-lavender/20 pt-2 font-mono">
+                      Granular consent enforced
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Priority Action Callout: Pending Connection Requests ── */}
+              {requests.length > 0 && (
+                <div className="p-6 rounded-3xl bg-brand-coralSoft border border-brand-coral/40 shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/80 text-brand-coral text-[10px] font-bold border border-brand-coral/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-coral animate-pulse" />
+                      Priority Action Required
+                    </div>
+                    <h3 className="font-editorial text-2xl text-brand-ink font-normal">
+                      {requests.length} Inbound Connection {requests.length === 1 ? 'Request' : 'Requests'}
+                    </h3>
+                    <p className="text-xs text-brand-ink/70">
+                      Patients are waiting for your clinical confirmation to begin sharing between-session telemetry.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navClick('requests')}
+                    className="px-5 py-2.5 rounded-xl bg-brand-coral text-white hover:bg-brand-coral/90 text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-center flex items-center gap-1.5"
+                  >
+                    <span>Triage Requests</span>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </button>
+                </div>
+              )}
+
+              {/* ── Active Patients Roster Preview ────────────────────── */}
+              <section className="bg-brand-paper rounded-3xl border border-brand-border/60 p-6 sm:p-8 shadow-card-lift space-y-5">
+                <div className="flex items-center justify-between border-b border-brand-border/40 pb-4">
+                  <div className="flex items-center gap-2 text-brand-teal">
+                    <span className="material-symbols-outlined text-[20px]">groups</span>
+                    <span className="text-xs font-bold uppercase tracking-widest">
+                      Active Patient Overview
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => navClick('patients')}
+                    className="text-xs font-bold text-brand-teal hover:underline flex items-center gap-1"
+                  >
+                    <span>View All ({patients.length})</span>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </button>
+                </div>
+
+                {loadingDash ? (
+                  <div className="space-y-3">
+                    {[...Array(2)].map((_, i) => (
+                      <Skeleton key={i} className="h-20" />
+                    ))}
+                  </div>
+                ) : patients.length === 0 ? (
+                  <p className="text-brand-ink/40 text-xs py-4">
+                    No active patients connected yet. When you accept incoming requests, they will appear here.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {patients.slice(0, 2).map((patient) => {
+                      const displayName = patient.name || patient.userId;
+                      return (
+                        <div
+                          key={patient.userId}
+                          className="p-4 rounded-2xl border border-brand-border bg-brand-canvas flex items-center justify-between gap-3 shadow-xs"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-xl bg-brand-teal text-white flex items-center justify-center font-bold text-sm shrink-0">
+                              {displayName.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="font-bold text-sm text-brand-ink truncate">
+                                {displayName}
+                              </h4>
+                              <p className="text-[11px] font-mono text-brand-ink/50 truncate">
+                                {patient.userId}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => openPatient(patient)}
+                            className="px-3.5 py-1.5 rounded-xl bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors shrink-0 shadow-xs"
+                          >
+                            Review
+                          </button>
                         </div>
                       );
                     })}
@@ -1647,6 +1872,81 @@ export default function PractitionerDashboardPage() {
           </footer>
         </div>
       </div>
+
+      {/* ── Mobile Floating Bottom Bar ───────────────────────────────── */}
+      <MobileBottomNav
+        items={[
+          {
+            id: 'dashboard',
+            label: 'Dashboard',
+            icon: 'cottage',
+            isActive: view === 'dashboard' && navItem === 'dashboard',
+            onClick: () => navClick('dashboard'),
+          },
+          {
+            id: 'requests',
+            label: 'Requests',
+            icon: 'person_add',
+            badge: pendingCount > 0 ? pendingCount : null,
+            isActive: view === 'dashboard' && navItem === 'requests',
+            onClick: () => navClick('requests'),
+          },
+          {
+            id: 'patients',
+            label: 'Patients',
+            icon: 'groups',
+            badge: patients.length > 0 ? patients.length : null,
+            isActive: view === 'dashboard' && navItem === 'patients',
+            onClick: () => navClick('patients'),
+          },
+          {
+            id: 'settings',
+            label: 'Settings',
+            icon: 'tune',
+            isActive: view === 'dashboard' && navItem === 'settings',
+            onClick: () => navClick('settings'),
+          },
+        ]}
+        actionTitle="Clinical Actions"
+        actionPills={[
+          {
+            id: 'triage',
+            icon: 'person_add',
+            label: 'Review Connection Requests',
+            subtitle: `${pendingCount} inbound requests awaiting triage`,
+            highlight: pendingCount > 0,
+            onClick: () => navClick('requests'),
+          },
+          {
+            id: 'roster',
+            icon: 'groups',
+            label: 'Consented Patient Roster',
+            subtitle: `${patients.length} active patients with live telemetry`,
+            onClick: () => navClick('patients'),
+          },
+          {
+            id: 'overview-action',
+            icon: 'monitoring',
+            label: 'Clinical Practice Overview',
+            subtitle: 'Caseload telemetry & response stats',
+            onClick: () => navClick('dashboard'),
+          },
+          {
+            id: 'settings-action',
+            icon: 'tune',
+            label: 'Practice & Intake Settings',
+            subtitle: 'Credentials, remote status & council registry',
+            onClick: () => navClick('settings'),
+          },
+          {
+            id: 'logout-action',
+            icon: 'logout',
+            label: 'Sign Out Practitioner Session',
+            subtitle: 'Secure encrypted session termination',
+            onClick: handleLogout,
+          },
+        ]}
+      />
     </div>
   );
 }

@@ -176,7 +176,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setShowCheckinModal(true)}
-              className="px-4 py-2.5 rounded-xl border border-brand-border/80 bg-brand-paper hover:bg-brand-canvas text-brand-ink text-xs font-medium transition-all shadow-xs flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-xl border border-brand-border/80 bg-brand-paper hover:bg-brand-canvas text-brand-ink text-xs font-medium transition-all duration-200 active:scale-[0.98] shadow-xs flex items-center gap-1.5"
             >
               <span className="material-symbols-outlined text-[16px] text-brand-teal">monitor_heart</span>
               <span>Check-in</span>
@@ -186,7 +186,7 @@ export default function DashboardPage() {
                 setSelectedPlanForModal(activePractice);
                 setShowPracticeModal(true);
               }}
-              className="px-4 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-all shadow-xs flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-all duration-200 active:scale-[0.98] shadow-xs flex items-center gap-1.5"
             >
               <span className="material-symbols-outlined text-[16px]">add_task</span>
               <span>Log Practice</span>

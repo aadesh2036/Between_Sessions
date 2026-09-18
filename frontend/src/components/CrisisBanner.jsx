@@ -6,7 +6,7 @@ export default function CrisisBanner() {
   return (
     <aside
       aria-label="24/7 Crisis Support Resources"
-      className="bg-brand-paper border-b border-brand-border/60 text-brand-ink text-xs px-4 py-2 sticky top-0 z-30 transition-all shadow-sm"
+      className="hidden md:block bg-brand-paper border-b border-brand-border/60 text-brand-ink text-xs px-4 py-2 sticky top-0 z-30 transition-all shadow-sm"
     >
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">

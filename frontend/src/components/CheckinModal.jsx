@@ -33,7 +33,7 @@ export default function CheckinModal({ onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fade-in p-4">
-      <div className="bg-brand-paper border border-brand-border/70 rounded-3xl shadow-card-lift w-full max-w-md p-6 sm:p-8 relative">
+      <div className="bg-brand-paper border border-brand-border/70 rounded-3xl shadow-card-lift w-full max-w-md p-6 sm:p-8 relative animate-liquid-pop">
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-brand-ink/40 hover:text-brand-ink transition-colors p-1"
