@@ -6,119 +6,111 @@ import React from 'react';
  * Ambient organic SVG illustration for the Daily Grounding Focus card.
  * Concept: "You do not need to solve the doubt to continue living your life."
  * 
- * Layout & Architecture:
- * - Stacked in a column layout underneath the daily grounding quote.
- * - Sequence of organic shapes from left to right:
- *   1. Question Mark: A separate entity formed of TWO distinct organic sub-shapes:
- *      - Sub-shape A: Organic curved upper hook
- *      - Sub-shape B: Organic rounded lower dot
- *   2. Organic 6-lobed scalloped flower blob (warm alarm response)
- *   3. Translucent breathing aura circle (mindful presence)
- *   4. Lavender/purple rounded pebble rotated 45° with multiply blend mode
- *   5. Warm apricot/peach crescent disc
- *   6. Mindful thought-drift particles floating between the gaps
- * 
- * Animation:
- * - Spacing between all shapes increases and reduces in a soothing 6.5s breathing loop.
- * - Spacing between the question mark hook and dot ALSO increases and reduces in sync.
- * - Desktop only: hidden on mobile (< md) to preserve compact vertical spacing.
+ * Design Details:
+ * - Chubby, friendly, organic shapes that deeply intersect with multiply blend modes.
+ * - Separate, wide, fat Question Mark composed of two distinct organic sub-shapes:
+ *   - Sub-shape A: Thick, bulbous curved upper hook (strokeWidth 24 with round caps)
+ *   - Sub-shape B: Plump organic lower dot pebble
+ * - Fat 6-lobed scalloped star/flower blob with subtle organic rotation during breathing.
+ * - Breathing aura circle, rounded purple pebble, and large peach disc overlapping.
+ * - Dynamic spacing loop: all shapes expand apart and contract together rhythmically.
  */
 export default function DoubtGroundingAnimation({ className = "" }) {
-  // Symmetrical 6-lobed organic flower blob path centered at (195, 75)
+  // Symmetrical chubby 6-lobed organic flower blob path centered at (210, 95)
   const flowerPath =
-    "M 238.0 75.0 C 238.0 79.8, 223.7 83.3, 220.1 89.5 C 216.5 95.7, 220.7 109.8, 216.5 112.2 C 212.3 114.7, 202.2 104.0, 195.0 104.0 C 187.8 104.0, 177.7 114.7, 173.5 112.2 C 169.3 109.8, 173.5 95.7, 169.9 89.5 C 166.3 83.3, 152.0 79.8, 152.0 75.0 C 152.0 70.2, 166.3 66.7, 169.9 60.5 C 173.5 54.3, 169.3 40.2, 173.5 37.8 C 177.7 35.3, 187.8 46.0, 195.0 46.0 C 202.2 46.0, 212.3 35.3, 216.5 37.8 C 220.7 40.2, 216.5 54.3, 220.1 60.5 C 223.7 66.7, 238.0 70.2, 238.0 75.0 Z";
+    "M 275.0 95.0 C 275.0 101.5, 249.2 105.1, 243.8 114.5 C 238.4 123.9, 248.1 148.0, 242.5 151.3 C 236.9 154.5, 220.8 134.0, 210.0 134.0 C 199.2 134.0, 183.1 154.5, 177.5 151.3 C 171.9 148.0, 181.6 123.9, 176.2 114.5 C 170.8 105.1, 145.0 101.5, 145.0 95.0 C 145.0 88.5, 170.8 84.9, 176.2 75.5 C 181.6 66.1, 171.9 42.0, 177.5 38.7 C 183.1 35.5, 199.2 56.0, 210.0 56.0 C 220.8 56.0, 236.9 35.5, 242.5 38.7 C 248.1 42.0, 238.4 66.1, 243.8 75.5 C 249.2 84.9, 275.0 88.5, 275.0 95.0 Z";
 
   return (
     <div
-      className={`relative w-full max-w-[540px] h-[120px] sm:h-[135px] select-none pointer-events-none flex items-center justify-center ${className}`}
+      className={`relative w-full max-w-[580px] h-[160px] sm:h-[185px] lg:h-[200px] select-none pointer-events-none flex items-center justify-center ${className}`}
       aria-hidden="true"
     >
       <svg
-        viewBox="0 0 540 150"
+        viewBox="0 0 580 190"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         className="w-full h-full overflow-visible"
       >
         <defs>
           {/* Question Mark gradient: rich warm terracotta/coral */}
-          <linearGradient id="doubtQmGrad" x1="60" y1="40" x2="110" y2="135" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#F05E32" />
-            <stop offset="100%" stopColor="#D94E28" />
+          <linearGradient id="doubtQmGrad" x1="70" y1="30" x2="140" y2="160" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#F25828" />
+            <stop offset="100%" stopColor="#DB4218" />
           </linearGradient>
 
-          {/* Coral/Amber gradient for the flower blob */}
-          <linearGradient id="doubtBlobGrad" x1="155" y1="40" x2="238" y2="112" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FF7A45" stopOpacity="0.88" />
-            <stop offset="100%" stopColor="#E8856C" stopOpacity="0.78" />
+          {/* Coral/Amber gradient for the chubby flower blob */}
+          <linearGradient id="doubtBlobGrad" x1="150" y1="40" x2="275" y2="150" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FF7A42" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#E88265" stopOpacity="0.82" />
           </linearGradient>
 
-          {/* Lavender/Purple gradient for the rounded pebble */}
-          <linearGradient id="doubtPebbleGrad" x1="335" y1="45" x2="395" y2="105" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#9C87DB" stopOpacity="0.85" />
-            <stop offset="100%" stopColor="#7E68BA" stopOpacity="0.75" />
+          {/* Lavender/Purple gradient for the chunky rounded pebble */}
+          <linearGradient id="doubtPebbleGrad" x1="340" y1="50" x2="430" y2="140" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#9C87DB" stopOpacity="0.88" />
+            <stop offset="100%" stopColor="#7E68BA" stopOpacity="0.78" />
           </linearGradient>
 
-          {/* Peach/Apricot gradient for the outer disc */}
-          <linearGradient id="doubtArcGrad" x1="410" y1="35" x2="500" y2="125" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FFC499" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="#F79F79" stopOpacity="0.5" />
+          {/* Peach/Apricot gradient for the large outer disc */}
+          <linearGradient id="doubtArcGrad" x1="410" y1="30" x2="550" y2="170" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FFC8A2" stopOpacity="0.75" />
+            <stop offset="100%" stopColor="#F79F79" stopOpacity="0.55" />
           </linearGradient>
 
           {/* Soft drop shadow for floating elements */}
           <filter id="doubtSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#17323A" floodOpacity="0.1" />
+            <feDropShadow dx="0" dy="5" stdDeviation="8" floodColor="#17323A" floodOpacity="0.09" />
           </filter>
         </defs>
 
-        {/* ── 1. Far Right: Peach/Apricot Disc (Spacing Drift 5) ── */}
+        {/* ── 1. Far Right: Large Peach/Apricot Disc (deeply intersecting purple pebble) ── */}
         <g className="anim-spacing-arc">
           <circle
-            cx="445"
-            cy="75"
-            r="54"
+            cx="480"
+            cy="95"
+            r="74"
             fill="url(#doubtArcGrad)"
             style={{ mixBlendMode: 'multiply' }}
           />
         </g>
 
-        {/* ── 2. Middle-Right: Lavender/Purple Rounded Diamond Pebble (Spacing Drift 4) ── */}
+        {/* ── 2. Middle-Right: Chunky Lavender/Purple Rounded Diamond (intersecting both sides) ── */}
         <g className="anim-spacing-pebble">
           <rect
-            x="337"
-            y="47"
-            width="56"
-            height="56"
-            rx="20"
-            transform="rotate(45 365 75)"
+            x="343"
+            y="53"
+            width="84"
+            height="84"
+            rx="30"
+            transform="rotate(45 385 95)"
             fill="url(#doubtPebbleGrad)"
             style={{ mixBlendMode: 'multiply' }}
             filter="url(#doubtSoftShadow)"
           />
         </g>
 
-        {/* ── 3. Center: Translucent Breathing Aura Circle (Spacing Scale 3) ── */}
+        {/* ── 3. Center: Soft Translucent Breathing Aura (intersecting center stage) ── */}
         <g className="anim-spacing-aura">
           <circle
-            cx="285"
-            cy="75"
-            r="38"
+            cx="310"
+            cy="95"
+            r="60"
             fill="#FFFFFF"
             fillOpacity="0.55"
             style={{ mixBlendMode: 'screen' }}
           />
-          {/* Delicate concentric dashed halo */}
+          {/* Subtle concentric halo ring */}
           <circle
-            cx="285"
-            cy="75"
-            r="48"
+            cx="310"
+            cy="95"
+            r="72"
             stroke="#FFFFFF"
-            strokeWidth="1.2"
-            strokeDasharray="4 4"
-            strokeOpacity="0.4"
+            strokeWidth="1.5"
+            strokeDasharray="5 5"
+            strokeOpacity="0.45"
           />
         </g>
 
-        {/* ── 4. Center-Left: Warm 6-Lobed Organic Flower Blob (Spacing Drift 2) ── */}
+        {/* ── 4. Center-Left: Fat Chubby 6-Lobed Star/Flower Blob (with subtle rotation) ── */}
         <g className="anim-spacing-flower">
           <path
             d={flowerPath}
@@ -127,39 +119,38 @@ export default function DoubtGroundingAnimation({ className = "" }) {
           />
         </g>
 
-        {/* ── 5. Left: Separate Organic Question Mark (?) (Spacing Drift 1) ── */}
-        {/* Composed of TWO separate organic sub-shapes whose distance also expands & contracts */}
+        {/* ── 5. Left: Separate Fat Organic Question Mark (?) (2 Sub-Shapes) ── */}
         <g className="anim-spacing-qm">
-          {/* Sub-shape A: Organic Curved Upper Hook */}
+          {/* Sub-shape A: Chubby Curved Upper Hook (strokeWidth 24 with rounded bulbous caps) */}
           <path
-            d="M 66 54 C 66 34, 106 34, 106 58 C 106 78, 86 84, 86 102"
+            d="M 80 64 C 80 34, 134 34, 134 68 C 134 94, 108 100, 108 126"
             fill="none"
             stroke="url(#doubtQmGrad)"
-            strokeWidth="14"
+            strokeWidth="24"
             strokeLinecap="round"
             strokeLinejoin="round"
             className="anim-spacing-qm-hook"
             filter="url(#doubtSoftShadow)"
           />
 
-          {/* Sub-shape B: Organic Lower Dot / Pebble */}
+          {/* Sub-shape B: Plump Lower Dot Pebble */}
           <ellipse
-            cx="86"
-            cy="128"
-            rx="8.5"
-            ry="8"
+            cx="108"
+            cy="158"
+            rx="14"
+            ry="13.5"
             fill="url(#doubtQmGrad)"
             className="anim-spacing-qm-dot"
             filter="url(#doubtSoftShadow)"
           />
         </g>
 
-        {/* ── 6. Mindful Thought Drift Particles floating in the gaps ── */}
+        {/* ── 6. Mindful Thought Drift Particles: Connecting the Opening Gaps ── */}
         <g className="anim-spacing-drift">
-          <circle cx="140" cy="73" r="2.8" fill="#E8856C" fillOpacity="0.6" />
-          <circle cx="248" cy="77" r="2.2" fill="#8B7EC8" fillOpacity="0.65" />
-          <circle cx="330" cy="71" r="2.5" fill="#176B67" fillOpacity="0.45" />
-          <circle cx="408" cy="79" r="2" fill="#F79F79" fillOpacity="0.6" />
+          <circle cx="158" cy="92" r="3.6" fill="#E8856C" fillOpacity="0.65" />
+          <circle cx="260" cy="98" r="3" fill="#8B7EC8" fillOpacity="0.7" />
+          <circle cx="348" cy="92" r="3.2" fill="#176B67" fillOpacity="0.45" />
+          <circle cx="432" cy="100" r="2.8" fill="#F79F79" fillOpacity="0.6" />
         </g>
       </svg>
     </div>

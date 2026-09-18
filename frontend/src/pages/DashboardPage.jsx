@@ -236,14 +236,14 @@ export default function DashboardPage() {
             </div>
 
             {/* Column Flexbox Body: Text on Top, Animation Stacked Below */}
-            <div className="relative z-10 my-auto py-3 flex flex-col gap-4">
+            <div className="relative z-10 my-auto py-2 flex flex-col gap-6">
               {/* Stacked 1: Quote & Explanation */}
-              <div className="space-y-2.5 max-w-2xl">
-                <h2 className="font-editorial text-2xl sm:text-3xl lg:text-4xl text-brand-ink leading-snug font-medium">
+              <div className="space-y-3 max-w-2xl">
+                <h2 className="font-editorial text-2xl sm:text-3xl lg:text-[2.2rem] text-brand-ink leading-[1.22] font-medium">
                   “You do not need to solve the doubt to continue living your life.”
                 </h2>
 
-                <p className="text-xs sm:text-sm text-brand-ink/75 leading-relaxed">
+                <p className="text-xs sm:text-sm lg:text-[15px] text-brand-ink/80 leading-relaxed max-w-xl">
                   In OCD, the brain treats uncertainty as an urgent life-or-death puzzle. Today’s gentle practice is allowing the question to remain unanswered while you direct your attention to what genuinely matters.
                 </p>
               </div>

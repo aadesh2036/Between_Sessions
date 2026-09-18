@@ -362,10 +362,10 @@ body {
 
 @keyframes spacing-qm-group {
   0%, 100% {
-    transform: translateX(20px);
+    transform: translateX(24px);
   }
   50% {
-    transform: translateX(-24px);
+    transform: translateX(-28px);
   }
 }
 
@@ -374,103 +374,103 @@ body {
     transform: translateY(3px) rotate(0deg);
   }
   50% {
-    transform: translateY(-8px) rotate(-3deg);
+    transform: translateY(-10px) rotate(-4deg);
   }
 }
 
 @keyframes spacing-qm-dot {
   0%, 100% {
-    transform: translateY(-2px) scale(0.95);
+    transform: translateY(-2px) scale(0.94);
   }
   50% {
-    transform: translateY(8px) scale(1.08);
+    transform: translateY(10px) scale(1.08);
   }
 }
 
 @keyframes spacing-flower {
   0%, 100% {
-    transform: translateX(10px) rotate(0deg);
+    transform: translateX(14px) rotate(-10deg) scale(0.97);
   }
   50% {
-    transform: translateX(-10px) rotate(6deg) scale(1.03);
+    transform: translateX(-16px) rotate(16deg) scale(1.04);
   }
 }
 
 @keyframes spacing-aura {
   0%, 100% {
     transform: scale(0.9);
-    opacity: 0.45;
+    opacity: 0.5;
   }
   50% {
-    transform: scale(1.15);
-    opacity: 0.75;
+    transform: scale(1.14);
+    opacity: 0.8;
   }
 }
 
 @keyframes spacing-pebble {
   0%, 100% {
-    transform: translateX(-10px) rotate(45deg);
+    transform: translateX(-14px) rotate(42deg);
   }
   50% {
-    transform: translateX(12px) rotate(50deg) scale(1.02);
+    transform: translateX(16px) rotate(52deg) scale(1.03);
   }
 }
 
 @keyframes spacing-arc {
   0%, 100% {
-    transform: translateX(-22px) scale(0.95);
-    opacity: 0.4;
+    transform: translateX(-24px) scale(0.96);
+    opacity: 0.45;
   }
   50% {
-    transform: translateX(28px) scale(1.05);
-    opacity: 0.55;
+    transform: translateX(30px) scale(1.06);
+    opacity: 0.65;
   }
 }
 
 @keyframes spacing-drift-dots {
   0%, 100% {
-    transform: translateX(-14px);
+    transform: translateX(-16px);
     opacity: 0.35;
   }
   50% {
-    transform: translateX(18px);
-    opacity: 0.8;
+    transform: translateX(20px);
+    opacity: 0.85;
   }
 }
 
 .anim-spacing-qm {
   animation: spacing-qm-group 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-  transform-origin: 86px 75px;
+  transform-origin: 108px 95px;
 }
 
 .anim-spacing-qm-hook {
   animation: spacing-qm-hook 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-  transform-origin: 86px 65px;
+  transform-origin: 108px 65px;
 }
 
 .anim-spacing-qm-dot {
   animation: spacing-qm-dot 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-  transform-origin: 86px 130px;
+  transform-origin: 108px 156px;
 }
 
 .anim-spacing-flower {
   animation: spacing-flower 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-  transform-origin: 195px 75px;
+  transform-origin: 210px 95px;
 }
 
 .anim-spacing-aura {
   animation: spacing-aura 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-  transform-origin: 285px 75px;
+  transform-origin: 310px 95px;
 }
 
 .anim-spacing-pebble {
   animation: spacing-pebble 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-  transform-origin: 365px 75px;
+  transform-origin: 385px 95px;
 }
 
 .anim-spacing-arc {
   animation: spacing-arc 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-  transform-origin: 445px 75px;
+  transform-origin: 480px 95px;
 }
 
 .anim-spacing-drift {
