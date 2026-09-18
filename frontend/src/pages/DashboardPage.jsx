@@ -174,7 +174,8 @@ export default function DashboardPage() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          {/* Primary Quick Actions: Desktop Only (Mobile uses floating + bottom action sheet) */}
+          <div className="hidden md:flex items-center gap-2.5">
             <button
               onClick={() => setShowCheckinModal(true)}
               className="px-4 py-2.5 rounded-xl border border-brand-border/80 bg-brand-paper hover:bg-brand-canvas text-brand-ink text-xs font-medium transition-all duration-200 active:scale-[0.98] shadow-xs flex items-center gap-1.5"

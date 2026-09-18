@@ -8,11 +8,12 @@ import React from 'react';
  * 
  * Design Details:
  * - Chubby, friendly, organic shapes that deeply intersect with multiply blend modes.
+ * - Soft, reduced pastel opacity that harmonizes with the warm amber paper background.
+ * - Gentle pastel warm amber/peach center aura (replaces the stark white circle).
  * - Separate, wide, fat Question Mark composed of two distinct organic sub-shapes:
  *   - Sub-shape A: Thick, bulbous curved upper hook (strokeWidth 24 with round caps)
  *   - Sub-shape B: Plump organic lower dot pebble
  * - Fat 6-lobed scalloped star/flower blob with subtle organic rotation during breathing.
- * - Breathing aura circle, rounded purple pebble, and large peach disc overlapping.
  * - Dynamic spacing loop: all shapes expand apart and contract together rhythmically.
  */
 export default function DoubtGroundingAnimation({ className = "" }) {
@@ -22,7 +23,7 @@ export default function DoubtGroundingAnimation({ className = "" }) {
 
   return (
     <div
-      className={`relative w-full max-w-[580px] h-[160px] sm:h-[185px] lg:h-[200px] select-none pointer-events-none flex items-center justify-center ${className}`}
+      className={`relative w-full max-w-[580px] h-[160px] sm:h-[185px] lg:h-[200px] select-none pointer-events-none flex items-center justify-center opacity-90 ${className}`}
       aria-hidden="true"
     >
       <svg
@@ -32,33 +33,39 @@ export default function DoubtGroundingAnimation({ className = "" }) {
         className="w-full h-full overflow-visible"
       >
         <defs>
-          {/* Question Mark gradient: rich warm terracotta/coral */}
+          {/* Question Mark gradient: soft warm terracotta/coral with reduced opacity */}
           <linearGradient id="doubtQmGrad" x1="70" y1="30" x2="140" y2="160" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#F25828" />
-            <stop offset="100%" stopColor="#DB4218" />
+            <stop offset="0%" stopColor="#F25828" stopOpacity="0.82" />
+            <stop offset="100%" stopColor="#DB4218" stopOpacity="0.74" />
           </linearGradient>
 
           {/* Coral/Amber gradient for the chubby flower blob */}
           <linearGradient id="doubtBlobGrad" x1="150" y1="40" x2="275" y2="150" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FF7A42" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#E88265" stopOpacity="0.82" />
+            <stop offset="0%" stopColor="#FF7A42" stopOpacity="0.75" />
+            <stop offset="100%" stopColor="#E88265" stopOpacity="0.66" />
+          </linearGradient>
+
+          {/* Warm pastel Amber/Peach aura gradient replacing the stark white circle */}
+          <linearGradient id="doubtAuraGrad" x1="270" y1="55" x2="350" y2="135" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FED7AA" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#FDBA74" stopOpacity="0.38" />
           </linearGradient>
 
           {/* Lavender/Purple gradient for the chunky rounded pebble */}
           <linearGradient id="doubtPebbleGrad" x1="340" y1="50" x2="430" y2="140" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#9C87DB" stopOpacity="0.88" />
-            <stop offset="100%" stopColor="#7E68BA" stopOpacity="0.78" />
+            <stop offset="0%" stopColor="#9C87DB" stopOpacity="0.72" />
+            <stop offset="100%" stopColor="#7E68BA" stopOpacity="0.62" />
           </linearGradient>
 
           {/* Peach/Apricot gradient for the large outer disc */}
           <linearGradient id="doubtArcGrad" x1="410" y1="30" x2="550" y2="170" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FFC8A2" stopOpacity="0.75" />
-            <stop offset="100%" stopColor="#F79F79" stopOpacity="0.55" />
+            <stop offset="0%" stopColor="#FFC8A2" stopOpacity="0.58" />
+            <stop offset="100%" stopColor="#F79F79" stopOpacity="0.40" />
           </linearGradient>
 
-          {/* Soft drop shadow for floating elements */}
+          {/* Subtle soft drop shadow for floating elements */}
           <filter id="doubtSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="5" stdDeviation="8" floodColor="#17323A" floodOpacity="0.09" />
+            <feDropShadow dx="0" dy="4" stdDeviation="7" floodColor="#17323A" floodOpacity="0.06" />
           </filter>
         </defs>
 
@@ -88,25 +95,24 @@ export default function DoubtGroundingAnimation({ className = "" }) {
           />
         </g>
 
-        {/* ── 3. Center: Soft Translucent Breathing Aura (intersecting center stage) ── */}
+        {/* ── 3. Center: Soft Translucent Warm Pastel Aura (replaces stark white circle) ── */}
         <g className="anim-spacing-aura">
           <circle
             cx="310"
             cy="95"
             r="60"
-            fill="#FFFFFF"
-            fillOpacity="0.55"
-            style={{ mixBlendMode: 'screen' }}
+            fill="url(#doubtAuraGrad)"
+            style={{ mixBlendMode: 'multiply' }}
           />
-          {/* Subtle concentric halo ring */}
+          {/* Subtle concentric warm coral halo ring */}
           <circle
             cx="310"
             cy="95"
             r="72"
-            stroke="#FFFFFF"
-            strokeWidth="1.5"
+            stroke="#E8856C"
+            strokeWidth="1.2"
             strokeDasharray="5 5"
-            strokeOpacity="0.45"
+            strokeOpacity="0.25"
           />
         </g>
 
@@ -147,10 +153,10 @@ export default function DoubtGroundingAnimation({ className = "" }) {
 
         {/* ── 6. Mindful Thought Drift Particles: Connecting the Opening Gaps ── */}
         <g className="anim-spacing-drift">
-          <circle cx="158" cy="92" r="3.6" fill="#E8856C" fillOpacity="0.65" />
-          <circle cx="260" cy="98" r="3" fill="#8B7EC8" fillOpacity="0.7" />
-          <circle cx="348" cy="92" r="3.2" fill="#176B67" fillOpacity="0.45" />
-          <circle cx="432" cy="100" r="2.8" fill="#F79F79" fillOpacity="0.6" />
+          <circle cx="158" cy="92" r="3.2" fill="#E8856C" fillOpacity="0.55" />
+          <circle cx="260" cy="98" r="2.8" fill="#8B7EC8" fillOpacity="0.6" />
+          <circle cx="348" cy="92" r="2.8" fill="#176B67" fillOpacity="0.4" />
+          <circle cx="432" cy="100" r="2.5" fill="#F79F79" fillOpacity="0.5" />
         </g>
       </svg>
     </div>

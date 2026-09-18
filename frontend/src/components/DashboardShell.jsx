@@ -59,13 +59,6 @@ export default function DashboardShell({ children, onDataRefresh }) {
               <span className="w-1.5 h-1.5 rounded-full bg-brand-coral animate-pulse" />
               <span>14416</span>
             </a>
-            <button
-              onClick={() => setShowCheckin(true)}
-              className="px-3 py-1 rounded-full bg-brand-softerTeal hover:bg-brand-teal hover:text-white text-brand-teal text-[11px] font-semibold flex items-center gap-1 transition-all shadow-xs"
-            >
-              <span className="material-symbols-outlined text-[15px]">monitor_heart</span>
-              <span>Check-in</span>
-            </button>
             <Link
               to="/app/settings"
               className="w-7 h-7 rounded-full bg-brand-canvas border border-brand-border flex items-center justify-center text-brand-ink/70 hover:text-brand-teal transition-all"
@@ -155,31 +148,6 @@ export default function DashboardShell({ children, onDataRefresh }) {
                   </NavLink>
                 ))}
               </nav>
-            </div>
-
-            {/* Quick Actions in Sidebar */}
-            <div className="pt-2 border-t border-brand-border/40 space-y-2">
-              <button
-                onClick={() => setShowCheckin(true)}
-                className="w-full py-2.5 px-3.5 rounded-xl border border-brand-border/80 hover:border-brand-teal hover:bg-brand-softerTeal/40 text-brand-ink text-xs font-medium transition-all duration-200 active:scale-[0.98] flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-brand-teal">monitor_heart</span>
-                  <span>Daily Check-in</span>
-                </div>
-                <span className="text-[10px] text-brand-ink/40 font-mono">0–10</span>
-              </button>
-
-              <button
-                onClick={() => setShowPractice(true)}
-                className="w-full py-2.5 px-3.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-all duration-200 active:scale-[0.98] shadow-xs flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px]">add_task</span>
-                  <span>Log Practice</span>
-                </div>
-                <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-              </button>
             </div>
           </div>
 
