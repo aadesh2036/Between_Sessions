@@ -5,69 +5,86 @@ import Logo from '../components/Logo';
 
 export default function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [needsVerification, setNeedsVerification] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showEntryAnimation, setShowEntryAnimation] = useState(false);
   
-  const { login } = useAuth();
+  const { login, register, verifyEmail, resendEmail } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/app';
 
   useEffect(() => {
-    // Trigger subtle entry transition when component mounts
     setShowEntryAnimation(true);
-  }, []);
+    const params = new URLSearchParams(location.search);
+    const token = params.get('verify');
+    if (token) {
+      verifyEmail(token).then(() => {
+        setSuccessMsg("Email verified! You may now sign in.");
+        setIsRegister(false);
+      }).catch(err => {
+        setError(err.message || "Verification failed or token expired.");
+      });
+    }
+  }, [location.search]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(''); setSuccessMsg(''); setNeedsVerification(false);
     
-    if (!email) {
-      setError('Please enter a valid email address.');
+    if (!email || !password) {
+      setError('Please enter both email and password.');
       return;
     }
 
     setIsLoading(true);
-    
     try {
-      await login(email);
-      // Success - navigate
-      setTimeout(() => {
-        navigate(from, { replace: true });
-      }, 500);
+      await login(email, password);
+      setTimeout(() => navigate(from, { replace: true }), 100);
     } catch (err) {
-      if (err instanceof TypeError && err.message === 'Failed to fetch') {
-        setError('Unable to connect to the server. Please check your connection.');
-      } else {
-        setError(err.message || 'Error connecting to sanctuary. Please try again.');
-      }
+      if (err.message.includes('Email not verified')) setNeedsVerification(true);
+      setError(err.message || 'Error connecting to sanctuary. Please try again.');
       setIsLoading(false);
     }
   };
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    if (!email) {
-      setError('Please enter an email address.');
+    setError(''); setSuccessMsg('');
+    
+    if (!email || !password || !name) {
+      setError('Please fill in all fields.');
       return;
     }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+
     setIsLoading(true);
-    
     try {
-      await login(email);
-      setTimeout(() => {
-        navigate('/onboarding', { replace: true });
-      }, 500);
+      const res = await register(email, password, name); // pass name if backend updated
+      setSuccessMsg(res.message);
+      setIsRegister(false); // flip back to sign in
     } catch (err) {
-      if (err instanceof TypeError && err.message === 'Failed to fetch') {
-        setError('Unable to connect to the server. Please check your connection.');
-      } else {
-        setError(err.message || 'Error creating sanctuary. Please try again.');
-      }
+      setError(err.message || 'Error creating account.');
+    } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    try {
+      await resendEmail(email);
+      setSuccessMsg("Verification email resent. Check your inbox.");
+      setNeedsVerification(false);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -290,7 +307,9 @@ export default function LoginPage() {
                   </div>
                   <div className="relative">
                     <input 
-                      type="password" 
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••••••••••" 
                       className="w-full px-4 py-2.5 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
                     />
@@ -363,7 +382,7 @@ export default function LoginPage() {
                 {/* Pseudonym / Sanctuary Alias */}
                 <div>
                   <label className="block text-xs font-semibold text-brand-ink mb-1">Preferred Alias or Name</label>
-                  <input type="text" placeholder="e.g. Alex, SkySeeker, or QuietHaven" className="w-full px-4 py-2 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink" />
+                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Alex, SkySeeker, or QuietHaven" className="w-full px-4 py-2 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink" required />
                   <p className="text-[10px] text-brand-ink/50 mt-0.5">Legal name is never required. Privacy is guaranteed.</p>
                 </div>
 
@@ -382,15 +401,15 @@ export default function LoginPage() {
 
                 {/* Passphrase with gentle strength guide */}
                 <div>
-                  <label className="block text-xs font-semibold text-brand-ink mb-1">Sanctuary Passphrase (Mocked)</label>
-                  <input type="password" placeholder="Create a comforting, secure phrase" className="w-full px-4 py-2 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink" />
+                  <label className="block text-xs font-semibold text-brand-ink mb-1">Sanctuary Passphrase</label>
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a comforting, secure phrase (min 8 chars)" className="w-full px-4 py-2 text-xs rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink" required />
                   
                   {/* Gentle non-punitive meter */}
                   <div className="flex items-center gap-1.5 mt-1.5">
                     <div className="h-1 flex-1 rounded-full bg-brand-teal"></div>
                     <div className="h-1 flex-1 rounded-full bg-brand-teal"></div>
-                    <div className="h-1 flex-1 rounded-full bg-brand-teal/30"></div>
-                    <div className="h-1 flex-1 rounded-full bg-brand-teal/20"></div>
+                    <div className={`h-1 flex-1 rounded-full ${password.length >= 8 ? 'bg-brand-teal' : 'bg-brand-teal/30'}`}></div>
+                    <div className={`h-1 flex-1 rounded-full ${password.length >= 12 ? 'bg-brand-teal' : 'bg-brand-teal/20'}`}></div>
                     <span className="text-[10px] font-mono text-brand-ink/60 ml-1">Calm & Resilient</span>
                   </div>
                 </div>

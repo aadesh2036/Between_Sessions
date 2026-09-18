@@ -1,4 +1,8 @@
-process.env.MAILTRAP_USER = 'demo'; process.env.MAILTRAP_PASS = 'demo';
+process.env.MAILTRAP_SMTP_HOST = 'sandbox.smtp.mailtrap.io';
+process.env.MAILTRAP_SMTP_PORT = '2525';
+process.env.MAILTRAP_SMTP_USER = '9a1e374c409f43';
+process.env.MAILTRAP_SMTP_PASS = '848727f20872a7';
+
 const express = require('express');
 const cors = require('cors');
 
@@ -10,7 +14,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Helper to simulate API Gateway Event
 const createApiGatewayEvent = (req) => ({
   body: JSON.stringify(req.body),
   headers: req.headers,
@@ -20,7 +23,6 @@ const createApiGatewayEvent = (req) => ({
   path: req.path
 });
 
-// Helper to handle Lambda Response
 const handleLambdaResponse = (res, lambdaResult) => {
   if (lambdaResult.headers) {
     for (const [key, value] of Object.entries(lambdaResult.headers)) {
@@ -30,8 +32,7 @@ const handleLambdaResponse = (res, lambdaResult) => {
   res.status(lambdaResult.statusCode || 200).send(lambdaResult.body);
 };
 
-// Routes mapping to Lambda Handlers
-app.post('/api/v1/auth/verify', async (req, res) => {
+app.post(['/api/v1/auth/register', '/api/v1/auth/login', '/api/v1/auth/verify', '/api/v1/auth/resend', '/api/v1/user/update'], async (req, res) => {
   const event = createApiGatewayEvent(req);
   try {
     const result = await authHandler(event);
@@ -64,5 +65,4 @@ app.get('/api/v1/practitioner/patients/:userId/summary', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serverless wrapper running on http://localhost:${PORT}`);
-  console.log(`Routing to AWS Lambda handlers...`);
 });

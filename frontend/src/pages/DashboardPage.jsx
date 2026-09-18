@@ -4,7 +4,7 @@ import Logo from '../components/Logo';
 import { Link } from 'react-router-dom';
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, resendEmail } = useAuth();
   
   // Pause & Choose State
   const [pauseStep, setPauseStep] = useState('idle'); // idle, pause, allow, choose
@@ -71,13 +71,13 @@ export default function DashboardPage() {
                 <span className="text-[14px]">Home</span>
                 <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
               </Link>
-              <Link className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-brand-ink/60 hover:bg-white hover:text-brand-ink transition-all shadow-sm" to="/app">
+              <Link className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-brand-ink/60 hover:bg-white hover:text-brand-ink transition-all shadow-sm" to="/app/practice">
                 <div className="w-8 h-8 rounded-full bg-brand-coralSoft flex items-center justify-center text-brand-coral">
                   <span className="material-symbols-outlined text-[18px]">psychology</span>
                 </div>
                 <span className="text-[14px] font-medium">Pause & Choose</span>
               </Link>
-              <Link className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-brand-ink/60 hover:bg-white hover:text-brand-ink transition-all shadow-sm" to="/app">
+              <Link className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-brand-ink/60 hover:bg-white hover:text-brand-ink transition-all shadow-sm" to="/app/practice">
                 <div className="w-8 h-8 rounded-full bg-brand-amberSoft flex items-center justify-center text-brand-amber">
                   <span className="material-symbols-outlined text-[18px]">history</span>
                 </div>
@@ -89,7 +89,7 @@ export default function DashboardPage() {
           <div className="space-y-3">
             <span className="px-2 text-[10px] font-bold uppercase tracking-widest text-brand-ink/40">Care Continuity</span>
             <nav className="flex flex-col gap-1.5">
-              <Link className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-brand-ink/60 hover:bg-white hover:text-brand-ink transition-all shadow-sm group" to="/app">
+              <Link className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-brand-ink/60 hover:bg-white hover:text-brand-ink transition-all shadow-sm group" to="/app/practice">
                 <div className="w-8 h-8 rounded-full bg-brand-canvas flex items-center justify-center text-brand-ink/60 group-hover:text-brand-ink transition-colors">
                   <span className="material-symbols-outlined text-[18px]">medical_services</span>
                 </div>
@@ -108,6 +108,7 @@ export default function DashboardPage() {
               <div className="text-xs font-bold text-brand-ink truncate">{user?.email || 'Individual'}</div>
               <div className="text-[10px] text-brand-ink/60 font-mono mt-0.5 truncate">ID: {user?.id}</div>
             </div>
+            <Link to="/app/settings" className="p-2 text-brand-ink/40 hover:text-brand-teal transition-colors" title="Settings"><span className="material-symbols-outlined text-[18px]">settings</span></Link>
             <button onClick={logout} className="p-2 text-brand-ink/40 hover:text-brand-coral transition-colors" title="Sign out">
               <span className="material-symbols-outlined text-[18px]">logout</span>
             </button>
@@ -118,7 +119,7 @@ export default function DashboardPage() {
       {/* MAIN DASHBOARD CONTENT */}
       <div className="flex-1 min-w-0 relative">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjMsIDEwNywgMTAzLCAwLjA1KSIvPjwvc3ZnPg==')] opacity-60 z-0"></div>
-        <div className="absolute top-0 right-0 w-[60%] h-[60%] bg-brand-teal/5 blur-[140px] rounded-full pointer-events-none z-0"></div>
+        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-brand-softerTeal blur-[120px] opacity-70 pointer-events-none z-0"></div>\n        <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full bg-brand-coralSoft blur-[140px] opacity-70 pointer-events-none z-0"></div>
         
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-10">
           
@@ -136,6 +137,21 @@ export default function DashboardPage() {
             </button>
           </header>
 
+          
+          {!user.isVerified && (
+            <div className="mb-6 p-4 bg-brand-amberSoft border border-brand-amber/30 rounded-2xl flex items-center justify-between text-brand-ink animate-fade-in shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-brand-amber">mail</span>
+                <div>
+                  <h4 className="text-xs font-bold font-sans">Verify your email address</h4>
+                  <p className="text-[11px] opacity-80 mt-0.5">Please click the link in the email we sent you to secure your sanctuary.</p>
+                </div>
+              </div>
+              <button onClick={() => resendEmail(user.email)} className="px-4 py-1.5 bg-white border border-brand-border rounded-full text-[10px] font-bold text-brand-teal hover:bg-brand-sand transition-colors">
+                Resend Email
+              </button>
+            </div>
+          )}
           <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-up" style={{ animationDelay: '100ms' }}>
             
             {/* TODAY & PAUSE MODAL (Left Column) */}

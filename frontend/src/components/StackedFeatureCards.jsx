@@ -177,58 +177,48 @@ export default function StackedFeatureCards() {
 
               {/* Right Column: 4 Interactive Modules */}
               <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                {/* 1. 90-Second Urge Surfer */}
+                {/* 1. Pause & Choose */}
                 <div className="bg-black/20 rounded-lg p-3.5 sm:p-4 border border-white/5 flex flex-col justify-between">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-sans font-bold text-brand-coral uppercase tracking-widest">
-                      90-SECOND URGE SURFER
+                    <span className="text-[10px] font-sans font-bold text-brand-teal uppercase tracking-widest">
+                      PAUSE & CHOOSE
                     </span>
-                    <span className="w-2 h-2 rounded-full bg-brand-coral pulse-indicator" />
+                    <span className="w-2 h-2 rounded-full bg-brand-teal pulse-indicator" />
                   </div>
-                  <div className="py-1.5">
-                    <div className="flex justify-between items-baseline mb-1">
-                      <span className="text-xs text-white/70 font-sans font-medium">Visceral Urge Crest</span>
-                      <span className="text-xs sm:text-sm font-mono font-bold text-brand-coral">01:14 remaining</span>
-                    </div>
-                    <div className="h-11 w-full">
-                      <svg className="w-full h-full overflow-visible" viewBox="0 0 200 45" fill="none">
-                        <path d="M 0 35 Q 30 35 60 25 T 110 8 T 160 30 T 200 35" stroke="#E8856C" strokeWidth="2.5" strokeLinecap="round" />
-                        <circle cx="110" cy="8" r="3.5" fill="#E8856C" className="anim-wave-surf" />
-                        <circle cx="110" cy="8" r="8" fill="#E8856C" opacity="0.3" className="anim-wave-surf" />
-                      </svg>
+                  <div className="py-2 flex flex-col gap-2">
+                    <p className="text-xs text-white/70 font-sans font-medium">I am experiencing the urge to...</p>
+                    <div className="flex gap-2">
+                      <span className="px-3 py-1 bg-brand-teal/20 text-brand-teal text-[10px] rounded border border-brand-teal/30">Check</span>
+                      <span className="px-3 py-1 bg-brand-coral/20 text-brand-coral text-[10px] rounded border border-brand-coral/30">Seek Reassurance</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-[10px] font-sans font-medium text-white/60 pt-2 border-t border-white/10">
-                    <span>Tactile haptics active</span>
-                    <button className="bg-brand-coral/20 text-brand-coral px-2.5 py-0.5 rounded-full hover:bg-brand-coral hover:text-white transition-colors text-[10px]">
-                      Pause Spike
+                    <span>Non-evaluative logging</span>
+                    <button className="bg-brand-teal/20 text-brand-teal px-2.5 py-0.5 rounded-full hover:bg-brand-teal hover:text-white transition-colors text-[10px]">
+                      Delay
                     </button>
                   </div>
                 </div>
 
-                {/* 2. Digital Worry Stone */}
+                {/* 2. Values Alignment */}
                 <div className="bg-black/20 rounded-lg p-3.5 sm:p-4 border border-white/5 flex flex-col justify-between">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-sans font-bold text-brand-teal uppercase tracking-widest">
-                      DIGITAL WORRY STONE
+                    <span className="text-[10px] font-sans font-bold text-brand-amber uppercase tracking-widest">
+                      LIFE OUTSIDE OCD
                     </span>
-                    <span className="text-[10px] font-sans font-semibold text-white/60 uppercase tracking-widest">4-7-8 Rhythm</span>
+                    <span className="text-[10px] font-sans font-semibold text-white/60 uppercase tracking-widest">Values</span>
                   </div>
-                  <div className="flex items-center gap-3.5 py-1.5">
-                    <div className="w-12 h-12 rounded-full bg-brand-teal/20 border border-brand-teal/40 flex items-center justify-center relative shrink-0">
-                      <div className="w-7 h-7 rounded-full bg-brand-teal/40 anim-vagus-breathe"></div>
-                      <span className="absolute text-[8px] font-sans text-white font-bold tracking-widest">EXHALE</span>
-                    </div>
-                    <div className="space-y-0.5">
-                      <p className="text-xs sm:text-sm font-semibold text-white">Parasympathetic Reset</p>
-                      <p className="text-[11px] text-white/70 leading-snug">
-                        Tactile thumb contact paces autonomic arousal down.
-                      </p>
+                  <div className="flex flex-col gap-2 py-2">
+                    <p className="text-xs text-white/70 font-sans font-medium">What matters to you today?</p>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      <span className="px-2.5 py-1 rounded-full bg-brand-amber/20 text-brand-amber border border-brand-amber/30 text-[10px]">Family</span>
+                      <span className="px-2.5 py-1 rounded-full bg-white/5 text-white/60 border border-white/10 text-[10px]">Career</span>
+                      <span className="px-2.5 py-1 rounded-full bg-brand-teal/20 text-brand-teal border border-brand-teal/30 text-[10px]">Creativity</span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-[10px] font-sans font-medium text-brand-teal pt-2 border-t border-white/10">
-                    <span>Tactile Frequency</span>
-                    <span className="font-bold">0.1 Hz Pacing</span>
+                  <div className="flex items-center justify-between text-[10px] font-sans font-medium text-brand-amber pt-2 border-t border-white/10">
+                    <span>Re-orienting direction</span>
+                    <span className="font-bold">Focus</span>
                   </div>
                 </div>
 

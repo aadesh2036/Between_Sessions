@@ -5,6 +5,9 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import OnboardingFlow from './pages/OnboardingFlow';
 import DashboardPage from './pages/DashboardPage';
+import SettingsPage from './pages/SettingsPage';
+import PracticeHistoryPage from './pages/PracticeHistoryPage';
+import ClinicianConnectPage from './pages/ClinicianConnectPage';
 
 function App() {
   return (
@@ -27,10 +30,15 @@ function App() {
           
           {/* Protected App Routes */}
           <Route 
-            path="/app" 
+            path="/app/*" 
             element={
               <ProtectedRoute requireOnboarding={true}>
-                <DashboardPage />
+                <Routes>
+                  <Route path="/" element={<DashboardPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="practice" element={<PracticeHistoryPage />} />
+                  <Route path="clinician" element={<ClinicianConnectPage />} />
+                </Routes>
               </ProtectedRoute>
             } 
           />

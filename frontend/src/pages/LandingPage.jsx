@@ -92,7 +92,7 @@ export default function LandingPage() {
         between sessions.
       </h1>
 <p className="text-lg text-brand-ink/75 max-w-xl font-normal leading-relaxed">
-        Structured behavioral continuity for Exposure and Response Prevention (ERP). Track compulsions without shame, surf visceral urge spikes, and share consent-based longitudinal patterns with your practitioner.
+        Structured behavioral continuity for Exposure and Response Prevention (ERP). Track compulsions without shame, pause and choose your response, and share consent-based longitudinal patterns with your practitioner.
       </p>
 {/* Pathway selector buttons */}
 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 w-full sm:w-auto">
@@ -235,7 +235,7 @@ export default function LandingPage() {
 </g>
 </svg></div>{/* STITCH_SVG_END:ANIMATION_15 */}
 <p className="text-xs text-brand-ink/65 text-center mt-3 font-medium">
-        Meet <span className="font-bold text-brand-teal">Pip</span>: Your steady companion for grounding and urge-surfing.
+        Meet <span className="font-bold text-brand-teal">Pip</span>: Your steady companion for grounding and mindful choices.
       </p>
 </div>
 </div>
@@ -330,7 +330,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-brand-ink/80">
             <div className="p-4 bg-brand-canvas rounded-2xl border border-brand-border space-y-1.5">
               <p className="font-bold text-brand-ink">What Between Sessions IS:</p>
-              <p className="leading-relaxed">A structured continuity companion for tracking behaviors, surfing urge crests, practicing therapist-guided exercises, and organizing longitudinal reflections for clinical review.</p>
+              <p className="leading-relaxed">A structured continuity companion for tracking behaviors, practicing the pause, practicing therapist-guided exercises, and organizing longitudinal reflections for clinical review.</p>
             </div>
             <div className="p-4 bg-brand-canvas rounded-2xl border border-brand-border space-y-1.5">
               <p className="font-bold text-brand-ink">What Between Sessions is NOT:</p>

@@ -143,3 +143,22 @@ Between_Sessions/
 | Design System | `Organic Strategic Editorial` |
 | Design System Asset | `assets/5b983aea382c4d5fbfdfe4f98f906e7e` |
 | Safety Helpline | Tele-MANAS: 14416 / 1800-891-4416 |
+
+## Remaining Tasks & Known Limitations (Pending Implementation)
+> **Note:** The following features and architectural tasks are currently incomplete and are marked for the next iteration.
+
+1. **Forgot Password Flow:**
+   - Password reset functionality (emailing reset link, reset token verification, and password change endpoints) is completely missing.
+
+2. **Dashboard Sub-Pages:**
+   - The inside pages of the dashboard (`/app/practice`, `/app/clinician`) are currently static structural placeholders. They need to be wired to real backend queries (e.g., fetching historical behavioral events from DynamoDB).
+
+3. **User Profile Management:**
+   - The User Edit Profile page exists visually, but the `/api/v1/user/update` endpoint currently lacks proper JWT bearer token authorization validation to securely protect user data modification.
+
+4. **Complete ERP Architecture:**
+   - The comprehensive Exposure and Response Prevention (ERP) engine (e.g., exposure hierarchies, detailed exposure logging, and SUDS tracking over time) is not fully implemented yet.
+
+5. **Production Readiness:**
+   - Replacing Mailtrap with a production email service (e.g., AWS SES).
+   - Moving from local DynamoDB and the Express wrapper to a fully deployed AWS API Gateway + Lambda + DynamoDB production stack.

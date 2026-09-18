@@ -10,58 +10,81 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Check local storage for existing session
     const storedUser = localStorage.getItem('bs_user');
     const storedToken = localStorage.getItem('bs_token');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    if (storedToken) {
-      setToken(storedToken);
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
+    if (storedToken) setToken(storedToken);
     setIsLoading(false);
   }, []);
 
-  const login = async (email) => {
+  const _fetch = async (endpoint, body) => {
+    const res = await fetch(`http://localhost:3000/api/v1${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
+    return data;
+  };
+
+  const register = async (email, password, name) => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/v1/auth/verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      return await _fetch('/auth/register', { email, password, name });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      if (!response.ok) {
-        let errorMessage = 'Verification failed';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || errorMessage;
-        } catch (e) {
-          // ignore JSON parse error
-        }
-        throw new Error(errorMessage);
-      }
-
-      const data = await response.json();
-      const { token, user } = data;
-
-      localStorage.setItem('bs_token', token);
-      localStorage.setItem('bs_user', JSON.stringify(user));
-      
-      setToken(token);
-      setUser(user);
-      
+  const login = async (email, password) => {
+    setIsLoading(true);
+    try {
+      const data = await _fetch('/auth/login', { email, password });
+      localStorage.setItem('bs_token', data.token);
+      localStorage.setItem('bs_user', JSON.stringify(data.user));
+      setToken(data.token);
+      setUser(data.user);
       return data;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const completeOnboarding = () => {
+  const verifyEmail = async (verificationToken) => {
+    setIsLoading(true);
+    try {
+      return await _fetch('/auth/verify', { token: verificationToken });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resendEmail = async (email) => {
+    setIsLoading(true);
+    try {
+      return await _fetch('/auth/resend', { email });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateUser = async (email, updates) => {
+    setIsLoading(true);
+    try {
+      await _fetch('/user/update', { email, ...updates });
+      const updatedUser = { ...user, ...updates };
+      localStorage.setItem('bs_user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const completeOnboarding = async () => {
     if (user) {
       const updatedUser = { ...user, onboardingComplete: true };
+      await updateUser(user.email, { onboardingComplete: true });
       localStorage.setItem('bs_user', JSON.stringify(updatedUser));
       setUser(updatedUser);
     }
@@ -75,12 +98,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = {
-    user,
-    token,
-    isLoading,
-    login,
-    logout,
-    completeOnboarding
+    user, token, isLoading,
+    register, login, logout, verifyEmail, resendEmail, updateUser, completeOnboarding
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
