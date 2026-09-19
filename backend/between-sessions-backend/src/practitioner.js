@@ -31,8 +31,9 @@ const {
 const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
 
+const ddbEndpoint = process.env.DYNAMODB_ENDPOINT || 'http://127.0.0.1:8000';
 const ddbClient = new DynamoDBClient({
-  endpoint: 'http://localhost:8000',
+  endpoint: ddbEndpoint,
   region: 'local',
   credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' },
 });
@@ -156,6 +157,48 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ data: safe }) };
     }
 
+    // ── PUT /practitioner/me ─────────────────────────────────────────────────
+    if (method === 'PUT' && path.includes('/practitioner/me')) {
+      const decoded = requirePractitionerAuth(event);
+      const body = JSON.parse(event.body || '{}');
+      const { name, credentials, specialisation, languages, remoteAvailable, clinicName, notes } = body;
+
+      const updateExpr = [];
+      const exprVals = {};
+      const exprNames = {};
+
+      if (name) { updateExpr.push("#nm = :n"); exprVals[":n"] = name; exprNames["#nm"] = "name"; }
+      if (credentials) { updateExpr.push("credentials = :c"); exprVals[":c"] = credentials; }
+      if (specialisation) { updateExpr.push("specialisation = :s"); exprVals[":s"] = specialisation; }
+      if (languages) { updateExpr.push("languages = :l"); exprVals[":l"] = languages; }
+      if (remoteAvailable !== undefined) { updateExpr.push("remoteAvailable = :ra"); exprVals[":ra"] = remoteAvailable; }
+      if (clinicName) { updateExpr.push("clinicName = :cn"); exprVals[":cn"] = clinicName; }
+      if (notes) { updateExpr.push("notes = :nt"); exprVals[":nt"] = notes; }
+
+      if (updateExpr.length > 0) {
+        await docClient.send(new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `PRACTITIONER#${decoded.practitionerId}`, SK: 'PROFILE' },
+          UpdateExpression: 'SET ' + updateExpr.join(', '),
+          ExpressionAttributeValues: exprVals,
+          ...(Object.keys(exprNames).length > 0 ? { ExpressionAttributeNames: exprNames } : {}),
+        }));
+        if (decoded.email) {
+          try {
+            await docClient.send(new UpdateCommand({
+              TableName: TABLE_NAME,
+              Key: { PK: `PRACTITIONER#${decoded.email}`, SK: 'PROFILE' },
+              UpdateExpression: 'SET ' + updateExpr.join(', '),
+              ExpressionAttributeValues: exprVals,
+              ...(Object.keys(exprNames).length > 0 ? { ExpressionAttributeNames: exprNames } : {}),
+            }));
+          } catch {}
+        }
+      }
+
+      return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ message: 'Practitioner profile updated successfully.' }) };
+    }
+
     // ── GET /practitioner/requests ───────────────────────────────────────────
     if (method === 'GET' && path.includes('/practitioner/requests') && !path.includes('/accept') && !path.includes('/decline')) {
       const decoded = requirePractitionerAuth(event);
@@ -254,8 +297,21 @@ exports.handler = async (event) => {
         }));
         if (connRes.Item) {
           const s = connRes.Item.status;
+          let uProfile = {};
+          try {
+            const uRes = await docClient.send(new GetCommand({
+              TableName: TABLE_NAME,
+              Key: { PK: `USER#${uid}`, SK: 'PROFILE' },
+            }));
+            if (uRes.Item) uProfile = uRes.Item;
+          } catch { /* proceed */ }
+
           patients.push({
             userId: uid,
+            name: uProfile.name || uid,
+            email: uProfile.email || '',
+            values: uProfile.values || [],
+            ageBand: uProfile.ageBand || 'Adult',
             connectionStatus: s,
             consentedCategories: connRes.Item.consentedCategories || [],
             connectedAt: connRes.Item.createdAt,
@@ -372,6 +428,22 @@ exports.handler = async (event) => {
         trigger: j.trigger,
       }));
 
+      let patientProfile = {};
+      try {
+        const uRes = await docClient.send(new GetCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: pk, SK: 'PROFILE' },
+        }));
+        if (uRes.Item) {
+          patientProfile = {
+            name: uRes.Item.name,
+            email: uRes.Item.email,
+            values: uRes.Item.values || [],
+            ageBand: uRes.Item.ageBand || 'Adult',
+          };
+        }
+      } catch { /* proceed */ }
+
       const sudsValues = checkins.map(c => c.sudsScore).filter(n => typeof n === 'number');
       const avgSuds = sudsValues.length
         ? (sudsValues.reduce((a, b) => a + b, 0) / sudsValues.length).toFixed(1)
@@ -383,6 +455,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           data: {
             userId,
+            patientProfile,
             practitionerId: decoded.practitionerId,
             consentedCategories: [...consentedCategories],
             period: { from: fromISO, to: now },

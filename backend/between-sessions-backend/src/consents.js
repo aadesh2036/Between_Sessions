@@ -13,8 +13,9 @@ const { DynamoDBDocumentClient, PutCommand, QueryCommand, UpdateCommand } = requ
 const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
 
+const ddbEndpoint = process.env.DYNAMODB_ENDPOINT || 'http://127.0.0.1:8000';
 const ddbClient = new DynamoDBClient({
-  endpoint: 'http://localhost:8000',
+  endpoint: ddbEndpoint,
   region: 'local',
   credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' },
 });
@@ -135,19 +136,18 @@ exports.handler = async (event) => {
 
       await docClient.send(new PutCommand({ TableName: TABLE_NAME, Item: item }));
 
-      // If revoking, also update the matching CONNECTION to strip consent categories
-      if (consentStatus === 'revoked') {
-        try {
-          await docClient.send(new UpdateCommand({
-            TableName: TABLE_NAME,
-            Key: { PK: `USER#${userId}`, SK: `CONNECTION#${recipientId}` },
-            UpdateExpression: 'SET consentedCategories = :empty, updatedAt = :now',
-            ExpressionAttributeValues: { ':empty': [], ':now': now },
-            ConditionExpression: 'attribute_exists(PK)', // only if connection exists
-          }));
-        } catch {
-          // connection may not exist — fine
-        }
+      // Synchronize matching CONNECTION's consentedCategories so Cedar checks see the update immediately
+      try {
+        const syncedCategories = consentStatus === 'active' ? categories : [];
+        await docClient.send(new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `USER#${userId}`, SK: `CONNECTION#${recipientId}` },
+          UpdateExpression: 'SET consentedCategories = :cats, updatedAt = :now',
+          ExpressionAttributeValues: { ':cats': syncedCategories, ':now': now },
+          ConditionExpression: 'attribute_exists(PK)', // only if connection exists
+        }));
+      } catch {
+        // connection may not exist yet — fine
       }
 
       return {

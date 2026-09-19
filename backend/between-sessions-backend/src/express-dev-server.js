@@ -27,6 +27,9 @@ const progressHandler = require('./progress').handler;
 const aiSummaryHandler = require('./aiSummary').handler;
 const consentsHandler = require('./consents').handler;
 const connectionsHandler = require('./connections').handler;
+const toolkitHandler = require('./toolkit').handler;
+const valuesHandler = require('./values').handler;
+const learningHandler = require('./learning').handler;
 
 const app = express();
 app.use(cors());
@@ -83,8 +86,24 @@ app.put('/api/v1/user/update', bridge(authHandler));
 // Also support POST for backward compat with existing AuthContext call
 app.post('/api/v1/user/update', bridge(authHandler));
 
-// ── Practice (legacy behavioral events) ─────────────────────────────────────
+// ── Practice & Exposure Plans ───────────────────────────────────────────────
 app.post('/api/v1/practice', bridge(practiceHandler));
+app.get('/api/v1/practice', bridge(practiceHandler));
+app.get('/api/v1/practice/plans', bridge(practiceHandler));
+
+// ── Toolkit (Grounding, Breathing, Pause&Choose, Reassurance, Focus) ─────────
+app.post('/api/v1/toolkit/interactions', bridge(toolkitHandler));
+app.get('/api/v1/toolkit/interactions', bridge(toolkitHandler));
+
+// ── Values & Life Outside OCD ────────────────────────────────────────────────
+app.get('/api/v1/values', bridge(valuesHandler));
+app.get('/api/v1/values/actions', bridge(valuesHandler));
+app.post('/api/v1/values/actions', bridge(valuesHandler));
+
+// ── Learn (Books, Chapters, Masterclasses, Resources) ─────────────────────────
+app.get('/api/v1/learn/modules', bridge(learningHandler));
+app.get('/api/v1/learn/progress', bridge(learningHandler));
+app.post('/api/v1/learn/progress', bridge(learningHandler));
 
 // ── Checkins ─────────────────────────────────────────────────────────────────
 app.post('/api/v1/checkins', bridge(checkinsHandler));
@@ -109,19 +128,23 @@ app.get('/api/v1/consents', bridge(consentsHandler));
 app.put('/api/v1/consents/:consentId', bridge(consentsHandler));
 app.put('/api/v1/consents', bridge(consentsHandler)); // new consent without id
 
-// ── Connections ──────────────────────────────────────────────────────────────
+// ── Connections & Recommendations ───────────────────────────────────────────
 app.post('/api/v1/connections', bridge(connectionsHandler));
 app.get('/api/v1/connections', bridge(connectionsHandler));
 app.delete('/api/v1/connections/:id', bridge(connectionsHandler));
+app.get('/api/v1/recommendations', bridge(connectionsHandler));
+app.get('/api/v1/connections/cedar-eval', bridge(connectionsHandler));
 
-// ── Practitioner login ───────────────────────────────────────────────────────
+// ── Practitioner auth ────────────────────────────────────────────────────────
 app.post('/api/v1/auth/practitioner-login', bridge(authHandler));
+app.post('/api/v1/auth/practitioner-register', bridge(authHandler));
 
 // ── Public practitioner discovery (no auth) ──────────────────────────────────
 app.get('/api/v1/practitioners', bridge(practitionerHandler));
 
 // ── Practitioner domain routes ───────────────────────────────────────────────
 app.get('/api/v1/practitioner/me',                                          bridge(practitionerHandler));
+app.put('/api/v1/practitioner/me',                                          bridge(practitionerHandler));
 app.get('/api/v1/practitioner/requests',                                    bridge(practitionerHandler));
 app.post('/api/v1/practitioner/requests/:userId/accept',                    bridge(practitionerHandler));
 app.post('/api/v1/practitioner/requests/:userId/decline',                   bridge(practitionerHandler));

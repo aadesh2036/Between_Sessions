@@ -6,7 +6,7 @@
  * understand backend error shapes.
  */
 
-const BASE_URL = 'http://localhost:3000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE || '/api/v1';
 
 /** Retrieve the stored JWT token */
 function getToken() {
@@ -113,12 +113,53 @@ export const journalApi = {
   },
 };
 
-// ── Practice ─────────────────────────────────────────────────────────────────
+// ── Practice & Exposure ───────────────────────────────────────────────────────
 
 export const practiceApi = {
   /** Legacy behavioral event log (Pause & Choose) */
   logEvent: (userId, responseType) =>
     apiFetch('/practice', { method: 'POST', body: JSON.stringify({ userId, responseType }) }),
+
+  /** Create practice / exposure log */
+  create: (payload) =>
+    apiFetch('/practice', { method: 'POST', body: JSON.stringify(payload) }),
+
+  /** Retrieve practice logs */
+  list: () => apiFetch('/practice'),
+
+  /** Retrieve active clinician-assigned & self-guided practice plans */
+  getPlans: () => apiFetch('/practice/plans'),
+};
+
+// ── Toolkit (Grounding, Breathing, Pause & Choose, Reassurance, Focus) ─────────
+
+export const toolkitApi = {
+  logInteraction: (payload) =>
+    apiFetch('/toolkit/interactions', { method: 'POST', body: JSON.stringify(payload) }),
+
+  listInteractions: () => apiFetch('/toolkit/interactions'),
+};
+
+// ── Values (Life Outside OCD) ────────────────────────────────────────────────
+
+export const valuesApi = {
+  get: () => apiFetch('/values'),
+
+  logAction: (payload) =>
+    apiFetch('/values/actions', { method: 'POST', body: JSON.stringify(payload) }),
+
+  listActions: () => apiFetch('/values/actions'),
+};
+
+// ── Learn (Curated Library & Progress) ───────────────────────────────────────
+
+export const learnApi = {
+  getModules: () => apiFetch('/learn/modules'),
+
+  getProgress: () => apiFetch('/learn/progress'),
+
+  saveProgress: (chapterId, bookId, completed = true) =>
+    apiFetch('/learn/progress', { method: 'POST', body: JSON.stringify({ chapterId, bookId, completed }) }),
 };
 
 // ── Progress ─────────────────────────────────────────────────────────────────
@@ -167,6 +208,11 @@ export const connectionsApi = {
 
   remove: (practitionerId) =>
     apiFetch(`/connections/${practitionerId}`, { method: 'DELETE' }),
+
+  cedarEval: (practitionerId) => {
+    const qs = practitionerId ? `?practitionerId=${encodeURIComponent(practitionerId)}` : '';
+    return apiFetch(`/connections/cedar-eval${qs}`);
+  },
 };
 
 // ── Practitioner (Clinician Dashboard) ───────────────────────────────────────
@@ -213,16 +259,36 @@ async function pracFetch(path, options = {}) {
   return data;
 }
 
+// ── Recommendations (Patient View) ───────────────────────────────────────────
+
+export const recommendationsApi = {
+  list: () => apiFetch('/recommendations'),
+};
+
+// ── Public Practitioner Directory ────────────────────────────────────────────
+
+export const practitionersApi = {
+  list: () => apiFetch('/practitioners'),
+};
+
 export const practitionerApi = {
   /** Authenticate a practitioner — uses apiFetch (no token needed for login) */
   login: (email, password, govCertId) =>
     apiFetch('/auth/practitioner-login', { method: 'POST', body: JSON.stringify({ email, password, practitionerId: govCertId }) }),
+
+  /** Register a new practitioner with synthetic demo credential */
+  register: (payload) =>
+    apiFetch('/auth/practitioner-register', { method: 'POST', body: JSON.stringify(payload) }),
 
   /** Get the currently authenticated practitioner's profile */
   me: () => pracFetch('/practitioner/me'),
 
   /** Get the currently authenticated practitioner's profile (alias) */
   getMe: () => pracFetch('/practitioner/me'),
+
+  /** Update practitioner profile and settings */
+  updateMe: (payload) =>
+    pracFetch('/practitioner/me', { method: 'PUT', body: JSON.stringify(payload) }),
 
   /** Get all pending connection requests */
   getRequests: () => pracFetch('/practitioner/requests'),
@@ -251,3 +317,4 @@ export const practitionerApi = {
       body: JSON.stringify(payload),
     }),
 };
+

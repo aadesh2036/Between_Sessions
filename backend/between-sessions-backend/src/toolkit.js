@@ -1,7 +1,8 @@
 /**
- * Checkins Handler
- * POST /api/v1/checkins  — Log a daily distress/urge check-in
- * GET  /api/v1/checkins  — Retrieve check-in history with optional date range
+ * Toolkit Handler — Between Sessions
+ *
+ * POST /api/v1/toolkit/interactions — Log a session with Grounding, Breathing, Pause & Choose, Reassurance Interrupter, or Focus Timer
+ * GET  /api/v1/toolkit/interactions — Retrieve recent toolkit interactions
  */
 
 const jwt = require('jsonwebtoken');
@@ -28,7 +29,6 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
 };
 
-/** Extract and verify the bearer token. Returns decoded payload or throws. */
 function requireAuth(event) {
   const authHeader =
     event.headers?.authorization || event.headers?.Authorization || '';
@@ -46,34 +46,33 @@ exports.handler = async (event) => {
     const method = event.httpMethod;
 
     if (method === 'POST') {
-      /* ── Create check-in ─────────────────────────────────────────────── */
       const decoded = requireAuth(event);
       const body = JSON.parse(event.body || '{}');
 
-      const { sudsScore, urgeScore, mood, note } = body;
+      const { toolId, durationSeconds, actionChosen, details, notes } = body;
 
-      // sudsScore 0-10 required
-      if (sudsScore === undefined || sudsScore === null) {
+      if (!toolId) {
         return {
           statusCode: 400,
           headers: CORS_HEADERS,
-          body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'sudsScore (0–10) is required.' } }),
+          body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'toolId is required.' } }),
         };
       }
 
       const timestamp = new Date().toISOString();
-      const checkinId = `CI_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      const interactionId = `TK_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
 
       const item = {
         PK: `USER#${decoded.userId}`,
-        SK: `CHECKIN#${timestamp}#${checkinId}`,
-        entityType: 'Checkin',
-        checkinId,
+        SK: `TOOLKIT#${timestamp}#${interactionId}`,
+        entityType: 'ToolkitInteraction',
+        interactionId,
         userId: decoded.userId,
-        sudsScore: Number(sudsScore),
-        urgeScore: urgeScore !== undefined ? Number(urgeScore) : null,
-        mood: mood || null,
-        note: note || null, // keep brief, not clinical narrative
+        toolId, // 'grounding', 'breathing', 'pause-choose', 'reassurance-interrupter', 'focus-timer'
+        durationSeconds: durationSeconds ? Number(durationSeconds) : 0,
+        actionChosen: actionChosen || null,
+        details: details || null,
+        notes: notes || null,
         createdAt: timestamp,
       };
 
@@ -82,55 +81,44 @@ exports.handler = async (event) => {
       return {
         statusCode: 201,
         headers: CORS_HEADERS,
-        body: JSON.stringify({ message: 'Check-in logged.', data: item }),
+        body: JSON.stringify({ message: 'Toolkit interaction recorded.', data: item }),
       };
     }
 
     if (method === 'GET') {
-      /* ── List check-ins ─────────────────────────────────────────────── */
       const decoded = requireAuth(event);
-      const qs = event.queryStringParameters || {};
-      const fromDate = qs.from || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const toDate = qs.to || new Date().toISOString();
 
-      const result = await docClient.send(
+      const res = await docClient.send(
         new QueryCommand({
           TableName: TABLE_NAME,
-          KeyConditionExpression: 'PK = :pk AND SK BETWEEN :skFrom AND :skTo',
+          KeyConditionExpression: 'PK = :pk AND begins_with(SK, :skPrefix)',
           ExpressionAttributeValues: {
             ':pk': `USER#${decoded.userId}`,
-            ':skFrom': `CHECKIN#${fromDate}`,
-            ':skTo': `CHECKIN#${toDate}Z`,
+            ':skPrefix': 'TOOLKIT#',
           },
-          ScanIndexForward: false, // newest first
+          ScanIndexForward: false,
+          Limit: 30,
         })
       );
 
       return {
         statusCode: 200,
         headers: CORS_HEADERS,
-        body: JSON.stringify({ data: result.Items || [] }),
+        body: JSON.stringify({ data: res.Items || [] }),
       };
     }
 
     return {
       statusCode: 405,
       headers: CORS_HEADERS,
-      body: JSON.stringify({ error: { code: 'METHOD_NOT_ALLOWED' } }),
+      body: JSON.stringify({ error: 'Method not allowed' }),
     };
   } catch (err) {
-    if (err.statusCode) {
-      return {
-        statusCode: err.statusCode,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({ error: { code: err.code, message: err.message } }),
-      };
-    }
-    console.error('[checkins]', err);
+    console.error('Toolkit handler error:', err);
     return {
-      statusCode: 500,
+      statusCode: err.statusCode || 500,
       headers: CORS_HEADERS,
-      body: JSON.stringify({ error: { code: 'INTERNAL_ERROR', message: 'Unexpected error.' } }),
+      body: JSON.stringify({ error: { code: err.code || 'INTERNAL_ERROR', message: err.message || 'Internal server error' } }),
     };
   }
 };

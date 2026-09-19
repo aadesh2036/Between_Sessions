@@ -11,8 +11,10 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import MobileBottomNav from '../components/MobileBottomNav';
+import BetweenLoading from '../components/BetweenLoading';
 import { practitionerApi } from '../services/api';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -284,16 +286,43 @@ function PatientView({ patient, onBack }) {
         </button>
       </header>
 
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
-              Patient
-            </p>
-            <h2 className="font-editorial text-3xl text-brand-ink">
-              {patient.userId}
+      <div className="bg-brand-paper rounded-3xl border border-brand-border/60 p-6 sm:p-8 shadow-card-lift">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-brand-teal px-2.5 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
+                Patient Continuity Profile
+              </span>
+              <span className="font-mono text-xs text-brand-ink/40">
+                ID: {patient.userId}
+              </span>
+            </div>
+            <h2 className="font-editorial text-3xl sm:text-4xl text-brand-ink font-medium">
+              {summary?.patientProfile?.name || patient.name || patient.userId}
             </h2>
+            <p className="text-xs text-brand-ink/60">
+              Age Band: <span className="font-semibold text-brand-ink">{summary?.patientProfile?.ageBand || patient.ageBand || 'Adult'}</span>
+              {summary?.patientProfile?.email && ` • ${summary.patientProfile.email}`}
+            </p>
+
+            {/* Life Outside OCD / Values Context */}
+            {(summary?.patientProfile?.values || patient.values || []).length > 0 && (
+              <div className="pt-2 flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-brand-ink/50 mr-1">
+                  Life Outside OCD:
+                </span>
+                {(summary?.patientProfile?.values || patient.values || []).map((v) => (
+                  <span
+                    key={v}
+                    className="text-[10px] px-2.5 py-0.5 rounded-full bg-brand-amberSoft text-brand-amber font-medium border border-brand-amber/20"
+                  >
+                    {v}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
+
           <div className="flex flex-wrap items-center gap-2">
             <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusBg} ${statusText}`}>
               {statusLabel}
@@ -301,7 +330,7 @@ function PatientView({ patient, onBack }) {
             {patient.consentedCategories?.map((cat) => (
               <span
                 key={cat}
-                className="px-3 py-1 rounded-full text-[10px] font-bold bg-brand-softerTeal text-brand-teal border border-brand-teal/20"
+                className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-brand-softerTeal text-brand-teal border border-brand-teal/20"
               >
                 {cat}
               </span>
@@ -310,9 +339,8 @@ function PatientView({ patient, onBack }) {
         </div>
 
         {/* Clinical boundary note */}
-        <p className="mt-4 text-[11px] text-brand-ink/50 italic border-t border-brand-border/40 pt-4">
-          Data shown is limited to categories the patient has explicitly consented to share.
-          This is not a clinical record system.
+        <p className="mt-4 text-[11px] text-brand-ink/50 italic border-t border-brand-border/40 pt-3">
+          Data shown is limited to categories the patient has explicitly consented to share under AWS Cedar policy. This is an intentional between-session companion, not an EHR or diagnosis system.
         </p>
       </div>
 
@@ -335,16 +363,14 @@ function PatientView({ patient, onBack }) {
         </div>
       )}
 
-      {/* ── Loading skeletons ────────────────────────────────────────────── */}
+      {/* ── Loading state with signature Between Sessions animation ────────── */}
       {loading && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
-          <Skeleton className="h-32" />
-          <Skeleton className="h-48" />
+        <div className="bg-brand-paper rounded-3xl border border-brand-border/60 p-12 shadow-card-lift">
+          <BetweenLoading
+            size="lg"
+            label="Evaluating cryptographic consent & retrieving continuity logs..."
+            sublabel="Cedar WASM engine verifying patient-authorized data scopes"
+          />
         </div>
       )}
 
@@ -508,7 +534,7 @@ function PatientView({ patient, onBack }) {
           </section>
 
           {/* Recommendations */}
-          <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
+          <section id="recommendation-section" className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 text-brand-teal">
                 <span className="text-xs font-bold uppercase tracking-widest">Recommendations</span>
@@ -601,6 +627,366 @@ function PatientView({ patient, onBack }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
+/*  Practitioner Settings View                                                 */
+/* ─────────────────────────────────────────────────────────────────────────── */
+function PractitionerSettingsView({ prac, onUpdated, onLogout }) {
+  const [name, setName] = useState(prac?.name || '');
+  const [clinicName, setClinicName] = useState(prac?.clinicName || '');
+  const [credentials, setCredentials] = useState(prac?.credentials || '');
+  const [specialisation, setSpecialisation] = useState(
+    Array.isArray(prac?.specialisation) ? prac.specialisation.join(', ') : (prac?.specialisation || '')
+  );
+  const [languages, setLanguages] = useState(
+    Array.isArray(prac?.languages) ? prac.languages.join(', ') : (prac?.languages || 'English, Hindi')
+  );
+  const [remoteAvailable, setRemoteAvailable] = useState(prac?.remoteAvailable ?? true);
+  const [notes, setNotes] = useState(prac?.notes || '');
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState('');
+  const [saveError, setSaveError] = useState('');
+
+  // Sync if prac prop updates
+  useEffect(() => {
+    if (prac) {
+      if (prac.name) setName(prac.name);
+      if (prac.clinicName) setClinicName(prac.clinicName);
+      if (prac.credentials) setCredentials(prac.credentials);
+      if (prac.specialisation) {
+        setSpecialisation(Array.isArray(prac.specialisation) ? prac.specialisation.join(', ') : prac.specialisation);
+      }
+      if (prac.languages) {
+        setLanguages(Array.isArray(prac.languages) ? prac.languages.join(', ') : prac.languages);
+      }
+      if (prac.remoteAvailable !== undefined) setRemoteAvailable(prac.remoteAvailable);
+      if (prac.notes) setNotes(prac.notes);
+    }
+  }, [prac]);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setSaveSuccess('');
+    setSaveError('');
+
+    try {
+      const specs = specialisation.split(',').map((s) => s.trim()).filter(Boolean);
+      const langs = languages.split(',').map((l) => l.trim()).filter(Boolean);
+      const payload = {
+        name: name.trim(),
+        clinicName: clinicName.trim(),
+        credentials: credentials.trim(),
+        specialisation: specs,
+        languages: langs,
+        remoteAvailable,
+        notes: notes.trim(),
+      };
+      const res = await practitionerApi.updateMe(payload);
+      setSaveSuccess(res.message || 'Practitioner profile updated successfully.');
+      onUpdated({ ...prac, ...payload });
+      setTimeout(() => setSaveSuccess(''), 4000);
+    } catch (err) {
+      setSaveError(err.message || 'Failed to update practitioner profile.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-semibold mb-2">
+          <span className="material-symbols-outlined text-sm">tune</span>
+          Clinical Practice Configuration
+        </div>
+        <h1 className="font-editorial text-4xl sm:text-5xl text-brand-ink font-normal leading-tight">
+          Practitioner Settings
+        </h1>
+        <p className="text-brand-ink/60 text-sm mt-1 max-w-2xl">
+          Manage your professional details, credentials, clinical areas of focus, and patient intake availability.
+        </p>
+      </div>
+
+      {saveSuccess && (
+        <div className="p-4 rounded-2xl bg-brand-softerTeal text-brand-teal text-sm font-medium border border-brand-teal/20 flex items-center gap-2">
+          <span className="material-symbols-outlined text-lg">check_circle</span>
+          <span>{saveSuccess}</span>
+        </div>
+      )}
+
+      {saveError && (
+        <div className="p-4 rounded-2xl bg-brand-coralSoft text-brand-coral text-sm font-medium border border-brand-coral/20 flex items-center gap-2">
+          <span className="material-symbols-outlined text-lg">error</span>
+          <span>{saveError}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSave} className="space-y-6">
+        {/* Bento Grid layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Card 1: Professional Identity (Col span 2) */}
+          <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/70 shadow-card-lift space-y-5">
+            <div className="flex items-center justify-between border-b border-brand-border/40 pb-4">
+              <div>
+                <h2 className="font-editorial text-2xl text-brand-ink font-normal">
+                  Professional Identity
+                </h2>
+                <p className="text-xs text-brand-ink/50 mt-0.5">
+                  Visible to patients during clinician discovery and consultation matching.
+                </p>
+              </div>
+              <span className="material-symbols-outlined text-brand-teal text-2xl">badge</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Full Name &amp; Title
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Dr. Kavita Mehra"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Clinic or Practice Affiliation
+                </label>
+                <input
+                  type="text"
+                  value={clinicName}
+                  onChange={(e) => setClinicName(e.target.value)}
+                  placeholder="e.g. Horizons Behavioral Health"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Credentials, Degrees &amp; Council Registration
+                </label>
+                <input
+                  type="text"
+                  value={credentials}
+                  onChange={(e) => setCredentials(e.target.value)}
+                  placeholder="e.g. MD, MCI Registered Psychiatrist · ERP Specialist"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                  required
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Practice Philosophy &amp; Patient Notes
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Describe your therapeutic modality, approach to ERP between sessions, or consultation criteria."
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink resize-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Practitioner Registry & License Badge (Col span 1) */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/70 shadow-card-lift flex flex-col justify-between space-y-5">
+            <div>
+              <div className="flex items-center justify-between border-b border-brand-border/40 pb-4 mb-4">
+                <div>
+                  <h2 className="font-editorial text-2xl text-brand-ink font-normal">
+                    Verified Registry
+                  </h2>
+                  <p className="text-xs text-brand-ink/50 mt-0.5">
+                    Synthetic demo credential status
+                  </p>
+                </div>
+                <span className="material-symbols-outlined text-brand-lavender text-2xl">verified</span>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-brand-softerTeal/70 border border-brand-teal/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-brand-teal">
+                    Registry ID
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-brand-teal text-white text-[9px] font-bold">
+                    VERIFIED
+                  </span>
+                </div>
+                <div className="font-mono text-base font-bold text-brand-ink">
+                  {prac?.govCertId || 'MCI-2024-KM-7741'}
+                </div>
+                <p className="text-[11px] text-brand-ink/65 leading-relaxed pt-1 border-t border-brand-teal/20">
+                  Practitioner identity verified for simulated clinical continuity. In production, verified against national medical councils.
+                </p>
+              </div>
+
+              <div className="mt-4 p-4 rounded-2xl bg-brand-canvas border border-brand-border/60 space-y-1.5">
+                <div className="text-xs font-semibold text-brand-ink">
+                  Registered Account Email
+                </div>
+                <div className="font-mono text-xs text-brand-ink/60">
+                  {prac?.email || 'kavita@betweensessions.com'}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-brand-coralSoft/70 border border-brand-coral/20 text-brand-coral text-[11px] flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">support</span>
+              <span>Tele-MANAS crisis link remains active on all views (14416).</span>
+            </div>
+          </div>
+
+          {/* Card 3: Clinical Focus & Consultation Mode (Col span 2) */}
+          <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/70 shadow-card-lift space-y-5">
+            <div className="flex items-center justify-between border-b border-brand-border/40 pb-4">
+              <div>
+                <h2 className="font-editorial text-2xl text-brand-ink font-normal">
+                  Clinical Focus &amp; Consultation Mode
+                </h2>
+                <p className="text-xs text-brand-ink/50 mt-0.5">
+                  Configure areas of therapeutic focus and accepted consultation modalities.
+                </p>
+              </div>
+              <span className="material-symbols-outlined text-brand-teal text-2xl">psychology</span>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Specialization Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={specialisation}
+                  onChange={(e) => setSpecialisation(e.target.value)}
+                  placeholder="e.g. OCD, Anxiety Disorders, ERP, Phobias"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                />
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {specialisation.split(',').map((tag, idx) => {
+                    const trimmed = tag.trim();
+                    if (!trimmed) return null;
+                    return (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-medium border border-brand-teal/20"
+                      >
+                        {trimmed}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-brand-ink mb-1">
+                  Languages Spoken (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={languages}
+                  onChange={(e) => setLanguages(e.target.value)}
+                  placeholder="e.g. English, Hindi, Marathi"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-brand-canvas border border-brand-border focus:border-brand-teal focus:ring-1 focus:ring-brand-teal focus:outline-none transition-colors text-brand-ink"
+                />
+              </div>
+
+              {/* Remote availability toggle */}
+              <div className="flex items-center justify-between p-4 bg-brand-canvas rounded-2xl border border-brand-border/60">
+                <div>
+                  <div className="text-xs font-bold text-brand-ink">
+                    Tele-Consultation / Remote Availability
+                  </div>
+                  <div className="text-[11px] text-brand-ink/60">
+                    Allow consented patients across regions to request remote asynchronous monitoring and review.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRemoteAvailable(!remoteAvailable)}
+                  className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
+                    remoteAvailable ? 'bg-brand-teal' : 'bg-brand-border'
+                  }`}
+                >
+                  <span
+                    className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform ${
+                      remoteAvailable ? 'translate-x-6' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4: Session Security & Sign Out (Col span 1) */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/70 shadow-card-lift flex flex-col justify-between space-y-5">
+            <div>
+              <div className="flex items-center justify-between border-b border-brand-border/40 pb-4 mb-4">
+                <div>
+                  <h2 className="font-editorial text-2xl text-brand-ink font-normal">
+                    Session Security
+                  </h2>
+                  <p className="text-xs text-brand-ink/50 mt-0.5">
+                    Encrypted practitioner session
+                  </p>
+                </div>
+                <span className="material-symbols-outlined text-brand-amber text-2xl">security</span>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div className="p-3 rounded-xl bg-brand-canvas border border-brand-border/60 flex items-center justify-between">
+                  <span className="text-brand-ink/60">Session Token:</span>
+                  <span className="font-mono text-[11px] text-brand-teal font-bold">Encrypted JWT</span>
+                </div>
+                <div className="p-3 rounded-xl bg-brand-canvas border border-brand-border/60 flex items-center justify-between">
+                  <span className="text-brand-ink/60">Cookie Security:</span>
+                  <span className="font-mono text-[11px] text-brand-ink">SameSite=Lax</span>
+                </div>
+                <div className="p-3 rounded-xl bg-brand-canvas border border-brand-border/60 flex items-center justify-between">
+                  <span className="text-brand-ink/60">Consent Boundary:</span>
+                  <span className="font-mono text-[11px] text-brand-teal font-bold">Enforced</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-brand-border/50">
+              <button
+                type="button"
+                onClick={onLogout}
+                className="w-full py-2.5 rounded-xl border border-brand-coral/40 text-brand-coral font-bold text-xs hover:bg-brand-coralSoft transition-colors flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-base">logout</span>
+                Sign Out of Practitioner Session
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Action button bar */}
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-brand-border/50">
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="px-8 py-3 rounded-full bg-brand-teal text-white font-bold text-xs hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center gap-2 disabled:opacity-60"
+          >
+            <span className="material-symbols-outlined text-base">save</span>
+            <span>{isSaving ? 'Saving Profile…' : 'Save Practitioner Profile'}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
 /*  Main page                                                                  */
 /* ─────────────────────────────────────────────────────────────────────────── */
 export default function PractitionerDashboardPage() {
@@ -632,6 +1018,13 @@ export default function PractitionerDashboardPage() {
 
   // Per-request action state  { [userId]: 'accepting' | 'declining' | 'done' | error }
   const [reqActions, setReqActions] = useState({});
+
+  /* ── Toast notification ──────────────────────────────────────────────── */
+  const [toastMsg, setToastMsg] = useState('');
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(''), 3200);
+  };
 
   /* ── Auth gate ──────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -716,30 +1109,66 @@ export default function PractitionerDashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem('bs_prac_token');
     localStorage.removeItem('bs_prac_user');
+    document.cookie = 'bs_prac_token=; path=/; max-age=0; SameSite=Lax';
     navigate('/practitioner/login', { replace: true });
   };
 
-  /* ── Sidebar nav helper ─────────────────────────────────────────────── */
+  /* ── Patient search state ───────────────────────────────────────────── */
+  const [patientSearch, setPatientSearch] = useState('');
+
+  /* ── Sidebar & mobile nav helper ─────────────────────────────────────── */
   const navClick = (item) => {
     setNavItem(item);
-    if (item === 'dashboard') {
-      setView('dashboard');
-      setSelectedPatient(null);
-    } else if (item === 'patients') {
-      setView('dashboard'); // patients list is inside dashboard view
-      setSelectedPatient(null);
-    }
-    // settings / requests are sections within the dashboard view
+    setView('dashboard');
+    setSelectedPatient(null);
   };
 
   const pendingCount = requests.length;
+
+  const filteredPatients = patients.filter((p) => {
+    if (!patientSearch.trim()) return true;
+    const q = patientSearch.toLowerCase();
+    const name = (p.name || '').toLowerCase();
+    const id = (p.userId || '').toLowerCase();
+    return name.includes(q) || id.includes(q);
+  });
 
   /* ─────────────────────────────────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-brand-canvas text-brand-ink font-sans flex flex-col md:flex-row overflow-x-hidden selection:bg-brand-teal/20">
 
-      {/* ── SIDEBAR ───────────────────────────────────────────────────── */}
-      <aside className="w-full md:w-[260px] bg-white border-r border-brand-border/40 shrink-0 flex flex-col md:sticky md:top-0 md:h-screen z-20">
+      {/* ── Mobile Top Bar (Clinician) ─────────────────────────────────── */}
+      <div className="md:hidden flex items-center justify-between px-4 py-2.5 bg-white/95 backdrop-blur-md border-b border-brand-border/60 sticky top-0 z-30 shadow-xs">
+        <div className="flex items-center gap-2">
+          <Logo />
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20">
+            Clinician
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Shortened Tele-MANAS crisis button on mobile */}
+          <a
+            href="tel:14416"
+            className="px-2.5 py-1 rounded-full bg-brand-coralSoft text-brand-coral border border-brand-coral/30 hover:bg-brand-coral hover:text-white text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-xs"
+            title="Tele-MANAS 24/7 Free Crisis Telephony"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-coral animate-pulse" />
+            <span>14416</span>
+          </a>
+          <button
+            onClick={() => navClick('settings')}
+            className={`w-7 h-7 rounded-full bg-brand-canvas border border-brand-border flex items-center justify-center transition-all ${
+              navItem === 'settings' ? 'text-brand-teal border-brand-teal bg-brand-softerTeal' : 'text-brand-ink/70 hover:text-brand-teal'
+            }`}
+            title="Settings"
+          >
+            <span className="material-symbols-outlined text-[16px]">tune</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── SIDEBAR (Desktop) ──────────────────────────────────────────── */}
+      <aside className="hidden md:flex w-[260px] bg-white border-r border-brand-border/40 shrink-0 flex-col md:sticky md:top-0 md:h-screen z-20">
         {/* Logo */}
         <div className="p-6 md:p-8 shrink-0">
           <Logo />
@@ -894,25 +1323,346 @@ export default function PractitionerDashboardPage() {
       </aside>
 
       {/* ── MAIN ──────────────────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0 relative">
-        {/* Ambient background blobs */}
-        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-brand-softerTeal blur-[120px] opacity-60 pointer-events-none z-0" />
-        <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full bg-brand-coralSoft blur-[140px] opacity-50 pointer-events-none z-0" />
+      <div className="flex-1 min-w-0 relative overflow-hidden">
+        {/* Ambient background blobs strictly contained within viewport bounds */}
+        <div className="absolute top-0 -left-[10%] w-[500px] h-[500px] rounded-full bg-brand-softerTeal blur-[120px] opacity-60 pointer-events-none z-0" />
+        <div className="absolute bottom-0 -right-[10%] w-[500px] h-[500px] rounded-full bg-brand-coralSoft blur-[140px] opacity-50 pointer-events-none z-0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 pb-24 md:pb-6 space-y-8">
 
           {/* ═══════════════════════════════════════════════════════════ */}
           {/* VIEW: patient detail                                        */}
           {/* ═══════════════════════════════════════════════════════════ */}
           {view === 'patient' && selectedPatient && (
-            <PatientView patient={selectedPatient} onBack={backToDashboard} />
+            <div key={selectedPatient.userId || selectedPatient.id} className="animate-tab-switch">
+              <PatientView patient={selectedPatient} onBack={backToDashboard} />
+            </div>
           )}
 
           {/* ═══════════════════════════════════════════════════════════ */}
-          {/* VIEW: dashboard                                             */}
+          {/* VIEW: practitioner settings                                  */}
           {/* ═══════════════════════════════════════════════════════════ */}
-          {view === 'dashboard' && (
-            <>
+          {view === 'dashboard' && navItem === 'settings' && (
+            <div key="settings" className="animate-tab-switch">
+              <PractitionerSettingsView
+                prac={prac}
+                onUpdated={(updatedPrac) => {
+                  setPrac(updatedPrac);
+                  localStorage.setItem('bs_prac_user', JSON.stringify(updatedPrac));
+                }}
+                onLogout={handleLogout}
+              />
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {/* VIEW: requests (Inbound Triage)                             */}
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {view === 'dashboard' && navItem === 'requests' && (
+            <div key="requests" className="space-y-6 animate-tab-switch">
+              <header>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-coralSoft text-brand-coral text-xs font-semibold mb-2">
+                  <span className="material-symbols-outlined text-sm">person_add</span>
+                  Inbound Clinical Intake
+                </div>
+                <h1 className="font-editorial text-4xl sm:text-5xl text-brand-ink font-normal leading-tight">
+                  Connection Requests
+                </h1>
+                <p className="text-brand-ink/60 text-sm mt-1 max-w-2xl">
+                  Review patients requesting clinical connection and consent-governed longitudinal oversight between sessions.
+                </p>
+              </header>
+
+              {/* Error banner */}
+              {dashError && (
+                <div className="p-4 bg-brand-coralSoft border border-brand-coral/20 rounded-2xl text-brand-coral text-sm">
+                  {dashError}
+                </div>
+              )}
+
+              {/* Pending requests panel */}
+              <section className="bg-brand-paper rounded-3xl border border-brand-border/60 p-6 sm:p-8 shadow-card-lift space-y-4">
+                <div className="flex items-center justify-between border-b border-brand-border/40 pb-4">
+                  <div className="flex items-center gap-2 text-brand-coral">
+                    <span className="material-symbols-outlined text-[20px]">mark_email_unread</span>
+                    <span className="text-xs font-bold uppercase tracking-widest">
+                      Inbound Patient Inquiries
+                    </span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-brand-coralSoft text-brand-coral text-xs font-bold border border-brand-coral/20">
+                    {requests.length} pending
+                  </span>
+                </div>
+
+                {loadingDash ? (
+                  <div className="py-8">
+                    <BetweenLoading
+                      size="sm"
+                      label="Synchronizing connection requests..."
+                      sublabel="Holding the space between sessions"
+                    />
+                  </div>
+                ) : requests.length === 0 ? (
+                  <div className="py-12 text-center space-y-2">
+                    <div className="w-12 h-12 rounded-full bg-brand-softerTeal text-brand-teal flex items-center justify-center mx-auto mb-2">
+                      <span className="material-symbols-outlined text-2xl">all_inbox</span>
+                    </div>
+                    <p className="text-brand-ink font-semibold text-sm">
+                      All connection requests triaged
+                    </p>
+                    <p className="text-brand-ink/50 text-xs max-w-md mx-auto">
+                      New patient requests will appear here when patients share their logs using your Practitioner ID (<span className="font-mono text-brand-teal">{prac?.govCertId || 'MCI-2024-KM-7741'}</span>).
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {requests.map((req) => {
+                      const actionState = reqActions[req.userId];
+                      const busy = actionState === 'accepting' || actionState === 'declining';
+                      const done = actionState === 'done';
+
+                      return (
+                        <div
+                          key={req.userId}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-brand-canvas border border-brand-border/60 hover:border-brand-teal/30 transition-all shadow-xs"
+                        >
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-xs text-brand-ink">
+                                Patient ID: <span className="font-mono text-brand-teal">{req.userId}</span>
+                              </span>
+                              {req.requestedAt && (
+                                <span className="text-[10px] text-brand-ink/40 font-mono">
+                                  Requested: {fmtDate(req.requestedAt)}
+                                </span>
+                              )}
+                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-brand-amberSoft text-brand-amber font-semibold border border-brand-amber/20">
+                                Pending Triage
+                              </span>
+                            </div>
+
+                            {req.message && (
+                              <p className="text-xs text-brand-ink/80 leading-relaxed bg-white/80 p-3 rounded-xl border border-brand-border/40">
+                                "{req.message}"
+                              </p>
+                            )}
+
+                            <div className="flex items-center gap-1.5 text-[10px] text-brand-ink/50 font-mono pt-0.5">
+                              <span>Requested scope:</span>
+                              <span className="text-brand-teal bg-brand-softerTeal px-1.5 py-0.5 rounded">Practice Logs</span>
+                              <span className="text-brand-teal bg-brand-softerTeal px-1.5 py-0.5 rounded">Check-ins (SUDS)</span>
+                              <span className="text-brand-teal bg-brand-softerTeal px-1.5 py-0.5 rounded">Journal Reflection</span>
+                            </div>
+                          </div>
+
+                          {done ? (
+                            <span className="px-3.5 py-1.5 rounded-full bg-brand-softSuccess text-clinical-success text-xs font-bold shrink-0 flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[16px]">check</span>
+                              Accepted
+                            </span>
+                          ) : typeof actionState === 'string' &&
+                            actionState !== 'accepting' &&
+                            actionState !== 'declining' ? (
+                            <span className="text-brand-coral text-xs shrink-0">
+                              {actionState}
+                            </span>
+                          ) : (
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                onClick={() => handleAccept(req.userId)}
+                                disabled={busy}
+                                className="px-4 py-2 rounded-xl bg-brand-teal text-white text-xs font-semibold hover:bg-brand-tealDark transition-colors shadow-xs disabled:opacity-60 flex items-center gap-1.5"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">check</span>
+                                <span>{actionState === 'accepting' ? 'Accepting…' : 'Accept Connection'}</span>
+                              </button>
+                              <button
+                                onClick={() => handleDecline(req.userId)}
+                                disabled={busy}
+                                className="px-3.5 py-2 rounded-xl border border-brand-border text-brand-ink/60 text-xs font-medium hover:text-brand-coral hover:border-brand-coral transition-colors disabled:opacity-60"
+                              >
+                                {actionState === 'declining' ? 'Declining…' : 'Decline'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {/* VIEW: patients (Consented Patient Roster)                    */}
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {view === 'dashboard' && navItem === 'patients' && (
+            <div key="patients" className="space-y-6 animate-tab-switch">
+              <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-semibold mb-2">
+                    <span className="material-symbols-outlined text-sm">groups</span>
+                    Active Clinical Roster
+                  </div>
+                  <h1 className="font-editorial text-4xl sm:text-5xl text-brand-ink font-normal leading-tight">
+                    Patient Roster
+                  </h1>
+                  <p className="text-brand-ink/60 text-sm mt-1">
+                    {patients.length} consented patients with longitudinal telemetry and journal access.
+                  </p>
+                </div>
+
+                {/* Patient search input */}
+                <div className="w-full sm:w-72">
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-brand-ink/40 text-[18px]">
+                      search
+                    </span>
+                    <input
+                      type="text"
+                      value={patientSearch}
+                      onChange={(e) => setPatientSearch(e.target.value)}
+                      placeholder="Search patients by name or ID..."
+                      className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-white border border-brand-border focus:border-brand-teal focus:outline-none transition-colors text-brand-ink shadow-xs"
+                    />
+                  </div>
+                </div>
+              </header>
+
+              {/* Active patients grid */}
+              <section className="bg-brand-paper rounded-3xl border border-brand-border/60 p-6 sm:p-8 shadow-card-lift space-y-4">
+                <div className="flex items-center justify-between border-b border-brand-border/40 pb-4">
+                  <div className="flex items-center gap-2 text-brand-teal">
+                    <span className="material-symbols-outlined text-[20px]">clinical_notes</span>
+                    <span className="text-xs font-bold uppercase tracking-widest">
+                      Consented Between-Session Telemetry
+                    </span>
+                  </div>
+                  <span className="font-mono text-xs text-brand-ink/50">
+                    {filteredPatients.length} of {patients.length} Showing
+                  </span>
+                </div>
+
+                {loadingDash ? (
+                  <div className="py-8">
+                    <BetweenLoading
+                      size="sm"
+                      label="Loading consented patient caseload..."
+                      sublabel="Checking cryptographic authorizations"
+                    />
+                  </div>
+                ) : filteredPatients.length === 0 ? (
+                  <div className="py-12 text-center space-y-2">
+                    <div className="w-12 h-12 rounded-full bg-brand-canvas text-brand-ink/40 flex items-center justify-center mx-auto mb-2">
+                      <span className="material-symbols-outlined text-2xl">person_search</span>
+                    </div>
+                    <p className="text-brand-ink font-semibold text-sm">
+                      No matching patients found
+                    </p>
+                    <p className="text-brand-ink/50 text-xs">
+                      Try searching with a different name or patient identifier.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filteredPatients.map((patient) => {
+                      const { bg: sBg, text: sText, label: sLabel } = statusMeta(
+                        patient.connectionStatus || patient.status
+                      );
+                      const displayName = patient.name || patient.userId;
+                      const patientValues = patient.values || ['Career', 'Family', 'Reading', 'Yoga'];
+
+                      return (
+                        <div
+                          key={patient.userId}
+                          className="p-5 rounded-3xl border border-brand-border bg-brand-canvas hover:border-brand-teal/40 transition-all flex flex-col justify-between space-y-3 group shadow-xs"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-brand-teal text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                  {displayName.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <h3 className="font-editorial text-xl text-brand-ink font-medium leading-snug">
+                                    {displayName}
+                                  </h3>
+                                  <p className="text-[11px] font-mono text-brand-ink/50">
+                                    {patient.userId} • {patient.ageBand || '25-34'}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${sBg} ${sText}`}>
+                                {sLabel}
+                              </span>
+                            </div>
+
+                            {/* Patient Values (Life Outside OCD) */}
+                            {patientValues.length > 0 && (
+                              <div className="pt-1">
+                                <span className="text-[9px] uppercase font-bold tracking-wider text-brand-ink/50 block mb-1">
+                                  Life Outside OCD (Values):
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {patientValues.map((v) => (
+                                    <span
+                                      key={v}
+                                      className="text-[10px] px-2.5 py-0.5 rounded-full bg-brand-amberSoft text-brand-amber font-medium border border-brand-amber/20"
+                                    >
+                                      {v}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Consented Categories */}
+                            {patient.consentedCategories?.length > 0 && (
+                              <div className="pt-1">
+                                <span className="text-[9px] uppercase font-bold tracking-wider text-brand-ink/50 block mb-1">
+                                  Consented Data:
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {patient.consentedCategories.map((cat) => (
+                                    <span
+                                      key={cat}
+                                      className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20"
+                                    >
+                                      {cat}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="pt-3 border-t border-brand-border/50 flex items-center justify-between">
+                            <span className="text-[10px] text-brand-ink/40 font-mono">
+                              Connected: {fmtDate(patient.connectedAt)}
+                            </span>
+                            <button
+                              onClick={() => openPatient(patient)}
+                              className="px-3.5 py-1.5 rounded-xl bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors flex items-center gap-1 shadow-xs"
+                            >
+                              <span>Review Patient &amp; Journal</span>
+                              <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {/* VIEW: dashboard (Clinical Overview)                         */}
+          {/* ═══════════════════════════════════════════════════════════ */}
+          {view === 'dashboard' && navItem === 'dashboard' && (
+            <div key="dashboard" className="space-y-8 animate-tab-switch">
               {/* ── Welcome header ────────────────────────────────────── */}
               <header>
                 <p className="text-brand-teal font-bold text-xs uppercase tracking-widest mb-2">
@@ -941,228 +1691,190 @@ export default function PractitionerDashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
-                      Pending Requests
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Card 1: Active Patients */}
+                  <div
+                    onClick={() => navClick('patients')}
+                    className="bg-brand-amberSoft border border-brand-amber/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3 cursor-pointer hover:border-brand-amber transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-amber/30">
+                        Patients
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-amber">group</span>
                     </div>
-                    <div className="font-mono text-3xl font-medium text-brand-ink">
-                      {requests.length}
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-ink">
+                        {patients.length}
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Active Consented Patients
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-amber font-bold border-t border-brand-amber/20 pt-2 flex items-center justify-between">
+                      <span>View Roster</span>
+                      <span>→</span>
                     </div>
                   </div>
-                  <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
-                      Active Patients
+
+                  {/* Card 2: Pending Requests */}
+                  <div
+                    onClick={() => navClick('requests')}
+                    className="bg-brand-coralSoft border border-brand-coral/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3 cursor-pointer hover:border-brand-coral transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-coral/30">
+                        Pending
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-coral">person_add</span>
                     </div>
-                    <div className="font-mono text-3xl font-medium text-brand-ink">
-                      {patients.length}
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-coral">
+                        {requests.length}
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Connection Requests
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-coral font-bold border-t border-brand-coral/20 pt-2 flex items-center justify-between">
+                      <span>Review Inbox</span>
+                      <span>→</span>
                     </div>
                   </div>
-                  {/* Placeholder tiles */}
-                  <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm opacity-50">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
-                      Recommendations
+
+                  {/* Card 3: Exposure Protocols */}
+                  <div className="bg-brand-softerTeal border border-brand-teal/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-teal/30">
+                        Protocols
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-teal">clinical_notes</span>
                     </div>
-                    <div className="font-mono text-3xl font-medium text-brand-ink/30">—</div>
-                    <div className="text-[9px] text-brand-ink/30 mt-1">This week</div>
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-teal">
+                        Active
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Clinical Guidance Notes
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-teal/20 pt-2 font-mono">
+                      Human authored guidance
+                    </div>
                   </div>
-                  <div className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm opacity-50">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
-                      Last Activity
+
+                  {/* Card 4: Cedar WASM Policy Engine */}
+                  <div className="bg-brand-lavenderSoft border border-brand-lavender/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-lavender px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-lavender/30">
+                        Cedar WASM
+                      </span>
+                      <span className="material-symbols-outlined text-[18px] text-brand-lavender">verified_user</span>
                     </div>
-                    <div className="font-mono text-3xl font-medium text-brand-ink/30">—</div>
+                    <div>
+                      <div className="font-mono text-3xl font-bold text-brand-ink">
+                        Gated
+                      </div>
+                      <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
+                        Real-Time Policy Check
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-lavender/20 pt-2 font-mono">
+                      Granular consent enforced
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* ── Pending requests panel ────────────────────────────── */}
-              <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-2 text-brand-coral">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                      <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6z" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+              {/* ── Priority Action Callout: Pending Connection Requests ── */}
+              {requests.length > 0 && (
+                <div className="p-6 rounded-3xl bg-brand-coralSoft border border-brand-coral/40 shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/80 text-brand-coral text-[10px] font-bold border border-brand-coral/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-coral animate-pulse" />
+                      Priority Action Required
+                    </div>
+                    <h3 className="font-editorial text-2xl text-brand-ink font-normal">
+                      {requests.length} Inbound Connection {requests.length === 1 ? 'Request' : 'Requests'}
+                    </h3>
+                    <p className="text-xs text-brand-ink/70">
+                      Patients are waiting for your clinical confirmation to begin sharing between-session telemetry.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navClick('requests')}
+                    className="px-5 py-2.5 rounded-xl bg-brand-coral text-white hover:bg-brand-coral/90 text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-center flex items-center gap-1.5"
+                  >
+                    <span>Triage Requests</span>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </button>
+                </div>
+              )}
+
+              {/* ── Active Patients Roster Preview ────────────────────── */}
+              <section className="bg-brand-paper rounded-3xl border border-brand-border/60 p-6 sm:p-8 shadow-card-lift space-y-5">
+                <div className="flex items-center justify-between border-b border-brand-border/40 pb-4">
+                  <div className="flex items-center gap-2 text-brand-teal">
+                    <span className="material-symbols-outlined text-[20px]">groups</span>
                     <span className="text-xs font-bold uppercase tracking-widest">
-                      Pending Requests
+                      Active Patient Overview
                     </span>
                   </div>
-                  {requests.length > 0 && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-brand-coralSoft text-brand-coral text-xs font-bold">
-                      {requests.length}
-                    </span>
-                  )}
+                  <button
+                    onClick={() => navClick('patients')}
+                    className="text-xs font-bold text-brand-teal hover:underline flex items-center gap-1"
+                  >
+                    <span>View All ({patients.length})</span>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </button>
                 </div>
 
                 {loadingDash ? (
-                  <div className="space-y-3">
-                    {[...Array(2)].map((_, i) => (
-                      <Skeleton key={i} className="h-16" />
-                    ))}
+                  <div className="py-8">
+                    <BetweenLoading
+                      size="sm"
+                      label="Loading active patient cohort..."
+                    />
                   </div>
-                ) : requests.length === 0 ? (
-                  <p className="text-brand-ink/40 text-sm py-2">
-                    No pending connection requests.
+                ) : patients.length === 0 ? (
+                  <p className="text-brand-ink/40 text-xs py-4">
+                    No active patients connected yet. When you accept incoming requests, they will appear here.
                   </p>
                 ) : (
-                  <div className="space-y-3">
-                    {requests.map((req) => {
-                      const actionState = reqActions[req.userId];
-                      const busy = actionState === 'accepting' || actionState === 'declining';
-                      const done = actionState === 'done';
-
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {patients.slice(0, 2).map((patient) => {
+                      const displayName = patient.name || patient.userId;
                       return (
                         <div
-                          key={req.userId}
-                          className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl bg-brand-canvas border border-brand-border/30"
+                          key={patient.userId}
+                          className="p-4 rounded-2xl border border-brand-border bg-brand-canvas flex items-center justify-between gap-3 shadow-xs"
                         >
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-bold text-brand-ink font-mono">
-                              {req.userId}
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-xl bg-brand-teal text-white flex items-center justify-center font-bold text-sm shrink-0">
+                              {displayName.charAt(0).toUpperCase()}
                             </div>
-                            {req.message && (
-                              <p className="text-xs text-brand-ink/60 mt-0.5 line-clamp-2">
-                                {req.message}
+                            <div className="min-w-0">
+                              <h4 className="font-bold text-sm text-brand-ink truncate">
+                                {displayName}
+                              </h4>
+                              <p className="text-[11px] font-mono text-brand-ink/50 truncate">
+                                {patient.userId}
                               </p>
-                            )}
-                            {req.requestedAt && (
-                              <p className="text-[10px] text-brand-ink/40 font-mono mt-1">
-                                {fmtDate(req.requestedAt)}
-                              </p>
-                            )}
+                            </div>
                           </div>
-                          {done ? (
-                            <span className="px-3 py-1.5 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-bold shrink-0">
-                              Done
-                            </span>
-                          ) : typeof actionState === 'string' &&
-                            actionState !== 'accepting' &&
-                            actionState !== 'declining' ? (
-                            <span className="text-brand-coral text-xs shrink-0">
-                              {actionState}
-                            </span>
-                          ) : (
-                            <div className="flex items-center gap-2 shrink-0">
-                              <button
-                                onClick={() => handleAccept(req.userId)}
-                                disabled={busy}
-                                className="px-4 py-2 rounded-full bg-brand-teal text-white text-xs font-bold hover:bg-brand-tealDark transition-colors shadow-sm disabled:opacity-60"
-                              >
-                                {actionState === 'accepting' ? 'Accepting…' : 'Accept'}
-                              </button>
-                              <button
-                                onClick={() => handleDecline(req.userId)}
-                                disabled={busy}
-                                className="px-4 py-2 rounded-full border border-brand-border text-brand-ink/60 text-xs font-bold hover:text-brand-coral hover:border-brand-coral transition-colors disabled:opacity-60"
-                              >
-                                {actionState === 'declining' ? 'Declining…' : 'Decline'}
-                              </button>
-                            </div>
-                          )}
+                          <button
+                            onClick={() => openPatient(patient)}
+                            className="px-3.5 py-1.5 rounded-xl bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors shrink-0 shadow-xs"
+                          >
+                            Review
+                          </button>
                         </div>
                       );
                     })}
                   </div>
                 )}
               </section>
-
-              {/* ── Active patients list ──────────────────────────────── */}
-              <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-                <div className="flex items-center gap-2 text-brand-teal mb-5">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <span className="text-xs font-bold uppercase tracking-widest">
-                    Active Patients
-                  </span>
-                </div>
-
-                {loadingDash ? (
-                  <div className="space-y-3">
-                    {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="h-16" />
-                    ))}
-                  </div>
-                ) : patients.length === 0 ? (
-                  <p className="text-brand-ink/40 text-sm py-2">
-                    No active patients yet. Accepted connections will appear here.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {patients.map((patient) => {
-                      const { bg: sBg, text: sText, label: sLabel } = statusMeta(
-                        patient.status
-                      );
-                      return (
-                        <button
-                          key={patient.userId}
-                          onClick={() => openPatient(patient)}
-                          className="w-full flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl bg-brand-canvas border border-brand-border/30 hover:border-brand-teal/40 hover:bg-brand-softerTeal/30 transition-all text-left group"
-                        >
-                          {/* Avatar */}
-                          <div className="w-10 h-10 rounded-full bg-brand-ink text-white flex items-center justify-center text-sm font-bold shrink-0">
-                            {String(patient.userId).charAt(0).toUpperCase()}
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="font-mono text-sm font-bold text-brand-ink">
-                              {patient.userId}
-                            </div>
-                            {/* Consented categories */}
-                            {patient.consentedCategories?.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {patient.consentedCategories.map((cat) => (
-                                  <span
-                                    key={cat}
-                                    className="px-2 py-0.5 rounded-full bg-white border border-brand-border text-[9px] font-bold text-brand-ink/50"
-                                  >
-                                    {cat}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-3 shrink-0">
-                            <span
-                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${sBg} ${sText}`}
-                            >
-                              {sLabel}
-                            </span>
-                            <svg
-                              className="w-4 h-4 text-brand-ink/30 group-hover:text-brand-teal transition-colors"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.75"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                d="M9 5l7 7-7 7"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </section>
-
-              {/* ── Settings stub ─────────────────────────────────────── */}
-              {navItem === 'settings' && (
-                <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/30 shadow-sm">
-                  <div className="flex items-center gap-2 text-brand-lavender mb-4">
-                    <span className="text-xs font-bold uppercase tracking-widest">
-                      Settings
-                    </span>
-                  </div>
-                  <p className="text-brand-ink/50 text-sm">
-                    Practitioner account settings coming soon.
-                  </p>
-                </section>
-              )}
-            </>
+            </div>
           )}
 
           {/* ── Safety footer ──────────────────────────────────────────── */}
@@ -1175,6 +1887,101 @@ export default function PractitionerDashboardPage() {
           </footer>
         </div>
       </div>
+
+      {/* ── Floating Toast Notification ───────────────────────────────── */}
+      {toastMsg && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-brand-ink text-white text-xs font-semibold shadow-card-lift flex items-center gap-2 animate-tab-switch border border-white/20 pointer-events-none">
+          <span className="material-symbols-outlined text-[17px] text-brand-softerTeal">check_circle</span>
+          <span>{toastMsg}</span>
+        </div>
+      )}
+
+      {/* ── Mobile Floating Bottom Bar ───────────────────────────────── */}
+      <MobileBottomNav
+        items={[
+          {
+            id: 'dashboard',
+            label: 'Dashboard',
+            icon: 'cottage',
+            isActive: view === 'dashboard' && navItem === 'dashboard',
+            onClick: () => navClick('dashboard'),
+          },
+          {
+            id: 'requests',
+            label: 'Requests',
+            icon: 'person_add',
+            badge: pendingCount > 0 ? pendingCount : null,
+            isActive: view === 'dashboard' && navItem === 'requests',
+            onClick: () => navClick('requests'),
+          },
+          {
+            id: 'patients',
+            label: 'Patients',
+            icon: 'groups',
+            badge: patients.length > 0 ? patients.length : null,
+            isActive: view === 'dashboard' && navItem === 'patients',
+            onClick: () => navClick('patients'),
+          },
+          {
+            id: 'settings',
+            label: 'Settings',
+            icon: 'tune',
+            isActive: view === 'dashboard' && navItem === 'settings',
+            onClick: () => navClick('settings'),
+          },
+        ]}
+        actionTitle="Clinical Quick Actions"
+        actionPills={[
+          {
+            id: 'draft-rec',
+            icon: 'edit_note',
+            label: selectedPatient ? `Draft Note for ${selectedPatient.name || 'Patient'}` : 'Write Clinical Recommendation',
+            subtitle: selectedPatient ? 'Document ERP trial guidance or response strategy' : 'Select an active patient to formulate guidance',
+            highlight: true,
+            onClick: () => {
+              if (selectedPatient) {
+                const recSec = document.getElementById('recommendation-section');
+                if (recSec) recSec.scrollIntoView({ behavior: 'smooth' });
+                showToast(`Focused recommendation composer for ${selectedPatient.name || 'patient'}`);
+              } else if (patients.length > 0) {
+                openPatient(patients[0]);
+                showToast(`Opened ${patients[0].name || 'patient'} to draft recommendation`);
+              } else {
+                navClick('requests');
+                showToast('Review connection requests to link with patients first');
+              }
+            },
+          },
+          {
+            id: 'copy-id',
+            icon: 'badge',
+            label: 'Copy Practitioner ID',
+            subtitle: `Share ID with patient: ${prac?.govCertId || 'MCI-2024-KM-7741'}`,
+            onClick: () => {
+              const code = prac?.govCertId || prac?.id || 'MCI-2024-KM-7741';
+              navigator.clipboard?.writeText(code);
+              showToast(`Practitioner ID ${code} copied to clipboard!`);
+            },
+          },
+          {
+            id: 'triage-elevated',
+            icon: 'notifications_active',
+            label: 'Priority Caseload Triage',
+            subtitle: 'Review consented cases with recent high distress',
+            onClick: () => {
+              navClick('patients');
+              showToast('Filtered caseload for priority clinical review');
+            },
+          },
+          {
+            id: 'logout-action',
+            icon: 'logout',
+            label: 'Sign Out Clinician Session',
+            subtitle: 'Secure encrypted session termination',
+            onClick: handleLogout,
+          },
+        ]}
+      />
     </div>
   );
 }

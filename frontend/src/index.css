@@ -68,6 +68,8 @@
   --animate-pulse-indicator: pulse-indicator 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-fade-in: fade-in 0.4s ease-out forwards;
+  --animate-liquid-pop: liquid-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  --animate-tab-switch: tab-switch 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   
   @keyframes pulse-indicator {
     0%, 100% { opacity: 1; transform: scale(1); }
@@ -84,9 +86,39 @@
     100% { opacity: 1; }
   }
 
+  @keyframes tab-switch {
+    0% {
+      opacity: 0;
+      transform: translateY(6px) scale(0.995);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes liquid-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.85) translateY(24px);
+    }
+    65% {
+      opacity: 1;
+      transform: scale(1.025) translateY(-3px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
   --shadow-pill: 0 10px 30px -5px rgba(23, 107, 103, 0.08);
   --shadow-card-lift: 0 12px 36px -4px rgba(23, 50, 58, 0.07), 0 4px 16px -2px rgba(23, 50, 58, 0.04);
   --shadow-soft: 0 8px 30px rgba(23, 50, 58, 0.06);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -104,6 +136,10 @@ body {
 .soft-card {
   border: none !important;
   box-shadow: var(--shadow-card-lift);
+}
+
+.animate-tab-switch {
+  animation: tab-switch 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .pulse-indicator {
@@ -340,3 +376,227 @@ body {
   background: rgba(23, 50, 58, 0.15);
   border-radius: 4px;
 }
+
+/* ================= DOUBT & GROUNDING: DYNAMIC SPACING LOOP ================= */
+/* Spacing between all shapes increases and reduces in a harmonic breathing loop */
+
+@keyframes spacing-qm-group {
+  0%, 100% {
+    transform: translateX(24px);
+  }
+  50% {
+    transform: translateX(-28px);
+  }
+}
+
+@keyframes spacing-qm-hook {
+  0%, 100% {
+    transform: translateY(3px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-4deg);
+  }
+}
+
+@keyframes spacing-qm-dot {
+  0%, 100% {
+    transform: translateY(-2px) scale(0.94);
+  }
+  50% {
+    transform: translateY(10px) scale(1.08);
+  }
+}
+
+@keyframes spacing-flower {
+  0%, 100% {
+    transform: translateX(14px) rotate(-10deg) scale(0.97);
+  }
+  50% {
+    transform: translateX(-16px) rotate(16deg) scale(1.04);
+  }
+}
+
+@keyframes spacing-aura {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 0.8;
+  }
+}
+
+@keyframes spacing-pebble {
+  0%, 100% {
+    transform: translateX(-14px) rotate(42deg);
+  }
+  50% {
+    transform: translateX(16px) rotate(52deg) scale(1.03);
+  }
+}
+
+@keyframes spacing-arc {
+  0%, 100% {
+    transform: translateX(-24px) scale(0.96);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateX(30px) scale(1.06);
+    opacity: 0.65;
+  }
+}
+
+@keyframes spacing-drift-dots {
+  0%, 100% {
+    transform: translateX(-16px);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateX(20px);
+    opacity: 0.85;
+  }
+}
+
+.anim-spacing-qm {
+  animation: spacing-qm-group 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 108px 95px;
+}
+
+.anim-spacing-qm-hook {
+  animation: spacing-qm-hook 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 108px 65px;
+}
+
+.anim-spacing-qm-dot {
+  animation: spacing-qm-dot 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 108px 156px;
+}
+
+.anim-spacing-flower {
+  animation: spacing-flower 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 210px 95px;
+}
+
+.anim-spacing-aura {
+  animation: spacing-aura 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 310px 95px;
+}
+
+.anim-spacing-pebble {
+  animation: spacing-pebble 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 385px 95px;
+}
+
+.anim-spacing-arc {
+  animation: spacing-arc 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  transform-origin: 480px 95px;
+}
+
+.anim-spacing-drift {
+  animation: spacing-drift-dots 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+/* ==========================================================================
+   TIME-BETWEEN-SESSIONS SIGNATURE LOGO LOADER
+   Symbolises the continuous 167 hours unfolding between clinical sessions
+   ========================================================================== */
+
+@keyframes time-orbit-track {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes time-sweep-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes time-ambient-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.65;
+  }
+}
+
+@keyframes time-disc-breath {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.025);
+  }
+}
+
+@keyframes time-center-beat {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.22);
+    opacity: 1;
+  }
+}
+
+@keyframes time-sector-glow {
+  0%, 100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.anim-time-orbit-track {
+  animation: time-orbit-track 16s linear infinite;
+}
+
+.anim-time-sweep {
+  animation: time-sweep-spin 2.6s cubic-bezier(0.4, 0.05, 0.2, 0.95) infinite;
+}
+
+.anim-time-pulse {
+  animation: time-ambient-pulse 3.2s ease-in-out infinite;
+}
+
+.anim-time-disc {
+  animation: time-disc-breath 4s ease-in-out infinite;
+}
+
+.anim-time-center {
+  animation: time-center-beat 2.4s ease-in-out infinite;
+}
+
+.anim-time-sector {
+  animation: time-sector-glow 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-spacing-qm,
+  .anim-spacing-qm-hook,
+  .anim-spacing-qm-dot,
+  .anim-spacing-flower,
+  .anim-spacing-aura,
+  .anim-spacing-pebble,
+  .anim-spacing-arc,
+  .anim-spacing-drift,
+  .anim-time-orbit-track,
+  .anim-time-sweep,
+  .anim-time-pulse,
+  .anim-time-disc,
+  .anim-time-center,
+  .anim-time-sector {
+    animation: none !important;
+  }
+}
+
+

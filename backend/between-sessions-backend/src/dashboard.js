@@ -19,8 +19,9 @@ const { DynamoDBDocumentClient, QueryCommand } = require('@aws-sdk/lib-dynamodb'
 const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
 
+const ddbEndpoint = process.env.DYNAMODB_ENDPOINT || 'http://127.0.0.1:8000';
 const ddbClient = new DynamoDBClient({
-  endpoint: 'http://localhost:8000',
+  endpoint: ddbEndpoint,
   region: 'local',
   credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' },
 });
@@ -154,7 +155,9 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         data: {
           thisWeekPractice,
-          checkinStreak: streak,
+          checkinStreak: checkinDays.size,
+          activeDaysThisWeek: checkinDays.size,
+          checkinCountThisWeek: checkins.length,
           avgSudsThisWeek,
           recentCheckins,
           recentJournal,
