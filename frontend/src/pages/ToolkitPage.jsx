@@ -50,7 +50,7 @@ export default function ToolkitPage() {
         </div>
 
         {/* ── Tool Tabs ───────────────────────────────────────────────────── */}
-        <div className="flex flex-wrap gap-2 border-b border-brand-border/60 pb-3">
+        <div className="flex flex-wrap gap-2 border-b border-brand-border/60 pb-3" role="tablist" aria-label="Calm toolkit categories">
           {[
             { id: 'grounding', label: 'Grounding & Sensory', icon: 'spa' },
             { id: 'breathing', label: 'Paced Breathing', icon: 'air' },
@@ -60,11 +60,13 @@ export default function ToolkitPage() {
           ].map((t) => (
             <button
               key={t.id}
+              role="tab"
+              aria-selected={activeTool === t.id}
               onClick={() => setActiveTool(t.id)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center gap-2 ${
+              className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center gap-2 ${
                 activeTool === t.id
                   ? 'bg-brand-ink text-white shadow-xs font-semibold'
-                  : 'bg-brand-paper border border-brand-border text-brand-ink/70 hover:bg-brand-canvas hover:text-brand-ink'
+                  : 'bg-brand-paper border border-brand-border text-brand-ink/75 hover:bg-brand-canvas hover:text-brand-ink'
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">{t.icon}</span>
@@ -124,7 +126,7 @@ function GroundingTool() {
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Subtool Selector */}
-      <div className="flex gap-2 border-b border-brand-border/60 pb-3 text-xs">
+      <div className="flex flex-wrap gap-2 border-b border-brand-border/60 pb-3 text-xs" role="tablist" aria-label="Grounding sub-tools">
         {[
           { id: '54321', label: '5-4-3-2-1 Sensory' },
           { id: 'orienting', label: 'Room Orienting' },
@@ -133,15 +135,17 @@ function GroundingTool() {
         ].map((st) => (
           <button
             key={st.id}
+            role="tab"
+            aria-selected={subTool === st.id}
             onClick={() => {
               setSubTool(st.id);
               setLogged(false);
               setStep54321(5);
             }}
-            className={`px-3.5 py-1.5 rounded-xl transition-colors ${
+            className={`min-h-[44px] px-4 py-2 rounded-xl transition-colors flex items-center justify-center ${
               subTool === st.id
                 ? 'bg-brand-softerTeal text-brand-teal font-semibold border border-brand-teal/30'
-                : 'text-brand-ink/60 hover:text-brand-ink'
+                : 'text-brand-ink/75 hover:text-brand-ink'
             }`}
           >
             {st.label}
@@ -158,13 +162,13 @@ function GroundingTool() {
               </div>
 
               <div className="space-y-2">
-                <span className="text-[11px] font-bold uppercase tracking-widest text-brand-teal px-3 py-1 rounded-full bg-brand-softerTeal">
+                <span className="text-xs font-bold uppercase tracking-widest text-brand-teal px-3 py-1 rounded-full bg-brand-softerTeal">
                   Step {6 - step54321} of 5
                 </span>
-                <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
+                <h2 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
                   {current.prompt}
-                </h3>
-                <p className="text-xs sm:text-sm text-brand-ink/70 max-w-md mx-auto leading-relaxed">
+                </h2>
+                <p className="text-xs sm:text-sm text-brand-ink/75 max-w-md mx-auto leading-relaxed">
                   {current.desc}
                 </p>
               </div>
@@ -173,14 +177,14 @@ function GroundingTool() {
                 {step54321 < 5 && (
                   <button
                     onClick={() => setStep54321(step54321 + 1)}
-                    className="px-4 py-2 rounded-xl text-xs font-medium text-brand-ink/60 hover:text-brand-ink"
+                    className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-medium text-brand-ink/75 hover:text-brand-ink"
                   >
                     Previous
                   </button>
                 )}
                 <button
                   onClick={handleNext54321}
-                  className="px-6 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-xs"
+                  className="min-h-[44px] px-6 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-xs flex items-center"
                 >
                   {step54321 === 1 ? 'Complete Sequence' : 'I Notice These → Next'}
                 </button>
@@ -328,10 +332,10 @@ function BreathingTool() {
   return (
     <div className="space-y-6 max-w-lg mx-auto text-center py-4">
       <div className="space-y-1">
-        <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
+        <h2 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
           Paced Breath Cadence
-        </h3>
-        <p className="text-xs text-brand-ink/65 max-w-md mx-auto">
+        </h2>
+        <p className="text-xs text-brand-ink/75 max-w-md mx-auto">
           A gentle pacing aid to steady your respiration while tolerating distress.
         </p>
       </div>
@@ -350,10 +354,10 @@ function BreathingTool() {
                 setDuration(m.s);
                 setTimeLeft(m.s);
               }}
-              className={`px-4 py-2 rounded-xl transition-colors ${
+              className={`min-h-[44px] px-4 py-2.5 rounded-xl transition-colors ${
                 duration === m.s
                   ? 'bg-brand-ink text-white font-semibold'
-                  : 'bg-brand-canvas text-brand-ink/70 border border-brand-border hover:text-brand-ink'
+                  : 'bg-brand-canvas text-brand-ink/75 border border-brand-border hover:text-brand-ink'
               }`}
             >
               {m.label}
@@ -375,7 +379,7 @@ function BreathingTool() {
         ></div>
 
         <div className="relative z-10 space-y-1">
-          <span className="font-editorial text-xl font-medium text-brand-ink block">
+          <span className="font-editorial text-xl font-medium text-brand-ink block" aria-live="polite" aria-atomic="true">
             {running ? phase : 'Ready'}
           </span>
           <span className="font-mono text-xs text-brand-teal block">
@@ -387,7 +391,7 @@ function BreathingTool() {
       <div className="pt-2">
         <button
           onClick={handleToggle}
-          className={`px-7 py-2.5 rounded-xl text-xs font-medium transition-colors shadow-xs ${
+          className={`min-h-[44px] px-7 py-2.5 rounded-xl text-xs font-medium transition-colors shadow-xs flex items-center justify-center mx-auto ${
             running
               ? 'bg-brand-coral hover:bg-brand-coral/90 text-white'
               : 'bg-brand-teal hover:bg-brand-tealDark text-white'
@@ -397,7 +401,7 @@ function BreathingTool() {
         </button>
       </div>
 
-      <p className="text-[11px] text-brand-ink/50 italic">
+      <p className="text-xs text-brand-ink/75 italic">
         Tip: Allow breathing to be comfortable and unforced. The goal is steady presence, not eliminating all physical sensations.
       </p>
     </div>
@@ -427,10 +431,10 @@ function PauseChooseTool() {
   return (
     <div className="space-y-6 max-w-xl mx-auto text-center py-2">
       <div className="space-y-1">
-        <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
+        <h2 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
           Pause & Choose
-        </h3>
-        <p className="text-xs text-brand-ink/65">
+        </h2>
+        <p className="text-xs text-brand-ink/75">
           Insert a conscious pause between the OCD urge and your behavioral response.
         </p>
       </div>
@@ -439,21 +443,21 @@ function PauseChooseTool() {
         <div className="p-6 rounded-2xl bg-brand-canvas border border-brand-border/70 space-y-4 shadow-xs text-left">
           <div className="flex items-center justify-between text-xs border-b border-brand-border/60 pb-2">
             <span className="font-semibold text-brand-ink">Step {step} of 4</span>
-            <span className="text-brand-ink/50 font-mono">
+            <span className="text-brand-ink/75 font-sans font-semibold">
               {step === 1 ? 'Notice' : step === 2 ? 'Allow' : step === 3 ? 'Choose' : 'Act'}
             </span>
           </div>
 
           {step === 1 && (
             <div className="space-y-3 animate-fade-in text-xs">
-              <h4 className="text-sm font-bold text-brand-ink">1. Notice the Urge</h4>
-              <p className="text-brand-ink/70 leading-relaxed">
+              <h3 className="text-sm font-bold text-brand-ink">1. Notice the Urge</h3>
+              <p className="text-brand-ink/75 leading-relaxed">
                 Take a breath and observe what is happening: "I notice an intrusive thought has arrived, and my brain is urgently asking me to check, wash, confess, or replay."
               </p>
               <div className="pt-2 flex justify-end">
                 <button
                   onClick={() => setStep(2)}
-                  className="px-4 py-2 rounded-xl bg-brand-lavender text-white font-medium hover:bg-brand-lavender/90 transition-all shadow-xs"
+                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-brand-lavender text-white font-medium hover:bg-brand-lavender/90 transition-all shadow-xs flex items-center"
                 >
                   I Notice It → Next
                 </button>
@@ -463,17 +467,20 @@ function PauseChooseTool() {
 
           {step === 2 && (
             <div className="space-y-3 animate-fade-in text-xs">
-              <h4 className="text-sm font-bold text-brand-ink">2. Allow the Discomfort</h4>
-              <p className="text-brand-ink/70 leading-relaxed">
+              <h3 className="text-sm font-bold text-brand-ink">2. Allow the Discomfort</h3>
+              <p className="text-brand-ink/75 leading-relaxed">
                 Don't push the feeling away. Locate where it lives in your body: tight chest? knot in the stomach? Allow the discomfort to be there for 30 seconds without trying to fix it.
               </p>
               <div className="pt-2 flex justify-between items-center">
-                <button onClick={() => setStep(1)} className="text-brand-ink/50 hover:text-brand-ink text-xs font-medium">
+                <button
+                  onClick={() => setStep(1)}
+                  className="min-h-[44px] px-3 py-2 text-brand-ink/75 hover:text-brand-ink text-xs font-medium flex items-center"
+                >
                   ← Back
                 </button>
                 <button
                   onClick={() => setStep(3)}
-                  className="px-4 py-2 rounded-xl bg-brand-lavender text-white font-medium hover:bg-brand-lavender/90 transition-all shadow-xs"
+                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-brand-lavender text-white font-medium hover:bg-brand-lavender/90 transition-all shadow-xs flex items-center"
                 >
                   I Can Sit with It → Next
                 </button>
@@ -483,8 +490,8 @@ function PauseChooseTool() {
 
           {step === 3 && (
             <div className="space-y-3 animate-fade-in text-xs">
-              <h4 className="text-sm font-bold text-brand-ink">3. Choose Your Direction</h4>
-              <p className="text-brand-ink/70 leading-relaxed">
+              <h3 className="text-sm font-bold text-brand-ink">3. Choose Your Direction</h3>
+              <p className="text-brand-ink/75 leading-relaxed">
                 You have agency. You are not forced to obey the OCD siren. Select how you wish to respond:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
@@ -500,7 +507,7 @@ function PauseChooseTool() {
                     className="p-3.5 rounded-2xl border border-brand-border bg-white hover:border-brand-lavender hover:bg-brand-lavenderSoft/50 text-left transition-all shadow-2xs"
                   >
                     <span className="font-semibold block text-brand-ink">{opt.label}</span>
-                    <span className="text-[10px] text-brand-ink/60">{opt.desc}</span>
+                    <span className="text-xs text-brand-ink/75">{opt.desc}</span>
                   </button>
                 ))}
               </div>
@@ -512,10 +519,10 @@ function PauseChooseTool() {
           <div className="w-12 h-12 rounded-full bg-brand-teal text-white mx-auto flex items-center justify-center shadow-xs">
             <span className="material-symbols-outlined text-[24px]">check</span>
           </div>
-          <h4 className="font-editorial text-2xl text-brand-ink font-medium">
+          <h3 className="font-editorial text-2xl text-brand-ink font-medium">
             Choice Recorded: <span className="capitalize text-brand-teal">{chosen}</span>
-          </h4>
-          <p className="text-xs text-brand-ink/70 max-w-sm mx-auto leading-relaxed">
+          </h3>
+          <p className="text-xs text-brand-ink/75 max-w-sm mx-auto leading-relaxed">
             Every moment you delay or step back from an urge, your neural pathways adapt. Trust the process.
           </p>
           <button
@@ -524,7 +531,7 @@ function PauseChooseTool() {
               setStep(1);
               setChosen(null);
             }}
-            className="px-4 py-2 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-white transition-colors"
+            className="min-h-[44px] px-5 py-2.5 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-white transition-colors"
           >
             Start Another Pause
           </button>
@@ -583,13 +590,13 @@ function ReassuranceTool() {
   return (
     <div className="space-y-6 max-w-xl mx-auto py-2">
       <div className="text-center space-y-1">
-        <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-2.5 py-0.5 rounded-full bg-brand-coralSoft border border-brand-coral/30">
+        <span className="text-xs uppercase font-bold tracking-widest text-brand-coral px-2.5 py-0.5 rounded-full bg-brand-coralSoft border border-brand-coral/30">
           Certainty Interceptor
         </span>
-        <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
+        <h2 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
           “Am I Checking Right Now?”
-        </h3>
-        <p className="text-xs text-brand-ink/70 max-w-md mx-auto leading-relaxed">
+        </h2>
+        <p className="text-xs text-brand-ink/75 max-w-md mx-auto leading-relaxed">
           Reassurance seeking is OCD’s most insidious compulsion. It pretends to be harmless research, but only feeds the flame of doubt.
         </p>
       </div>
@@ -622,7 +629,7 @@ function ReassuranceTool() {
                     <span className="material-symbols-outlined text-[18px]">{act.icon}</span>
                     <span>{act.title}</span>
                   </div>
-                  <p className="text-[11px] text-brand-ink/70 leading-relaxed">{act.desc}</p>
+                  <p className="text-xs text-brand-ink/75 leading-relaxed">{act.desc}</p>
                 </button>
               ))}
             </div>
@@ -633,9 +640,9 @@ function ReassuranceTool() {
           <div className="w-12 h-12 rounded-full bg-brand-teal text-white mx-auto flex items-center justify-center shadow-xs">
             <span className="material-symbols-outlined text-[24px]">check</span>
           </div>
-          <h4 className="font-editorial text-2xl text-brand-ink font-medium">
+          <h3 className="font-editorial text-2xl text-brand-ink font-medium">
             Reassurance Interrupted!
-          </h4>
+          </h3>
           <p className="text-xs text-brand-ink/75 max-w-sm mx-auto leading-relaxed">
             You chose: <span className="font-semibold text-brand-ink">{selectedAction?.title}</span>.
             Certainty is a mirage in OCD. Embracing the doubt is freedom.
@@ -645,7 +652,7 @@ function ReassuranceTool() {
               setRecorded(false);
               setSelectedAction(null);
             }}
-            className="px-4 py-2 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-white transition-colors"
+            className="min-h-[44px] px-5 py-2.5 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-white transition-colors"
           >
             Reset Tool
           </button>
@@ -696,10 +703,10 @@ function FocusTool() {
   return (
     <div className="space-y-6 max-w-md mx-auto text-center py-2">
       <div className="space-y-1">
-        <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
+        <h2 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
           Life-Aligned Focus Timer
-        </h3>
-        <p className="text-xs text-brand-ink/65">
+        </h2>
+        <p className="text-xs text-brand-ink/75">
           Dedicate undistracted attention to an action outside of OCD.
         </p>
       </div>
@@ -722,10 +729,10 @@ function FocusTool() {
             <button
               key={m}
               onClick={() => handleSetMinutes(m)}
-              className={`px-4 py-2 rounded-xl transition-colors ${
+              className={`min-h-[44px] px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center ${
                 durationMin === m
                   ? 'bg-brand-ink text-white font-semibold shadow-xs'
-                  : 'bg-brand-canvas text-brand-ink/70 border border-brand-border hover:text-brand-ink'
+                  : 'bg-brand-canvas text-brand-ink/75 border border-brand-border hover:text-brand-ink'
               }`}
             >
               {m} Minutes
@@ -744,7 +751,7 @@ function FocusTool() {
       <div className="flex justify-center gap-3">
         <button
           onClick={() => setIsActive(!isActive)}
-          className={`px-6 py-2.5 rounded-xl text-xs font-medium transition-colors shadow-xs ${
+          className={`min-h-[44px] px-6 py-2.5 rounded-xl text-xs font-medium transition-colors shadow-xs flex items-center justify-center ${
             isActive
               ? 'bg-brand-coral hover:bg-brand-coral/90 text-white'
               : 'bg-brand-teal hover:bg-brand-tealDark text-white'
@@ -755,14 +762,14 @@ function FocusTool() {
         {isActive && (
           <button
             onClick={() => handleSetMinutes(durationMin)}
-            className="px-4 py-2.5 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-brand-canvas transition-colors"
+            className="min-h-[44px] px-4 py-2.5 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-brand-canvas transition-colors flex items-center justify-center"
           >
             Reset
           </button>
         )}
       </div>
 
-      <p className="text-[11px] text-brand-ink/50 italic">
+      <p className="text-xs text-brand-ink/75 italic">
         When an intrusive thought tries to interrupt your work, notice it, don't debate it, and return attention to this timer.
       </p>
     </div>

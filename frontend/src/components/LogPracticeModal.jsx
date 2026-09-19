@@ -171,11 +171,11 @@ export default function LogPracticeModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fade-in p-4 overflow-y-auto">
-      <div className="bg-brand-paper border border-brand-border/70 rounded-3xl shadow-card-lift w-full max-w-lg p-6 sm:p-8 relative my-8 animate-liquid-pop">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 backdrop-blur-xs animate-fade-in p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="practice-modal-title">
+      <div className="bg-brand-paper border border-brand-border/70 rounded-3xl shadow-card-lift w-full max-w-lg p-6 sm:p-8 relative my-auto sm:my-8 animate-liquid-pop">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-brand-ink/40 hover:text-brand-ink transition-colors p-1"
+          className="absolute top-4 right-4 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-brand-ink/70 hover:text-brand-ink hover:bg-brand-canvas transition-colors"
           aria-label="Close modal"
         >
           <span className="material-symbols-outlined text-[20px]">close</span>
@@ -186,10 +186,10 @@ export default function LogPracticeModal({
           <span className="text-xs font-bold uppercase tracking-widest">ERP Practice & Exposure</span>
         </div>
 
-        <h2 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium mb-1">
+        <h2 id="practice-modal-title" className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium mb-1">
           {step === 1 ? 'Prepare Exposure Session' : 'Record Outcome & Response'}
         </h2>
-        <p className="text-brand-ink/60 text-xs mb-6 leading-relaxed">
+        <p className="text-brand-ink/75 text-xs mb-6 leading-relaxed">
           {step === 1
             ? 'Anchor in the trigger, acknowledge the intrusive doubt, and observe pre-exposure distress.'
             : 'Observe how distress settled and record your response prevention choice.'}
@@ -205,7 +205,7 @@ export default function LogPracticeModal({
           <div className="space-y-5">
             {initialPlan && (
               <div className="p-3.5 rounded-2xl bg-brand-softerTeal/60 border border-brand-teal/20 text-xs">
-                <span className="font-bold text-brand-teal uppercase tracking-wider text-[10px] block mb-0.5">
+                <span className="font-bold text-brand-teal uppercase tracking-wider text-xs block mb-0.5">
                   {initialPlan.type === 'clinician-assigned' ? 'Clinician-Assigned Guideline' : 'Practice Plan'}
                 </span>
                 <p className="font-medium text-brand-ink">{initialPlan.title}</p>
@@ -229,16 +229,16 @@ export default function LogPracticeModal({
               <label className="block text-xs font-semibold text-brand-ink uppercase tracking-wider mb-2">
                 Environment / Context
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {['Home', 'Work', 'Social', 'Transit'].map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setContext(c)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs transition-colors ${
+                    className={`min-h-[44px] px-4 py-2 rounded-xl text-xs transition-colors flex items-center justify-center ${
                       context === c
                         ? 'bg-brand-ink text-white font-medium shadow-xs'
-                        : 'bg-brand-canvas text-brand-ink/70 border border-brand-border hover:border-brand-ink/30'
+                        : 'bg-brand-canvas text-brand-ink/75 border border-brand-border hover:border-brand-ink/30'
                     }`}
                   >
                     {c}
@@ -253,7 +253,7 @@ export default function LogPracticeModal({
                   Initial Distress (Pre-Exposure SUDS)
                 </label>
                 <span className="font-mono text-xl font-medium text-brand-coral">
-                  {preDistress} <span className="text-xs text-brand-ink/50 font-sans ml-1">({SUDS_LABELS[preDistress]})</span>
+                  {preDistress} <span className="text-xs text-brand-ink/75 font-sans ml-1">({SUDS_LABELS[preDistress]})</span>
                 </span>
               </div>
               <input
@@ -264,25 +264,25 @@ export default function LogPracticeModal({
                 onChange={(e) => setPreDistress(Number(e.target.value))}
                 className="w-full h-2 bg-brand-canvas rounded-full appearance-none cursor-pointer accent-brand-coral"
               />
-              <div className="flex justify-between text-[10px] text-brand-ink/40 font-mono mt-1">
-                <span>0 (Calm)</span>
-                <span>5 (Moderate)</span>
-                <span>10 (Peak)</span>
+              <div className="flex justify-between text-xs text-brand-ink/75 font-sans mt-1">
+                <span><span className="font-mono font-semibold">0</span> (Calm)</span>
+                <span><span className="font-mono font-semibold">5</span> (Moderate)</span>
+                <span><span className="font-mono font-semibold">10</span> (Peak)</span>
               </div>
             </div>
 
-            <div className="pt-3 flex justify-end gap-3">
+            <div className="pt-3 flex flex-wrap justify-end items-center gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs font-medium text-brand-ink/60 hover:text-brand-ink transition-colors"
+                className="min-h-[44px] px-4 py-2 text-xs font-medium text-brand-ink/75 hover:text-brand-ink transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-sm"
+                className="min-h-[44px] px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-sm flex items-center"
               >
                 Continue to Response Prevention →
               </button>
@@ -544,7 +544,7 @@ export default function LogPracticeModal({
                     </label>
                     <span className="font-mono text-xl font-medium text-brand-teal">
                       {postDistress}{' '}
-                      <span className="text-xs text-brand-ink/50 font-sans ml-1">
+                      <span className="text-xs text-brand-ink/75 font-sans ml-1">
                         ({SUDS_LABELS[postDistress]})
                       </span>
                     </span>
@@ -563,7 +563,7 @@ export default function LogPracticeModal({
 
             <div>
               <label className="block text-xs font-semibold text-brand-ink uppercase tracking-wider mb-2">
-                Qualitative Reflection <span className="text-brand-ink/40 font-normal lowercase">(What did you notice about your tolerance?)</span>
+                Qualitative Reflection <span className="text-brand-ink/75 font-normal lowercase">(What did you notice about your tolerance?)</span>
               </label>
               <textarea
                 value={notes}
@@ -574,21 +574,21 @@ export default function LogPracticeModal({
               />
             </div>
 
-            <div className="pt-2 flex justify-between items-center">
+            <div className="pt-2 flex flex-wrap gap-2 justify-between items-center">
               <button
                 type="button"
                 onClick={() => setStep(1)}
                 disabled={saving}
-                className="px-3.5 py-2 text-xs font-medium text-brand-ink/60 hover:text-brand-ink transition-colors"
+                className="min-h-[44px] px-4 py-2 text-xs font-medium text-brand-ink/75 hover:text-brand-ink transition-colors flex items-center"
               >
                 ← Back
               </button>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={saving}
-                  className="px-4 py-2 text-xs font-medium text-brand-ink/60 hover:text-brand-ink transition-colors"
+                  className="min-h-[44px] px-4 py-2 text-xs font-medium text-brand-ink/75 hover:text-brand-ink transition-colors"
                 >
                   Cancel
                 </button>
@@ -596,7 +596,7 @@ export default function LogPracticeModal({
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
+                  className="min-h-[44px] px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors shadow-sm disabled:opacity-50 flex items-center"
                 >
                   {saving ? 'Logging...' : 'Save Exposure Practice'}
                 </button>

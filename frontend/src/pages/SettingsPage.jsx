@@ -606,12 +606,12 @@ export default function SettingsPage() {
               <div className="p-4 rounded-2xl bg-brand-canvas border border-brand-border/60 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-brand-ink">Active Device Sync</span>
-                  <span className="text-[10px] font-mono text-clinical-success font-semibold">Protected</span>
+                  <span className="text-xs font-sans text-clinical-success font-bold">Protected</span>
                 </div>
-                <p className="text-[11px] text-brand-ink/60 leading-relaxed">
+                <p className="text-xs text-brand-ink/75 leading-relaxed">
                   Session token synchronized via secure HTTP-compatible storage and browser cookies (SameSite=Lax).
                 </p>
-                <div className="pt-1 flex items-center gap-1.5 text-[10px] text-brand-ink/50 font-mono">
+                <div className="pt-1 flex items-center gap-1.5 text-xs text-brand-ink/75 font-sans">
                   <span className="w-1.5 h-1.5 rounded-full bg-clinical-success" />
                   <span>Zero third-party trackers or ad beacons</span>
                 </div>
@@ -622,11 +622,11 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-brand-ink block">Active Session</span>
-                  <span className="text-[11px] text-brand-ink/50 font-mono">ID: {user?.id || 'usr_current'}</span>
+                  <span className="text-xs text-brand-ink/70 font-mono">ID: {user?.id || 'usr_current'}</span>
                 </div>
                 <button
                   onClick={logout}
-                  className="px-4 py-2 rounded-xl bg-brand-coralSoft text-brand-coral hover:bg-brand-coral hover:text-white text-xs font-semibold transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2 min-h-[44px] rounded-xl bg-brand-coralSoft text-brand-coral hover:bg-brand-coral hover:text-white text-xs font-semibold transition-colors flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-[16px]">logout</span>
                   <span>Sign Out</span>

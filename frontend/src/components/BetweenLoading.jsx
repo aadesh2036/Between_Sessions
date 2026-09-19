@@ -64,7 +64,7 @@ export default function BetweenLoading({
   const currentSize = sizeMap[size] || sizeMap.md;
 
   const loaderVisual = (
-    <div className={`relative flex items-center justify-center shrink-0 ${currentSize.box}`}>
+    <div className={`relative flex items-center justify-center shrink-0 ${currentSize.box}`} aria-hidden="true">
       {/* Outer subtle 7-day orbit track */}
       {size !== 'xs' && (
         <div
@@ -88,6 +88,7 @@ export default function BetweenLoading({
           fill="none"
           stroke="currentColor"
           xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
         >
           {/* Static sector fill: the 167 hours space */}
           <path
@@ -134,7 +135,7 @@ export default function BetweenLoading({
 
   if (inline) {
     return (
-      <span className={`inline-flex items-center gap-2 ${className}`}>
+      <span className={`inline-flex items-center gap-2 ${className}`} role="status" aria-live="polite">
         {loaderVisual}
         {label && <span className="text-xs font-medium text-brand-ink/80">{label}</span>}
       </span>
@@ -143,14 +144,14 @@ export default function BetweenLoading({
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 bg-brand-canvas/80 backdrop-blur-md flex flex-col items-center justify-center p-6 transition-all duration-300">
+      <div className="fixed inset-0 z-50 bg-brand-canvas/80 backdrop-blur-md flex flex-col items-center justify-center p-6 transition-all duration-300" role="status" aria-live="polite" aria-label={label || 'Loading'}>
         <div className="flex flex-col items-center text-center space-y-4 max-w-sm">
           {loaderVisual}
           <div className="space-y-1">
             <p className="font-editorial text-xl sm:text-2xl text-brand-ink font-medium">
               {label || 'Holding the space between sessions...'}
             </p>
-            <p className="text-xs font-sans text-brand-ink/60">
+            <p className="text-xs font-sans text-brand-ink/75">
               {sublabel || 'Bridging your continuity and mindful response'}
             </p>
           </div>
@@ -160,7 +161,7 @@ export default function BetweenLoading({
   }
 
   return (
-    <div className={`flex flex-col items-center justify-center p-4 text-center space-y-3 ${className}`}>
+    <div className={`flex flex-col items-center justify-center p-4 text-center space-y-3 ${className}`} role="status" aria-live="polite" aria-label={label || 'Loading'}>
       {loaderVisual}
       {(label || sublabel) && (
         <div className="space-y-0.5">
@@ -168,7 +169,7 @@ export default function BetweenLoading({
             <p className="font-sans text-xs font-semibold text-brand-ink/80">{label}</p>
           )}
           {sublabel && (
-            <p className="font-sans text-[11px] text-brand-ink/50">{sublabel}</p>
+            <p className="font-sans text-xs text-brand-ink/75">{sublabel}</p>
           )}
         </div>
       )}

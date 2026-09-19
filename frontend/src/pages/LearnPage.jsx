@@ -54,28 +54,28 @@ export default function LearnPage() {
     <DashboardShell>
       {/* ── Reading Modal / Drawer ───────────────────────────────────────── */}
       {activeReading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in overflow-y-auto">
-          <div className="bg-brand-paper border border-brand-border/70 rounded-3xl shadow-card-lift w-full max-w-2xl p-6 sm:p-8 relative my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="reading-title">
+          <div className="bg-brand-paper border border-brand-border/70 rounded-3xl shadow-card-lift w-full max-w-2xl p-6 sm:p-8 relative my-auto sm:my-8">
             <button
               onClick={() => setActiveReading(null)}
-              className="absolute top-5 right-5 text-brand-ink/40 hover:text-brand-ink transition-colors p-1"
+              className="absolute top-4 right-4 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-brand-ink/70 hover:text-brand-ink hover:bg-brand-canvas transition-colors"
               aria-label="Close reading view"
             >
               <span className="material-symbols-outlined text-[22px]">close</span>
             </button>
 
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20">
+              <span className="text-xs uppercase font-bold tracking-widest px-3 py-1 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20">
                 {activeReading.bookTitle || activeReading.badge || 'Curated Reading'}
               </span>
             </div>
 
-            <h2 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium leading-snug mb-3">
+            <h2 id="reading-title" className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium leading-snug mb-3">
               {activeReading.title}
             </h2>
 
             {activeReading.summary && (
-              <p className="text-xs text-brand-ink/70 italic border-l-2 border-brand-teal pl-3 py-1 mb-4 leading-relaxed bg-brand-canvas/60">
+              <p className="text-xs text-brand-ink/75 italic border-l-2 border-brand-teal pl-3 py-1 mb-4 leading-relaxed bg-brand-canvas/60">
                 {activeReading.summary}
               </p>
             )}
@@ -84,13 +84,13 @@ export default function LearnPage() {
               {activeReading.content}
             </div>
 
-            <div className="pt-6 mt-4 border-t border-brand-border/60 flex items-center justify-between">
+            <div className="pt-6 mt-4 border-t border-brand-border/60 flex flex-wrap items-center justify-between gap-3">
               {activeReading.chapterId ? (
                 <button
                   onClick={() => {
                     handleToggleComplete(activeReading.chapterId, activeReading.bookId);
                   }}
-                  className={`px-5 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center gap-2 ${
+                  className={`min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center gap-2 ${
                     completedChapters.includes(activeReading.chapterId)
                       ? 'bg-brand-softSuccess text-clinical-success border border-clinical-success/30'
                       : 'bg-brand-teal text-white hover:bg-brand-tealDark'
@@ -106,12 +106,12 @@ export default function LearnPage() {
                   </span>
                 </button>
               ) : (
-                <span className="text-xs text-brand-ink/50 italic">Clinical Masterclass Note</span>
+                <span className="text-xs text-brand-ink/75 italic">Clinical Masterclass Note</span>
               )}
 
               <button
                 onClick={() => setActiveReading(null)}
-                className="px-4 py-2 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-brand-canvas"
+                className="min-h-[44px] px-5 py-2 rounded-xl border border-brand-border text-xs text-brand-ink hover:bg-brand-canvas flex items-center justify-center"
               >
                 Close
               </button>
@@ -137,7 +137,7 @@ export default function LearnPage() {
             </p>
           </div>
 
-          <div className="flex gap-1.5 p-1 rounded-2xl bg-brand-paper border border-brand-border text-xs self-start sm:self-auto shadow-xs">
+          <div className="flex flex-wrap gap-1.5 p-1 rounded-2xl bg-brand-paper border border-brand-border text-xs self-start sm:self-auto shadow-xs" role="tablist" aria-label="Educational Sanctuary Tabs">
             {[
               { id: 'books', label: 'Books & Volumes' },
               { id: 'guides', label: 'Clinical Deep Dives' },
@@ -145,11 +145,13 @@ export default function LearnPage() {
             ].map((t) => (
               <button
                 key={t.id}
+                role="tab"
+                aria-selected={activeTab === t.id}
                 onClick={() => setActiveTab(t.id)}
-                className={`px-3.5 py-1.5 rounded-xl transition-all font-medium ${
+                className={`min-h-[44px] px-4 py-2 rounded-xl transition-all font-medium flex items-center justify-center ${
                   activeTab === t.id
                     ? 'bg-brand-ink text-white font-semibold shadow-xs'
-                    : 'text-brand-ink/70 hover:text-brand-ink'
+                    : 'text-brand-ink/75 hover:text-brand-ink'
                 }`}
               >
                 {t.label}
@@ -175,11 +177,11 @@ export default function LearnPage() {
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20">
+                        <span className="text-xs uppercase font-bold tracking-widest px-3 py-1 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20">
                           {book.badge}
                         </span>
-                        <span className="text-xs font-mono text-brand-ink/50">
-                          {bookReadCount}/{totalChapters} read
+                        <span className="text-xs font-sans text-brand-ink/75">
+                          <span className="font-mono font-semibold">{bookReadCount}/{totalChapters}</span> read
                         </span>
                       </div>
 
@@ -187,7 +189,7 @@ export default function LearnPage() {
                         <h2 className="font-editorial text-2xl text-brand-ink font-medium leading-snug">
                           {book.title}
                         </h2>
-                        <p className="text-xs text-brand-ink/65 mt-1 leading-relaxed">
+                        <p className="text-xs text-brand-ink/75 mt-1 leading-relaxed">
                           {book.subtitle}
                         </p>
                       </div>
@@ -211,7 +213,7 @@ export default function LearnPage() {
                             >
                               <span
                                 className={`material-symbols-outlined text-[17px] shrink-0 mt-0.5 ${
-                                  isDone ? 'text-brand-teal' : 'text-brand-ink/30 group-hover:text-brand-ink/50'
+                                  isDone ? 'text-brand-teal' : 'text-brand-ink/60 group-hover:text-brand-ink'
                                 }`}
                               >
                                 {isDone ? 'check_circle' : 'article'}
@@ -239,7 +241,7 @@ export default function LearnPage() {
                             });
                           }
                         }}
-                        className="w-full py-2.5 rounded-xl bg-brand-canvas hover:bg-brand-softerTeal text-brand-ink hover:text-brand-teal border border-brand-border text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
+                        className="w-full min-h-[44px] py-2.5 rounded-xl bg-brand-canvas hover:bg-brand-softerTeal text-brand-ink hover:text-brand-teal border border-brand-border text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
                       >
                         <span className="material-symbols-outlined text-[16px]">menu_book</span>
                         <span>{bookReadCount > 0 ? 'Continue Reading' : 'Open Volume'}</span>
@@ -255,6 +257,7 @@ export default function LearnPage() {
         {/* ── Tab 2: Clinical Deep Dives ──────────────────────────────────── */}
         {activeTab === 'guides' && (
           <div className="space-y-5 animate-fade-in">
+            <h2 className="sr-only">Clinical Deep Dives</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {(data.masterclasses || []).map((guide) => (
                 <div
@@ -263,17 +266,17 @@ export default function LearnPage() {
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full bg-brand-amberSoft text-brand-amber border border-brand-amber/30">
+                      <span className="text-xs uppercase font-bold tracking-widest px-3 py-1 rounded-full bg-brand-amberSoft text-brand-amber border border-brand-amber/30">
                         {guide.badge}
                       </span>
-                      <span className="text-xs font-mono text-brand-ink/50">{guide.duration}</span>
+                      <span className="text-xs font-sans font-medium text-brand-ink/75">{guide.duration}</span>
                     </div>
 
                     <h3 className="font-editorial text-xl text-brand-ink font-medium leading-snug">
                       {guide.title}
                     </h3>
 
-                    <p className="text-xs text-brand-ink/70 line-clamp-4 leading-relaxed whitespace-pre-line">
+                    <p className="text-xs text-brand-ink/75 line-clamp-4 leading-relaxed whitespace-pre-line">
                       {guide.content}
                     </p>
                   </div>
@@ -281,7 +284,7 @@ export default function LearnPage() {
                   <div className="pt-3 border-t border-brand-border/50">
                     <button
                       onClick={() => setActiveReading(guide)}
-                      className="w-full py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                      className="w-full min-h-[44px] py-2.5 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-medium transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                     >
                       <span className="material-symbols-outlined text-[16px]">auto_stories</span>
                       <span>Read Complete Guide</span>
@@ -310,6 +313,7 @@ export default function LearnPage() {
         {/* ── Tab 3: Curated Resource Library ─────────────────────────────── */}
         {activeTab === 'resources' && (
           <div className="space-y-4 animate-fade-in">
+            <h2 className="sr-only">External Authorities</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {(data.resources || []).map((res) => (
                 <div
@@ -318,7 +322,7 @@ export default function LearnPage() {
                 >
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-brand-canvas border border-brand-border text-brand-ink/70">
+                      <span className="text-xs uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-brand-canvas border border-brand-border text-brand-ink/75">
                         {res.category}
                       </span>
                     </div>
@@ -327,7 +331,7 @@ export default function LearnPage() {
                       {res.name}
                     </h3>
 
-                    <p className="text-xs text-brand-ink/70 leading-relaxed">
+                    <p className="text-xs text-brand-ink/75 leading-relaxed">
                       {res.description}
                     </p>
                   </div>
@@ -337,7 +341,7 @@ export default function LearnPage() {
                       href={res.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-teal hover:text-brand-tealDark transition-colors"
+                      className="min-h-[44px] inline-flex items-center gap-1.5 text-xs font-semibold text-brand-teal hover:text-brand-tealDark transition-colors"
                     >
                       <span>Visit Authority Website</span>
                       <span className="material-symbols-outlined text-[14px]">open_in_new</span>

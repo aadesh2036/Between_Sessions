@@ -238,10 +238,10 @@ export default function DashboardPage() {
           <div className="lg:col-span-8 lg:row-span-2 bg-brand-amberSoft border border-brand-amber/30 rounded-3xl p-6 sm:p-8 shadow-card-lift relative overflow-hidden flex flex-col justify-between">
             {/* Top Bar */}
             <div className="relative z-10 flex items-center justify-between">
-              <span className="text-[10px] uppercase font-bold tracking-widest text-brand-amber px-3 py-1 rounded-full bg-white/80 border border-brand-amber/20 shadow-2xs">
+              <span className="text-xs uppercase font-bold tracking-widest text-brand-amber px-3 py-1 rounded-full bg-white/80 border border-brand-amber/20 shadow-2xs">
                 Daily Grounding Focus
               </span>
-              <span className="text-xs font-mono text-brand-ink/50">
+              <span className="text-xs font-mono text-brand-ink/75">
                 {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
               </span>
             </div>
@@ -275,7 +275,7 @@ export default function DashboardPage() {
                 <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
               </Link>
               <span className="text-brand-amber/40">•</span>
-              <span className="text-brand-ink/60 text-[11px]">Brain Lock & ERP Clinical Framework</span>
+              <span className="text-brand-ink/75 text-xs">Brain Lock & ERP Clinical Framework</span>
             </div>
           </div>
 
@@ -283,11 +283,11 @@ export default function DashboardPage() {
           <div className="lg:col-span-4 lg:row-span-1 bg-brand-coralSoft border border-brand-coral/30 rounded-3xl p-6 shadow-card-lift flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-coral px-3 py-1 rounded-full bg-white/80 border border-brand-coral/20">
+                <span className="text-xs uppercase font-bold tracking-widest text-brand-coral px-3 py-1 rounded-full bg-white/80 border border-brand-coral/20">
                   {activePractice.type === 'clinician-assigned' ? 'Clinician-Assigned' : 'Active Practice'}
                 </span>
                 {activePractice.practitionerName && (
-                  <span className="text-[10px] font-semibold text-brand-teal">Dr. Mehra</span>
+                  <span className="text-xs font-semibold text-brand-teal">Dr. Mehra</span>
                 )}
               </div>
 
@@ -295,13 +295,13 @@ export default function DashboardPage() {
                 <h3 className="font-editorial text-xl text-brand-ink font-medium leading-snug mb-1">
                   {activePractice.title}
                 </h3>
-                <p className="text-xs text-brand-ink/70 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-brand-ink/75 line-clamp-2 leading-relaxed">
                   {activePractice.instructions}
                 </p>
               </div>
 
-              <div className="p-3 rounded-2xl bg-white/80 border border-brand-coral/20 flex items-center justify-between text-xs font-mono text-brand-ink/80">
-                <span className="font-sans text-[11px] text-brand-ink/60">Target:</span>
+              <div className="p-3 rounded-2xl bg-white/80 border border-brand-coral/20 flex items-center justify-between text-xs text-brand-ink/80">
+                <span className="font-sans text-xs text-brand-ink/75">Target:</span>
                 <span className="font-sans font-semibold text-brand-coral">Delay or Resist</span>
               </div>
             </div>
@@ -312,7 +312,7 @@ export default function DashboardPage() {
                   setSelectedPlanForModal(activePractice);
                   setShowPracticeModal(true);
                 }}
-                className="w-full py-2.5 px-3 rounded-xl bg-brand-ink hover:bg-brand-coral text-white text-xs font-medium transition-colors shadow-xs flex items-center justify-center gap-2"
+                className="w-full min-h-[44px] py-2.5 px-3 rounded-xl bg-brand-ink hover:bg-brand-coral text-white text-xs font-medium transition-colors shadow-xs flex items-center justify-center gap-2"
               >
                 <span className="material-symbols-outlined text-[16px]">play_circle</span>
                 <span>Begin Exposure</span>
@@ -328,7 +328,7 @@ export default function DashboardPage() {
                   <span className="material-symbols-outlined text-[18px] text-brand-teal">auto_awesome</span>
                   <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">Weekly Synthesis</span>
                 </div>
-                <span className="text-[10px] font-mono text-brand-ink/50">Pattern Review</span>
+                <span className="text-xs font-sans font-semibold text-brand-ink/75">Pattern Review</span>
               </div>
 
               {aiSummary?.summary ? (
@@ -340,13 +340,13 @@ export default function DashboardPage() {
                   You logged <span className="font-mono font-semibold text-brand-ink">{stats.checkinCountThisWeek ?? 0}</span> check-ins this week. Avg pre-distress was <span className="font-mono font-semibold text-brand-ink">{stats.avgSudsThisWeek ? Number(stats.avgSudsThisWeek).toFixed(1) : '—'}</span>/10. Primary strategy: <span className="font-semibold text-brand-teal">{stats.primaryPattern || 'delay'}</span>.
                 </div>
               ) : (
-                <div className="p-3.5 rounded-2xl bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/50 italic">
+                <div className="p-3.5 rounded-2xl bg-brand-canvas/70 border border-brand-border/60 text-xs text-brand-ink/75 italic">
                   Log a check-in and practice session to view your weekly behavioral summary.
                 </div>
               )}
             </div>
 
-            <div className="pt-2 border-t border-brand-border/40 flex items-center justify-between text-[11px] text-brand-ink/50">
+            <div className="pt-2 border-t border-brand-border/40 flex items-center justify-between text-xs text-brand-ink/75">
               <span className="italic">Synthesized from logs — not medical advice.</span>
               <Link to="/app/practice" className="font-medium text-brand-teal hover:underline">
                 History →
@@ -360,7 +360,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-editorial text-2xl text-brand-ink font-medium">Quick Calm Tools</h3>
-                  <p className="text-xs text-brand-ink/60 mt-0.5">Gentle regulation aids — not rituals to sanitize obsessions.</p>
+                  <p className="text-xs text-brand-ink/75 mt-0.5">Gentle regulation aids — not rituals to sanitize obsessions.</p>
                 </div>
                 <Link to="/app/toolkit" className="text-xs font-medium text-brand-teal hover:underline flex items-center gap-0.5">
                   <span>View All</span>
@@ -377,17 +377,17 @@ export default function DashboardPage() {
                       Pause & Choose
                     </span>
                   </div>
-                  <span className="text-[11px] text-brand-ink/50 font-medium">4-Step Hesitation</span>
+                  <span className="text-xs text-brand-ink/75 font-medium">4-Step Hesitation</span>
                 </div>
 
                 {inlinePauseStep === 'idle' && (
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="text-xs text-brand-ink/75">
                       Feeling the urge to check, replay, or seek reassurance right now?
                     </p>
                     <button
                       onClick={() => setInlinePauseStep('notice')}
-                      className="px-3.5 py-1.5 rounded-xl bg-brand-lavender text-white text-xs font-medium hover:bg-brand-lavender/90 transition-colors shrink-0 shadow-xs"
+                      className="min-h-[44px] px-4 py-2 rounded-xl bg-brand-lavender text-white text-xs font-medium hover:bg-brand-lavender/90 transition-colors shrink-0 shadow-xs flex items-center"
                     >
                       Pause 30s
                     </button>
@@ -399,19 +399,19 @@ export default function DashboardPage() {
                     <p className="text-xs font-medium text-brand-ink">
                       1. Notice: "I notice an intrusive thought and an urge to ritualize."
                     </p>
-                    <p className="text-[11px] text-brand-ink/70">
+                    <p className="text-xs text-brand-ink/75">
                       Acknowledge the urge without agreeing with the thought or arguing against it.
                     </p>
                     <div className="flex justify-end gap-2 pt-1">
                       <button
                         onClick={() => setInlinePauseStep('idle')}
-                        className="px-2.5 py-1 text-xs text-brand-ink/60 hover:text-brand-ink"
+                        className="min-h-[44px] px-3 py-2 text-xs text-brand-ink/75 hover:text-brand-ink flex items-center"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={() => setInlinePauseStep('choose')}
-                        className="px-3.5 py-1.5 rounded-xl bg-brand-lavender text-white text-xs font-medium"
+                        className="min-h-[44px] px-4 py-2.5 rounded-xl bg-brand-lavender text-white text-xs font-medium flex items-center"
                       >
                         Next: Choose Action →
                       </button>
@@ -427,31 +427,31 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
                       <button
                         onClick={() => handleInlinePauseChoice('delay')}
-                        className="p-2.5 rounded-xl border border-brand-amber/40 bg-white hover:bg-brand-amberSoft text-brand-ink text-center transition-colors shadow-2xs"
+                        className="min-h-[44px] p-2.5 rounded-xl border border-brand-amber/40 bg-white hover:bg-brand-amberSoft text-brand-ink text-center transition-colors shadow-2xs flex flex-col items-center justify-center"
                       >
-                        <span className="font-semibold block text-[11px] text-brand-amber">Delay</span>
-                        <span className="text-[10px] text-brand-ink/60">Wait 15m</span>
+                        <span className="font-semibold block text-xs text-brand-amber">Delay</span>
+                        <span className="text-xs text-brand-ink/75 font-medium">Wait 15m</span>
                       </button>
                       <button
                         onClick={() => handleInlinePauseChoice('resist')}
-                        className="p-2.5 rounded-xl border border-brand-teal/40 bg-white hover:bg-brand-softerTeal text-brand-ink text-center transition-colors shadow-2xs"
+                        className="min-h-[44px] p-2.5 rounded-xl border border-brand-teal/40 bg-white hover:bg-brand-softerTeal text-brand-ink text-center transition-colors shadow-2xs flex flex-col items-center justify-center"
                       >
-                        <span className="font-semibold block text-[11px] text-brand-teal">Resist</span>
-                        <span className="text-[10px] text-brand-ink/60">No Ritual</span>
+                        <span className="font-semibold block text-xs text-brand-teal">Resist</span>
+                        <span className="text-xs text-brand-ink/75 font-medium">No Ritual</span>
                       </button>
                       <button
                         onClick={() => handleInlinePauseChoice('return')}
-                        className="p-2.5 rounded-xl border border-brand-lavender/40 bg-white hover:bg-brand-lavenderSoft text-brand-ink text-center transition-colors shadow-2xs"
+                        className="min-h-[44px] p-2.5 rounded-xl border border-brand-lavender/40 bg-white hover:bg-brand-lavenderSoft text-brand-ink text-center transition-colors shadow-2xs flex flex-col items-center justify-center"
                       >
-                        <span className="font-semibold block text-[11px] text-brand-lavender">Return</span>
-                        <span className="text-[10px] text-brand-ink/60">To Activity</span>
+                        <span className="font-semibold block text-xs text-brand-lavender">Return</span>
+                        <span className="text-xs text-brand-ink/75 font-medium">To Activity</span>
                       </button>
                       <button
                         onClick={() => handleInlinePauseChoice('compulsion')}
-                        className="p-2.5 rounded-xl border border-brand-coral/40 bg-white hover:bg-brand-coralSoft text-brand-ink text-center transition-colors shadow-2xs"
+                        className="min-h-[44px] p-2.5 rounded-xl border border-brand-coral/40 bg-white hover:bg-brand-coralSoft text-brand-ink text-center transition-colors shadow-2xs flex flex-col items-center justify-center"
                       >
-                        <span className="font-semibold block text-[11px] text-brand-coral">Gave In</span>
-                        <span className="text-[10px] text-brand-ink/60">Honest Log</span>
+                        <span className="font-semibold block text-xs text-brand-coral">Gave In</span>
+                        <span className="text-xs text-brand-ink/75 font-medium">Honest Log</span>
                       </button>
                     </div>
                   </div>
@@ -474,7 +474,7 @@ export default function DashboardPage() {
                     <span className="material-symbols-outlined text-[18px]">spa</span>
                     <span className="text-xs font-bold uppercase tracking-wider">Grounding</span>
                   </div>
-                  <p className="text-[11px] text-brand-ink/70">5-4-3-2-1 sensory anchor back to reality.</p>
+                  <p className="text-xs text-brand-ink/75">5-4-3-2-1 sensory anchor back to reality.</p>
                 </Link>
 
                 <Link
@@ -485,7 +485,7 @@ export default function DashboardPage() {
                     <span className="material-symbols-outlined text-[18px]">air</span>
                     <span className="text-xs font-bold uppercase tracking-wider">Paced Breath</span>
                   </div>
-                  <p className="text-[11px] text-brand-ink/70">Unhurried pacing to steady the body.</p>
+                  <p className="text-xs text-brand-ink/75">Unhurried pacing to steady the body.</p>
                 </Link>
 
                 <Link
@@ -496,7 +496,7 @@ export default function DashboardPage() {
                     <span className="material-symbols-outlined text-[18px]">help_center</span>
                     <span className="text-xs font-bold uppercase tracking-wider">Interrupter</span>
                   </div>
-                  <p className="text-[11px] text-brand-ink/70">Catch digital & cognitive checking traps.</p>
+                  <p className="text-xs text-brand-ink/75">Catch digital & cognitive checking traps.</p>
                 </Link>
               </div>
             </div>
@@ -506,13 +506,13 @@ export default function DashboardPage() {
           <div className="lg:col-span-5 lg:row-span-2 bg-brand-paper border border-brand-border/60 rounded-3xl p-6 sm:p-8 shadow-card-lift flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-3 py-1 rounded-full bg-brand-softerTeal border border-brand-teal/20">
+                <span className="text-xs uppercase font-bold tracking-widest text-brand-teal px-3 py-1 rounded-full bg-brand-softerTeal border border-brand-teal/20">
                   Life Outside OCD
                 </span>
-                <span className="text-xs font-mono text-brand-ink/50">Values Actions</span>
+                <span className="text-xs font-sans font-semibold text-brand-ink/75">Values Actions</span>
               </div>
               <h3 className="font-editorial text-2xl text-brand-ink font-medium">Daily Value Steps</h3>
-              <p className="text-xs text-brand-ink/60 mb-4">
+              <p className="text-xs text-brand-ink/75 mb-4">
                 Recovery is not just reducing OCD; it is expanding what you care about.
               </p>
 
@@ -531,7 +531,7 @@ export default function DashboardPage() {
                     >
                       <span
                         className={`material-symbols-outlined text-[20px] shrink-0 mt-0.5 ${
-                          isDone ? 'text-brand-teal' : 'text-brand-ink/30'
+                          isDone ? 'text-brand-teal' : 'text-brand-ink/60'
                         }`}
                       >
                         {isDone ? 'check_circle' : 'radio_button_unchecked'}
@@ -541,11 +541,11 @@ export default function DashboardPage() {
                           <span className={`text-xs font-medium ${isDone ? 'line-through text-brand-ink/60' : 'text-brand-ink'}`}>
                             {act.title}
                           </span>
-                          <span className="text-[10px] font-mono text-brand-ink/40 shrink-0">
+                          <span className="text-xs font-mono font-semibold text-brand-ink/75 shrink-0">
                             {act.minutes}m
                           </span>
                         </div>
-                        <span className="text-[10px] text-brand-teal font-medium uppercase tracking-wider block mt-0.5">
+                        <span className="text-xs text-brand-teal font-medium uppercase tracking-wider block mt-0.5">
                           {act.value}
                         </span>
                       </div>
@@ -555,7 +555,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-brand-border/40 text-[11px] text-brand-ink/60 flex items-center justify-between">
+            <div className="pt-3 border-t border-brand-border/40 text-xs text-brand-ink/75 flex items-center justify-between">
               <span>{completedActions.length} value actions completed</span>
               <span className="text-brand-teal font-medium">One step is enough</span>
             </div>
@@ -565,10 +565,10 @@ export default function DashboardPage() {
           <div className="lg:col-span-12 bg-[#E8F3EE] border border-brand-border/60 rounded-3xl p-6 sm:p-8 shadow-card-lift flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2 max-w-xl">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-clinical-success px-3 py-1 rounded-full bg-white/90 border border-clinical-success/20">
+                <span className="text-xs uppercase font-bold tracking-widest text-clinical-success px-3 py-1 rounded-full bg-white/90 border border-clinical-success/20">
                   Gentle Rhythm
                 </span>
-                <span className="text-xs font-mono text-brand-ink/50">Anti-Gamified</span>
+                <span className="text-xs font-sans font-semibold text-brand-ink/75">Anti-Gamified</span>
               </div>
 
               <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink font-medium">
@@ -580,21 +580,21 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 shrink-0">
-              <div className="p-3.5 rounded-2xl bg-white/90 border border-brand-border/50 text-center min-w-[85px] shadow-xs">
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-3 shrink-0">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/90 border border-brand-border/50 text-center min-w-[70px] sm:min-w-[85px] shadow-xs">
                 <span className="font-mono text-xl font-bold text-brand-coral block">1</span>
                 <span className="text-xs font-semibold text-brand-ink">Practice</span>
-                <span className="text-[10px] text-brand-ink/50 block">Exposure trial</span>
+                <span className="text-xs text-brand-ink/75 block">Exposure trial</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-white/90 border border-brand-border/50 text-center min-w-[85px] shadow-xs">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/90 border border-brand-border/50 text-center min-w-[70px] sm:min-w-[85px] shadow-xs">
                 <span className="font-mono text-xl font-bold text-brand-teal block">1</span>
                 <span className="text-xs font-semibold text-brand-ink">Life Action</span>
-                <span className="text-[10px] text-brand-ink/50 block">Value step</span>
+                <span className="text-xs text-brand-ink/75 block">Value step</span>
               </div>
-              <div className="p-3.5 rounded-2xl bg-white/90 border border-brand-border/50 text-center min-w-[85px] shadow-xs">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/90 border border-brand-border/50 text-center min-w-[70px] sm:min-w-[85px] shadow-xs">
                 <span className="font-mono text-xl font-bold text-brand-lavender block">1</span>
                 <span className="text-xs font-semibold text-brand-ink">Calm Tool</span>
-                <span className="text-[10px] text-brand-ink/50 block">Pause/ground</span>
+                <span className="text-xs text-brand-ink/75 block">Pause/ground</span>
               </div>
             </div>
           </div>

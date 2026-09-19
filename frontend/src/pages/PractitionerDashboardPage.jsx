@@ -96,12 +96,12 @@ function SudsTrendChart({ checkins }) {
             className="flex flex-col items-center gap-1 shrink-0"
             title={`SUDS ${score} — ${fmtDate(ci.createdAt)}`}
           >
-            <span className="font-mono text-[9px] text-brand-ink/50">{score}</span>
+            <span className="font-mono text-xs font-medium text-brand-ink/75">{score}</span>
             <div
               className={`w-5 rounded-sm ${barColor} transition-all`}
               style={{ height: `${heightPx}px` }}
             />
-            <span className="font-mono text-[9px] text-brand-ink/40 rotate-0">
+            <span className="font-mono text-xs font-medium text-brand-ink/75 rotate-0">
               {mmdd(ci.createdAt)}
             </span>
           </div>
@@ -293,7 +293,7 @@ function PatientView({ patient, onBack }) {
       <header className="flex flex-col sm:flex-row sm:items-start gap-4">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-brand-ink/50 hover:text-brand-teal transition-colors text-sm font-bold self-start"
+          className="min-h-[44px] px-3 py-2 flex items-center gap-2 text-brand-ink/75 hover:text-brand-teal transition-colors text-sm font-bold self-start rounded-xl"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
@@ -306,17 +306,17 @@ function PatientView({ patient, onBack }) {
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-brand-teal px-2.5 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
+              <span className="text-xs font-bold uppercase tracking-widest text-brand-teal px-2.5 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
                 Patient Continuity Profile
               </span>
-              <span className="font-mono text-xs text-brand-ink/40">
+              <span className="font-mono text-xs text-brand-ink/75">
                 ID: {patient.userId}
               </span>
             </div>
             <h2 className="font-editorial text-3xl sm:text-4xl text-brand-ink font-medium">
               {summary?.patientProfile?.name || patient.name || patient.userId}
             </h2>
-            <p className="text-xs text-brand-ink/60">
+            <p className="text-xs text-brand-ink/75">
               Age Band: <span className="font-semibold text-brand-ink">{summary?.patientProfile?.ageBand || patient.ageBand || 'Adult'}</span>
               {summary?.patientProfile?.email && ` • ${summary.patientProfile.email}`}
             </p>
@@ -396,16 +396,16 @@ function PatientView({ patient, onBack }) {
           {/* Stats row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label: 'Check-ins', value: summary.stats?.checkinCount ?? 0 },
-              { label: 'Avg SUDS', value: summary.stats?.avgSuds != null ? summary.stats.avgSuds.toFixed(1) : '—' },
-              { label: 'Practices', value: summary.stats?.practiceCount ?? 0 },
-              { label: 'Journal entries', value: summary.stats?.journalCount ?? 0 },
+              { label: 'Check-ins', value: (summary.summary?.checkinCount ?? summary.stats?.checkinCount ?? 0) },
+              { label: 'Avg SUDS', value: (summary.summary?.avgSuds != null ? Number(summary.summary.avgSuds).toFixed(1) : (summary.stats?.avgSuds != null ? Number(summary.stats.avgSuds).toFixed(1) : '—')) },
+              { label: 'Practices', value: (summary.summary?.practiceCount ?? summary.stats?.practiceCount ?? 0) },
+              { label: 'Journal entries', value: (summary.summary?.journalCount ?? summary.stats?.journalCount ?? 0) },
             ].map(({ label, value }) => (
               <div
                 key={label}
                 className="bg-white rounded-2xl p-5 border border-brand-border/30 shadow-sm"
               >
-                <div className="text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 mb-1">
+                <div className="text-xs font-bold uppercase tracking-widest text-brand-ink/75 font-sans mb-1">
                   {label}
                 </div>
                 <div className="font-mono text-3xl font-medium text-brand-ink">{value}</div>
@@ -418,12 +418,12 @@ function PatientView({ patient, onBack }) {
             <div className="flex items-center gap-2 text-brand-teal mb-3">
               <span className="text-xs font-bold uppercase tracking-widest">SUDS Trend</span>
             </div>
-            <p className="text-[11px] text-brand-ink/40 mb-4">
+            <p className="text-xs text-brand-ink/75 mb-4">
               Each bar = one check-in. Height proportional to SUDS score (0–10).
             </p>
             <SudsTrendChart checkins={summary.checkins ?? []} />
             {(!summary.checkins || summary.checkins.length === 0) && (
-              <p className="text-brand-ink/40 text-sm">No check-in records in the shared window.</p>
+              <p className="text-brand-ink/75 text-sm">No check-in records in the shared window.</p>
             )}
           </section>
 
@@ -437,13 +437,13 @@ function PatientView({ patient, onBack }) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left border-b border-brand-border/40">
-                      <th className="pb-3 pr-4 text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 whitespace-nowrap">
+                      <th className="pb-3 pr-4 text-xs font-bold uppercase tracking-widest text-brand-ink/75 font-sans whitespace-nowrap">
                         Exercise
                       </th>
-                      <th className="pb-3 pr-4 text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 whitespace-nowrap">
+                      <th className="pb-3 pr-4 text-xs font-bold uppercase tracking-widest text-brand-ink/75 font-sans whitespace-nowrap">
                         Pre → Post Distress
                       </th>
-                      <th className="pb-3 text-[10px] font-bold uppercase tracking-widest text-brand-ink/40 whitespace-nowrap">
+                      <th className="pb-3 text-xs font-bold uppercase tracking-widest text-brand-ink/75 font-sans whitespace-nowrap">
                         Date
                       </th>
                     </tr>
@@ -457,11 +457,11 @@ function PatientView({ patient, onBack }) {
                         <td className="py-3 pr-4">
                           <span className="font-mono text-xs">
                             <span className="text-brand-coral">{p.preDistress ?? '—'}</span>
-                            <span className="text-brand-ink/40 mx-1">→</span>
+                            <span className="text-brand-ink/60 mx-1 font-sans font-bold">→</span>
                             <span className="text-brand-teal">{p.postDistress ?? '—'}</span>
                           </span>
                         </td>
-                        <td className="py-3 text-[11px] text-brand-ink/50 whitespace-nowrap">
+                        <td className="py-3 text-xs text-brand-ink/75 font-mono whitespace-nowrap">
                           {fmtDate(p.completedAt)}
                         </td>
                       </tr>
@@ -619,7 +619,7 @@ function PatientView({ patient, onBack }) {
                       <span className="text-[10px] font-bold uppercase tracking-wider text-brand-teal px-2 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
                         Longitudinal Synthesis
                       </span>
-                      <span className="text-[10px] font-mono text-brand-ink/50">
+                      <span className="text-xs font-mono text-brand-ink/70">
                         Model: {modelName} · {providerName}
                       </span>
                     </div>
@@ -635,7 +635,7 @@ function PatientView({ patient, onBack }) {
                         <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
                           Practice Observations
                         </span>
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-brand-softSuccess text-clinical-success uppercase border border-clinical-success/20">
+                        <span className="text-xs font-sans font-bold px-2 py-0.5 rounded bg-brand-softSuccess text-clinical-success uppercase border border-clinical-success/20">
                           FACT
                         </span>
                       </div>
@@ -647,9 +647,9 @@ function PatientView({ patient, onBack }) {
                             </p>
                             {obs.evidence?.length > 0 && (
                               <div className="flex flex-wrap items-center gap-1 pt-1 border-t border-brand-border/30">
-                                <span className="text-[9px] text-brand-ink/40 uppercase font-mono">Evidence:</span>
+                                <span className="text-xs text-brand-ink/75 uppercase font-sans font-bold">Evidence:</span>
                                 {obs.evidence.map((ev, ei) => (
-                                  <span key={ei} className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-brand-softerTeal text-brand-teal">
+                                  <span key={ei} className="font-mono text-xs px-2 py-0.5 rounded bg-brand-softerTeal text-brand-teal">
                                     {ev}
                                   </span>
                                 ))}
@@ -668,7 +668,7 @@ function PatientView({ patient, onBack }) {
                         <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
                           Observed Behavioral Patterns
                         </span>
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-brand-amberSoft text-brand-amber uppercase border border-brand-amber/20">
+                        <span className="text-xs font-sans font-bold px-2 py-0.5 rounded bg-brand-amberSoft text-brand-amber uppercase border border-brand-amber/20">
                           INFERENCE
                         </span>
                       </div>
@@ -689,7 +689,7 @@ function PatientView({ patient, onBack }) {
                         <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
                           Retrieved Clinical Knowledge (ERP Grounding)
                         </span>
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-brand-lavenderSoft text-brand-lavender uppercase border border-brand-lavender/20">
+                        <span className="text-xs font-sans font-bold px-2 py-0.5 rounded bg-brand-lavenderSoft text-brand-lavender uppercase border border-brand-lavender/20">
                           KNOWLEDGE
                         </span>
                       </div>
@@ -699,11 +699,11 @@ function PatientView({ patient, onBack }) {
                             <div className="font-editorial text-sm font-semibold text-brand-ink">
                               {item.title || item.point || 'Clinical Principle'}
                             </div>
-                            <div className="text-[11px] text-brand-ink/60 font-sans italic">
+                            <div className="text-xs text-brand-ink/75 font-sans italic">
                               {item.citation || item.source || 'Peer-reviewed clinical reference'}
                             </div>
                             {item.chunkId && (
-                              <span className="inline-block font-mono text-[9px] px-1.5 py-0.5 rounded bg-brand-lavenderSoft text-brand-lavender">
+                              <span className="inline-block font-mono text-xs px-2 py-0.5 rounded bg-brand-lavenderSoft text-brand-lavender">
                                 {item.chunkId}
                               </span>
                             )}
@@ -720,7 +720,7 @@ function PatientView({ patient, onBack }) {
                         <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
                           Session Prep Considerations
                         </span>
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-brand-softerTeal text-brand-teal uppercase border border-brand-teal/20">
+                        <span className="text-xs font-sans font-bold px-2 py-0.5 rounded bg-brand-softerTeal text-brand-teal uppercase border border-brand-teal/20">
                           CLINICAL PROBE
                         </span>
                       </div>
@@ -736,7 +736,7 @@ function PatientView({ patient, onBack }) {
                   )}
 
                   {/* Clinical Safety Disclaimer */}
-                  <div className="p-4 rounded-xl bg-brand-canvas border border-brand-border/40 text-[11px] text-brand-ink/50 leading-relaxed italic">
+                  <div className="p-4 rounded-xl bg-brand-canvas border border-brand-border/40 text-xs text-brand-ink/75 leading-relaxed italic">
                     AI-generated clinical decision support for licensed practitioners — not a medical diagnosis, treatment directive, or patient reassurance. Synthesized strictly from authorized DynamoDB logs and curated ERP literature under AWS Cedar policy. The practitioner retains sole clinical responsibility.
                   </div>
                 </div>
@@ -769,16 +769,16 @@ function PatientView({ patient, onBack }) {
                     className="p-4 rounded-2xl bg-brand-softerTeal border border-brand-teal/20"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-brand-teal">
+                      <span className="text-xs font-bold uppercase tracking-widest text-brand-teal">
                         Recommendation
                       </span>
-                      <span className="font-mono text-[10px] text-brand-ink/40">
+                      <span className="font-mono text-xs text-brand-ink/70">
                         {fmtDate(rec.createdAt)}
                       </span>
                     </div>
                     {rec.observation && (
                       <div className="mb-2">
-                        <span className="text-[10px] font-bold text-brand-ink/40 uppercase tracking-wider">
+                        <span className="text-xs font-bold text-brand-ink/70 uppercase tracking-wider">
                           Observation:{' '}
                         </span>
                         <span className="text-sm text-brand-ink">{rec.observation}</span>
@@ -786,7 +786,7 @@ function PatientView({ patient, onBack }) {
                     )}
                     {rec.nextStep && (
                       <div className="mb-2">
-                        <span className="text-[10px] font-bold text-brand-ink/40 uppercase tracking-wider">
+                        <span className="text-xs font-bold text-brand-ink/70 uppercase tracking-wider">
                           Next step:{' '}
                         </span>
                         <span className="text-sm text-brand-ink font-medium">{rec.nextStep}</span>
@@ -794,7 +794,7 @@ function PatientView({ patient, onBack }) {
                     )}
                     {rec.referral && (
                       <div className="mb-2">
-                        <span className="text-[10px] font-bold text-brand-ink/40 uppercase tracking-wider">
+                        <span className="text-xs font-bold text-brand-ink/70 uppercase tracking-wider">
                           Referral:{' '}
                         </span>
                         <span className="text-sm text-brand-ink">{rec.referral}</span>
@@ -802,7 +802,7 @@ function PatientView({ patient, onBack }) {
                     )}
                     {rec.noteToUser && (
                       <div className="mt-2 p-3 rounded-xl bg-white/60 border border-brand-teal/10">
-                        <span className="text-[10px] font-bold text-brand-teal/70 uppercase tracking-wider">
+                        <span className="text-xs font-bold text-brand-teal uppercase tracking-wider">
                           Note to patient:{' '}
                         </span>
                         <span className="text-sm text-brand-ink italic">{rec.noteToUser}</span>
@@ -813,7 +813,7 @@ function PatientView({ patient, onBack }) {
               </div>
             ) : (
               !showRecForm && (
-                <p className="text-brand-ink/40 text-sm mb-4">
+                <p className="text-brand-ink/70 text-sm mb-4">
                   No recommendations written yet for this patient.
                 </p>
               )
@@ -1116,22 +1116,29 @@ function PractitionerSettingsView({ prac, onUpdated, onLogout }) {
                   <div className="text-xs font-bold text-brand-ink">
                     Tele-Consultation / Remote Availability
                   </div>
-                  <div className="text-[11px] text-brand-ink/60">
+                  <div className="text-xs text-brand-ink/75 mt-0.5">
                     Allow consented patients across regions to request remote asynchronous monitoring and review.
                   </div>
                 </div>
                 <button
                   type="button"
+                  role="switch"
+                  aria-checked={remoteAvailable}
+                  aria-label="Toggle Tele-Consultation and Remote Availability"
                   onClick={() => setRemoteAvailable(!remoteAvailable)}
-                  className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
-                    remoteAvailable ? 'bg-brand-teal' : 'bg-brand-border'
-                  }`}
+                  className="min-h-[44px] min-w-[48px] flex items-center justify-center cursor-pointer"
                 >
-                  <span
-                    className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform ${
-                      remoteAvailable ? 'translate-x-6' : 'translate-x-0'
+                  <div
+                    className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
+                      remoteAvailable ? 'bg-brand-teal' : 'bg-brand-border'
                     }`}
-                  />
+                  >
+                    <span
+                      className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform ${
+                        remoteAvailable ? 'translate-x-6' : 'translate-x-0'
+                      }`}
+                    />
+                  </div>
                 </button>
               </div>
             </div>
@@ -1145,7 +1152,7 @@ function PractitionerSettingsView({ prac, onUpdated, onLogout }) {
                   <h2 className="font-editorial text-2xl text-brand-ink font-normal">
                     Session Security
                   </h2>
-                  <p className="text-xs text-brand-ink/50 mt-0.5">
+                  <p className="text-xs text-brand-ink/70 mt-0.5">
                     Encrypted practitioner session
                   </p>
                 </div>
@@ -1154,16 +1161,16 @@ function PractitionerSettingsView({ prac, onUpdated, onLogout }) {
 
               <div className="space-y-3 text-xs">
                 <div className="p-3 rounded-xl bg-brand-canvas border border-brand-border/60 flex items-center justify-between">
-                  <span className="text-brand-ink/60">Session Token:</span>
-                  <span className="font-mono text-[11px] text-brand-teal font-bold">Encrypted JWT</span>
+                  <span className="text-brand-ink/75">Session Token:</span>
+                  <span className="font-sans text-xs text-brand-teal font-bold">Encrypted JWT</span>
                 </div>
                 <div className="p-3 rounded-xl bg-brand-canvas border border-brand-border/60 flex items-center justify-between">
-                  <span className="text-brand-ink/60">Cookie Security:</span>
-                  <span className="font-mono text-[11px] text-brand-ink">SameSite=Lax</span>
+                  <span className="text-brand-ink/75">Cookie Security:</span>
+                  <span className="font-mono text-xs text-brand-ink font-semibold">SameSite=Lax</span>
                 </div>
                 <div className="p-3 rounded-xl bg-brand-canvas border border-brand-border/60 flex items-center justify-between">
-                  <span className="text-brand-ink/60">Consent Boundary:</span>
-                  <span className="font-mono text-[11px] text-brand-teal font-bold">Enforced</span>
+                  <span className="text-brand-ink/75">Consent Boundary:</span>
+                  <span className="font-sans text-xs text-brand-teal font-bold">Enforced</span>
                 </div>
               </div>
             </div>
@@ -1352,7 +1359,7 @@ export default function PractitionerDashboardPage() {
       <div className="md:hidden flex items-center justify-between px-4 py-2.5 bg-white/95 backdrop-blur-md border-b border-brand-border/60 sticky top-0 z-30 shadow-xs">
         <div className="flex items-center gap-2">
           <Logo />
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20">
+          <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20">
             Clinician
           </span>
         </div>
@@ -1360,7 +1367,7 @@ export default function PractitionerDashboardPage() {
           {/* Shortened Tele-MANAS crisis button on mobile */}
           <a
             href="tel:14416"
-            className="px-2.5 py-1 rounded-full bg-brand-coralSoft text-brand-coral border border-brand-coral/30 hover:bg-brand-coral hover:text-white text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-xs"
+            className="px-3 py-1.5 min-h-[40px] rounded-full bg-brand-coralSoft text-brand-coral border border-brand-coral/30 hover:bg-brand-coral hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs"
             title="Tele-MANAS 24/7 Free Crisis Telephony"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-brand-coral animate-pulse" />
@@ -1368,12 +1375,13 @@ export default function PractitionerDashboardPage() {
           </a>
           <button
             onClick={() => navClick('settings')}
-            className={`w-7 h-7 rounded-full bg-brand-canvas border border-brand-border flex items-center justify-center transition-all ${
+            className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-brand-canvas border border-brand-border flex items-center justify-center transition-all ${
               navItem === 'settings' ? 'text-brand-teal border-brand-teal bg-brand-softerTeal' : 'text-brand-ink/70 hover:text-brand-teal'
             }`}
             title="Settings"
+            aria-label="Practitioner Settings"
           >
-            <span className="material-symbols-outlined text-[16px]">tune</span>
+            <span className="material-symbols-outlined text-[18px]">tune</span>
           </button>
         </div>
       </div>
@@ -1515,15 +1523,16 @@ export default function PractitionerDashboardPage() {
                     Verified
                   </span>
                 )}
-                <span className="text-[10px] text-brand-ink/40 font-mono truncate">
+                <span className="text-xs text-brand-ink/70 font-mono truncate">
                   {prac?.email ?? ''}
                 </span>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="p-2 text-brand-ink/40 hover:text-brand-coral transition-colors shrink-0"
+              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-brand-ink/70 hover:text-brand-coral transition-colors shrink-0"
               title="Log out"
+              aria-label="Log out of practitioner session"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
                 <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" />
@@ -1539,7 +1548,7 @@ export default function PractitionerDashboardPage() {
         <div className="absolute top-0 -left-[10%] w-[500px] h-[500px] rounded-full bg-brand-softerTeal blur-[120px] opacity-60 pointer-events-none z-0" />
         <div className="absolute bottom-0 -right-[10%] w-[500px] h-[500px] rounded-full bg-brand-coralSoft blur-[140px] opacity-50 pointer-events-none z-0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 pb-24 md:pb-6 space-y-8">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 pb-28 md:pb-8 space-y-8">
 
           {/* ═══════════════════════════════════════════════════════════ */}
           {/* VIEW: patient detail                                        */}
@@ -1658,11 +1667,11 @@ export default function PractitionerDashboardPage() {
                               </p>
                             )}
 
-                            <div className="flex items-center gap-1.5 text-[10px] text-brand-ink/50 font-mono pt-0.5">
-                              <span>Requested scope:</span>
-                              <span className="text-brand-teal bg-brand-softerTeal px-1.5 py-0.5 rounded">Practice Logs</span>
-                              <span className="text-brand-teal bg-brand-softerTeal px-1.5 py-0.5 rounded">Check-ins (SUDS)</span>
-                              <span className="text-brand-teal bg-brand-softerTeal px-1.5 py-0.5 rounded">Journal Reflection</span>
+                            <div className="flex flex-wrap items-center gap-1.5 text-xs text-brand-ink/75 font-sans pt-0.5">
+                              <span className="font-medium">Requested scope:</span>
+                              <span className="text-brand-teal bg-brand-softerTeal px-2 py-0.5 rounded font-medium">Practice Logs</span>
+                              <span className="text-brand-teal bg-brand-softerTeal px-2 py-0.5 rounded font-medium">Check-ins (SUDS)</span>
+                              <span className="text-brand-teal bg-brand-softerTeal px-2 py-0.5 rounded font-medium">Journal Reflection</span>
                             </div>
                           </div>
 
@@ -1831,14 +1840,14 @@ export default function PractitionerDashboardPage() {
                             {/* Consented Categories */}
                             {patient.consentedCategories?.length > 0 && (
                               <div className="pt-1">
-                                <span className="text-[9px] uppercase font-bold tracking-wider text-brand-ink/50 block mb-1">
+                                <span className="text-xs uppercase font-bold tracking-wider text-brand-ink/70 block mb-1">
                                   Consented Data:
                                 </span>
-                                <div className="flex flex-wrap gap-1">
+                                <div className="flex flex-wrap gap-1.5">
                                   {patient.consentedCategories.map((cat) => (
                                     <span
                                       key={cat}
-                                      className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20"
+                                      className="text-xs font-sans font-medium px-2.5 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal border border-brand-teal/20"
                                     >
                                       {cat}
                                     </span>
@@ -1848,13 +1857,13 @@ export default function PractitionerDashboardPage() {
                             )}
                           </div>
 
-                          <div className="pt-3 border-t border-brand-border/50 flex items-center justify-between">
-                            <span className="text-[10px] text-brand-ink/40 font-mono">
+                          <div className="pt-3 border-t border-brand-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <span className="text-xs text-brand-ink/70 font-mono">
                               Connected: {fmtDate(patient.connectedAt)}
                             </span>
                             <button
                               onClick={() => openPatient(patient)}
-                              className="px-3.5 py-1.5 rounded-xl bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors flex items-center gap-1 shadow-xs"
+                              className="px-4 py-2 min-h-[44px] rounded-xl bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors flex items-center justify-center gap-1 shadow-xs w-full sm:w-auto"
                             >
                               <span>Review Patient &amp; Journal</span>
                               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -1962,14 +1971,14 @@ export default function PractitionerDashboardPage() {
                       <span className="material-symbols-outlined text-[18px] text-brand-teal">clinical_notes</span>
                     </div>
                     <div>
-                      <div className="font-mono text-3xl font-bold text-brand-teal">
+                      <div className="font-sans text-3xl font-bold text-brand-teal">
                         Active
                       </div>
                       <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
                         Clinical Guidance Notes
                       </div>
                     </div>
-                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-teal/20 pt-2 font-mono">
+                    <div className="text-xs text-brand-ink/75 border-t border-brand-teal/20 pt-2 font-sans font-medium">
                       Human authored guidance
                     </div>
                   </div>
@@ -1977,20 +1986,20 @@ export default function PractitionerDashboardPage() {
                   {/* Card 4: Cedar WASM Policy Engine */}
                   <div className="bg-brand-lavenderSoft border border-brand-lavender/40 rounded-3xl p-5 shadow-card-lift flex flex-col justify-between space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-lavender px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-lavender/30">
+                      <span className="text-xs uppercase font-bold tracking-wider text-brand-lavender px-2.5 py-0.5 rounded-full bg-white/80 border border-brand-lavender/30">
                         Cedar WASM
                       </span>
                       <span className="material-symbols-outlined text-[18px] text-brand-lavender">verified_user</span>
                     </div>
                     <div>
-                      <div className="font-mono text-3xl font-bold text-brand-ink">
+                      <div className="font-sans text-3xl font-bold text-brand-ink">
                         Gated
                       </div>
                       <div className="text-xs font-medium text-brand-ink/75 mt-0.5">
                         Real-Time Policy Check
                       </div>
                     </div>
-                    <div className="text-[10px] text-brand-ink/50 border-t border-brand-lavender/20 pt-2 font-mono">
+                    <div className="text-xs text-brand-ink/70 border-t border-brand-lavender/20 pt-2 font-sans font-medium">
                       Granular consent enforced
                     </div>
                   </div>
@@ -2001,20 +2010,20 @@ export default function PractitionerDashboardPage() {
               {requests.length > 0 && (
                 <div className="p-6 rounded-3xl bg-brand-coralSoft border border-brand-coral/40 shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/80 text-brand-coral text-[10px] font-bold border border-brand-coral/30">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/80 text-brand-coral text-xs font-bold border border-brand-coral/30">
                       <span className="w-1.5 h-1.5 rounded-full bg-brand-coral animate-pulse" />
                       Priority Action Required
                     </div>
-                    <h3 className="font-editorial text-2xl text-brand-ink font-normal">
+                    <h2 className="font-editorial text-2xl text-brand-ink font-normal">
                       {requests.length} Inbound Connection {requests.length === 1 ? 'Request' : 'Requests'}
-                    </h3>
+                    </h2>
                     <p className="text-xs text-brand-ink/70">
                       Patients are waiting for your clinical confirmation to begin sharing between-session telemetry.
                     </p>
                   </div>
                   <button
                     onClick={() => navClick('requests')}
-                    className="px-5 py-2.5 rounded-xl bg-brand-coral text-white hover:bg-brand-coral/90 text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-center flex items-center gap-1.5"
+                    className="px-5 py-2.5 min-h-[44px] rounded-xl bg-brand-coral text-white hover:bg-brand-coral/90 text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-center flex items-center gap-1.5"
                   >
                     <span>Triage Requests</span>
                     <span className="material-symbols-outlined text-sm">arrow_forward</span>
@@ -2033,7 +2042,7 @@ export default function PractitionerDashboardPage() {
                   </div>
                   <button
                     onClick={() => navClick('patients')}
-                    className="text-xs font-bold text-brand-teal hover:underline flex items-center gap-1"
+                    className="text-xs font-bold text-brand-teal hover:underline flex items-center gap-1 min-h-[44px] py-1"
                   >
                     <span>View All ({patients.length})</span>
                     <span className="material-symbols-outlined text-sm">arrow_forward</span>
@@ -2048,7 +2057,7 @@ export default function PractitionerDashboardPage() {
                     />
                   </div>
                 ) : patients.length === 0 ? (
-                  <p className="text-brand-ink/40 text-xs py-4">
+                  <p className="text-brand-ink/70 text-xs py-4">
                     No active patients connected yet. When you accept incoming requests, they will appear here.
                   </p>
                 ) : (
@@ -2065,17 +2074,17 @@ export default function PractitionerDashboardPage() {
                               {displayName.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">
-                              <h4 className="font-bold text-sm text-brand-ink truncate">
+                              <h3 className="font-bold text-sm text-brand-ink truncate">
                                 {displayName}
-                              </h4>
-                              <p className="text-[11px] font-mono text-brand-ink/50 truncate">
+                              </h3>
+                              <p className="text-xs font-mono text-brand-ink/70 truncate">
                                 {patient.userId}
                               </p>
                             </div>
                           </div>
                           <button
                             onClick={() => openPatient(patient)}
-                            className="px-3.5 py-1.5 rounded-xl bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors shrink-0 shadow-xs"
+                            className="px-4 py-2 min-h-[44px] rounded-xl bg-brand-ink text-white hover:bg-brand-teal text-xs font-medium transition-colors shrink-0 shadow-xs flex items-center justify-center"
                           >
                             Review
                           </button>
@@ -2089,7 +2098,7 @@ export default function PractitionerDashboardPage() {
           )}
 
           {/* ── Safety footer ──────────────────────────────────────────── */}
-          <footer className="border-t border-brand-border/40 pt-6 text-center text-[11px] text-brand-ink/40">
+          <footer className="border-t border-brand-border/40 pt-6 text-center text-xs text-brand-ink/75">
             <span className="font-bold text-brand-coral">Need immediate support?</span>
             {' '}Tele-MANAS:{' '}
             <span className="font-mono">14416</span>
