@@ -1,11 +1,11 @@
 {
-  "name": "src",
+  "name": "between-sessions-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Between Sessions Serverless Backend Functions & APIs",
   "main": "auth.js",
   "scripts": {
-    "test": "node ../test_e2e_journey.js",
-    "test:e2e": "node ../test_e2e_journey.js"
+    "test": "node ../../tests/test_backend_e2e.js",
+    "seed": "node seed.js"
   },
   "keywords": [],
   "author": "",

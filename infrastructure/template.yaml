@@ -53,7 +53,7 @@ Resources:
   AuthFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: auth.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -129,7 +129,7 @@ Resources:
   CheckinsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: checkins.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -150,7 +150,7 @@ Resources:
   JournalFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: journal.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -171,7 +171,7 @@ Resources:
   PracticeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: practice.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -197,7 +197,7 @@ Resources:
   DashboardFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: dashboard.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -213,7 +213,7 @@ Resources:
   ProgressFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: progress.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -229,7 +229,7 @@ Resources:
   AiSummaryFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: aiSummary.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -250,7 +250,7 @@ Resources:
   ConsentsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: consents.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -276,7 +276,7 @@ Resources:
   ConnectionsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: connections.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -312,7 +312,7 @@ Resources:
   PractitionerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: practitioner.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -378,7 +378,7 @@ Resources:
   ToolkitFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: toolkit.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -399,7 +399,7 @@ Resources:
   ValuesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: values.handler
       Policies:
         - DynamoDBCrudPolicy:
@@ -425,7 +425,7 @@ Resources:
   LearningFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
+      CodeUri: ../backend/src/
       Handler: learning.handler
       Policies:
         - DynamoDBCrudPolicy:

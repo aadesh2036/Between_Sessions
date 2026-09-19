@@ -1,0 +1,32 @@
+{
+  "name": "between-sessions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Between Sessions — Enterprise-grade serverless behavioral health ERP micro-exposure platform",
+  "scripts": {
+    "dev": "./scripts/start_local.sh",
+    "dev:sam": "./scripts/start_sam.sh",
+    "dev:express": "./scripts/start_express.sh",
+    "build": "npm run build:frontend && npm run build:sam",
+    "build:frontend": "npm run build --prefix frontend",
+    "build:sam": "cd infrastructure && sam build",
+    "test": "./scripts/run_tests.sh",
+    "test:backend": "NODE_PATH=backend/src/node_modules node tests/test_backend_e2e.js",
+    "test:ai": "NODE_PATH=backend/src/node_modules node tests/test_ai_rag.js",
+    "test:e2e": "NODE_PATH=backend/src/node_modules node tests/test_e2e_journey.js",
+    "seed": "./scripts/seed.sh"
+  },
+  "keywords": [
+    "mental-health",
+    "behavioral-health",
+    "aws-sam",
+    "serverless",
+    "cedar-policy",
+    "clinical-rag",
+    "react",
+    "vite",
+    "dynamodb"
+  ],
+  "author": "Between Sessions Team",
+  "license": "UNLICENSED"
+}

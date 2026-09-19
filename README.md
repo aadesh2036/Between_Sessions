@@ -88,7 +88,63 @@ Frontend development adheres strictly to the `.stitch/DESIGN.md` specification a
 
 ---
 
-## 🚀 Quick Start (Root Startup Scripts)
+## 📂 Project Architecture & Directory Structure
+
+The repository is cleanly partitioned into deployment-oriented functional boundaries:
+
+```
+Between_Sessions/
+├── frontend/                   # Client application (React 19, Vite, Tailwind CSS v4)
+│   ├── src/                    # Pages, components, contexts, and api.js
+│   ├── public/                 # Static assets and icons
+│   ├── package.json            # Frontend dependencies
+│   └── vite.config.js          # Vite build configuration
+│
+├── backend/                    # Serverless backend & Lambda business logic
+│   ├── src/                    # 13 Lambda functions, Express dev server, Cedar WASM, seed
+│   ├── .dynamodb-local/        # Local DynamoDB binaries and libraries
+│   ├── package.json            # Backend Node.js dependencies
+│   └── README.md               # Backend documentation
+│
+├── infrastructure/             # AWS Serverless Application Model (SAM) configuration
+│   ├── template.yaml           # SAM template (13 Lambdas, DynamoDB Single-Table, API Gateway)
+│   ├── samconfig.toml          # CloudFormation deployment settings
+│   ├── local-env.json          # Container networking environment overrides
+│   └── events/                 # Synthetic API Gateway invocation events
+│
+├── scripts/                    # Developer setup, launchers, and seeding utilities
+│   ├── start_local.sh          # Master local stack launcher (SAM Local or Express)
+│   ├── start_sam.sh            # Native AWS SAM Serverless CLI runner (:3000)
+│   ├── start_express.sh        # Lightweight Express dev server runner (:3000)
+│   ├── seed.sh                 # Database seeder utility
+│   └── run_tests.sh            # Complete automated test suite runner
+│
+├── tests/                      # Automated end-to-end and AI test suites
+│   ├── test_backend_e2e.js     # Backend logic, auth, password reset, Cedar WASM (36 tests)
+│   ├── test_ai_rag.js          # Clinical RAG retrieval, LLM fallback, isolation (23 tests)
+│   └── test_e2e_journey.js     # Full clinical and patient journey lifecycle (35 tests)
+│
+├── docs/                       # Complete project documentation hub
+│   ├── architecture/           # System architecture, AWS stack, and data models
+│   ├── deployment/             # AWS Cloud deployment guide (AWS_DEPLOYMENT.md)
+│   ├── product/                # Features, demo credentials, practitioner IDs
+│   ├── ai/                     # AI setup, RAG mechanics, and knowledge base
+│   ├── prds/                   # Recreated UX & Backend requirements specifications
+│   ├── reports/                # Audit, polish, and verification reports
+│   └── archive/                # Reference material and design notes
+│
+├── .env.example                # Environment variables template
+├── .gitignore                  # Git ignore rules
+├── AGENTS.md                   # Agent system directives & clinical boundaries
+├── GEMINI.md                   # Agent rules mirror
+├── package.json                # Root NPM scripts (dev, build, test, seed)
+├── start.sh                    # Convenience proxy to ./scripts/start_local.sh
+└── README.md                   # Master Documentation Hub (This File)
+```
+
+---
+
+## 🚀 Quick Start & Local Execution
 
 ### Prerequisites
 * **Node.js:** v20+ (tested on Node v24.18.1)
@@ -100,77 +156,37 @@ Frontend development adheres strictly to the `.stitch/DESIGN.md` specification a
 
 ### 1. Launch Modes
 
-| Script | Purpose | Stack |
+| Command | Purpose | Stack |
 |---|---|---|
-| **`./start_sam.sh`** | **AWS Hackathon & Cloud-Parity** | Native AWS SAM CLI (`sam local start-api`), 13 Lambda functions, warm container caching, DynamoDB Local, Vite frontend. |
-| **`./start_express.sh`** | **Fast Local Dev Loop** | Node Express dev server bridging Lambda handlers, in-memory DynamoDB Local, Vite frontend. |
-| **`./start.sh`** | **Master Launcher** | Defaults to `./start_sam.sh`. Accepts `--express` for fast dev and `--build`/`--seed` flags. |
-
-#### AWS SAM Serverless Mode (Default for Hackathon):
-```bash
-./start_sam.sh          # Boots SAM local API on :3000 + DynamoDB on :8000 + Frontend on :5173
-./start_sam.sh --build  # Rebuilds SAM Lambda functions prior to launch
-./start_sam.sh --seed   # Re-seeds DynamoDB Local with fresh clinical demo datasets
-```
-
-#### Express Development Mode:
-```bash
-./start_express.sh      # Boots lightweight Express server on :3000 + DynamoDB on :8000 + Frontend on :5173
-./start_express.sh --seed
-```
+| **`npm run dev`** (or `./scripts/start_local.sh`) | **AWS Serverless Local (Default)** | Native AWS SAM CLI (`sam local start-api`), 13 Lambda functions, warm container caching, DynamoDB Local, Vite frontend. |
+| **`npm run dev:express`** (or `./scripts/start_express.sh`) | **Fast Dev Loop** | Node Express dev server bridging Lambda handlers, in-memory DynamoDB Local, Vite frontend. |
+| **`npm run build`** | **Production Build** | Builds React frontend and packages all 13 SAM Lambda functions. |
+| **`npm test`** (or `./scripts/run_tests.sh`) | **Run All Tests** | Executes all 94 verification checks across 3 test suites. |
+| **`npm run seed`** (or `./scripts/seed.sh`) | **Seed Demo Data** | Populates DynamoDB Local with complete deterministic clinical demo data. |
 
 Open **`http://localhost:5173`** in your browser.
 
 ---
 
 ### 2. Run Automated Verification Suites
+
 All three verification suites run against either SAM Local API or Express on port 3000:
+* **Backend & Security E2E Suite (36 / 36 checks passed):**
+  ```bash
+  npm run test:backend
+  # or: NODE_PATH=backend/src/node_modules node tests/test_backend_e2e.js
+  ```
 * **AI & Clinical RAG Integration Suite (23 / 23 checks passed):**
   ```bash
-  node backend/test_ai_rag.js
-  ```
-* **Backend & Security E2E Suite (25 / 25 checks passed):**
-  ```bash
-  node backend/test_backend_e2e.js
+  npm run test:ai
+  # or: NODE_PATH=backend/src/node_modules node tests/test_ai_rag.js
   ```
 * **Full Care Journey E2E Suite (35 / 35 checks passed):**
   ```bash
-  node backend/test_e2e_journey.js
+  npm run test:e2e
+  # or: NODE_PATH=backend/src/node_modules node tests/test_e2e_journey.js
   ```
-* **Total Automated Test Verification:** **83 / 83 passing checks** with zero regressions.
-
----
-
-### 3. Repository Documentation Directory
-
-```
-Between_Sessions/
-├── README.md                   # Master Documentation Hub (This File)
-├── AI_SETUP.md                 # Hugging Face API key, Qwen 2.5 7B, and fallback guide
-├── AI_ARCHITECTURE.md          # RAG architecture, evidence citations, Cedar boundaries
-├── RAG.md                      # Clinical knowledge chunks, scoring algorithm, and prompt schema
-├── FEATURES.md                 # Complete feature matrix for Individuals and Practitioners
-├── AWS_STACK.md                # AWS SAM CLI specification, Lambda inventory, DynamoDB schema
-├── DATA_MODELS.md              # Single-Table DynamoDB schema and entity definitions
-├── DEMO_CREDENTIALS.md         # Quick reference demo accounts and test login IDs
-├── DEMO_PRACTITIONER_IDS.md    # Pre-seeded certified practitioner registry IDs
-├── TILL_NOW.md                 # Development milestone log & implementation history
-├── docs/
-│   ├── prds/                   # Recreated UX & Backend requirements specifications
-│   │   ├── MVP_RECREATED.md
-│   │   ├── PRD_BACKEND_RECREATED.md
-│   │   └── PRD_FRONTEND_RECREATED.md
-│   └── reports/                # Audit and quality assurance reports
-│       └── PROJECT_AUDIT.md
-├── backend/
-│   └── between-sessions-backend/
-│       ├── template.yaml       # AWS SAM Serverless specification (13 Lambdas)
-│       ├── src/                # Lambda handler domain services & Cedar engine
-│       └── README.md           # Backend serverless documentation
-└── frontend/
-    ├── src/                    # React 18 client application
-    └── README.md               # Frontend UI & design system documentation
-```
+* **Total Automated Test Verification:** **94 / 94 passing checks (100%)** with zero regressions.
 
 ---
 
@@ -214,7 +230,7 @@ Practitioners can self-register at `/practitioner/login` using any synthetic ID 
 ## 🏛️ System Architecture & API Endpoints
 
 ### Frontend (`frontend/`)
-* **Framework:** React 18, React Router v7, Tailwind CSS v4 `@theme`.
+* **Framework:** React 19, React Router v7, Tailwind CSS v4 `@theme`.
 * **Key Routes:**
   * `/` — Editorial Landing Page with 3D stacked feature peel.
   * `/dashboard` — Patient Dashboard with Pause & Choose, anti-gamified stats, and Clinical Recommendations card.
@@ -226,7 +242,7 @@ Practitioners can self-register at `/practitioner/login` using any synthetic ID 
   * `/practitioner` — Clinician Dashboard for patient review, pending requests, AI overview, and recommendation authoring.
   * `/settings` — Profile management, session tokens, and 24/7 crisis access.
 
-### Backend (`backend/between-sessions-backend/src/`)
+### Backend Lambda Handlers (`backend/src/`)
 * **`auth.js`** — Patient and Practitioner authentication and self-registration.
 * **`checkins.js`** — 0–10 calibrated SUDS check-in records.
 * **`practice.js`** — ERP trial logging and Habit Delay recording.
@@ -260,32 +276,22 @@ If the patient unchecks `practice_logs` or revokes the connection, the Cedar eng
 
 ---
 
-## ☁️ AWS SAM CLI & Hackathon Cloud Deployment
+## ☁️ AWS Cloud Production Deployment
 
-Between Sessions is fully architected for native AWS Serverless deployment via **AWS SAM (Serverless Application Model)**:
+See the comprehensive deployment runbook: **[`docs/deployment/AWS_DEPLOYMENT.md`](file:///run/media/aadesh/New%20Volume%20D/Between_Sessions/docs/deployment/AWS_DEPLOYMENT.md)**.
 
-* **SAM CLI Version:** `v1.166.2+`
-* **Runtime:** Node.js 22 (`nodejs22.x` on AWS Lambda, x86_64)
-* **Storage:** Amazon DynamoDB Single-Table (`BetweenSessionsTable` on Pay-Per-Request billing) with Server-Side Encryption
-* **API Gateway:** HTTP / REST API with stage routing to 13 decoupled serverless Lambda functions
-* **Configuration:** Pre-configured in `backend/between-sessions-backend/template.yaml` and `samconfig.toml`
+* **Target Stack:** AWS SAM (`infrastructure/template.yaml`, `infrastructure/samconfig.toml`).
+* **Runtime:** Node.js 22 (`nodejs22.x` on AWS Lambda, x86_64).
+* **Storage:** Amazon DynamoDB Single-Table (`BetweenSessionsTable` on Pay-Per-Request billing) with KMS Encryption.
+* **API Gateway:** HTTP / REST API with stage routing to 13 decoupled serverless Lambda functions.
+* **Hosting:** Amazon S3 + CloudFront CDN for frontend distribution.
 
-### Validate & Build with SAM CLI
+### Quick Deployment Commands
 ```bash
-cd backend/between-sessions-backend
+# 1. Build serverless functions
+cd infrastructure && sam build
 
-# 1. Validate template syntax and cfn-lint rules
-sam validate
-
-# 2. Build serverless artifacts into .aws-sam/build/
-sam build
-```
-
-### Deploy to AWS Cloud
-```bash
-# Guided first-time deployment with IAM capability confirmation
+# 2. Deploy to AWS Cloud (Guided first time)
 sam deploy --guided
-
-# Subsequent automated continuous deployment
-sam deploy
 ```
+*(Do NOT deploy to AWS until completing local manual review).*

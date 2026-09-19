@@ -13,9 +13,9 @@
  */
 
 const assert = require('assert');
-const { retrieveRelevantKnowledge, CLINICAL_KNOWLEDGE_BASE } = require('./src/clinicalKnowledge');
-const { MockLLMProvider, validateAndNormalizeOutput } = require('./src/llmProvider');
-const { evaluateCedarConsent } = require('./src/ragPipeline');
+const { retrieveRelevantKnowledge, CLINICAL_KNOWLEDGE_BASE } = require('../backend/src/clinicalKnowledge');
+const { MockLLMProvider, validateAndNormalizeOutput } = require('../backend/src/llmProvider');
+const { evaluateCedarConsent } = require('../backend/src/ragPipeline');
 
 const API_BASE = process.env.API_BASE || 'http://localhost:3000/api/v1';
 

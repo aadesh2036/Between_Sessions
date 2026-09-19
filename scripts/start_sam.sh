@@ -1,21 +1,27 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Between Sessions — Express Development Environment Startup Script
+# Between Sessions — AWS SAM Local Serverless Stack Startup Script
 #
-# Launches DynamoDB Local, seeds deterministic data, starts the Express API
-# backend, and launches the Vite frontend dev server with a single command.
-# Ideal for rapid local feature iteration and UI development.
+# Launches DynamoDB Local, seeds deterministic data, builds serverless Lambda
+# functions (if needed), starts the native AWS SAM CLI API Gateway emulator
+# with warm container caching, and launches the Vite React frontend.
+#
+# Primary orchestrator for AWS hackathon compliance and cloud-parity evaluation.
 #
 # Usage:
-#   ./start_express.sh          # Start all services (auto-seeds on first run)
-#   ./start_express.sh --seed   # Start all services and force re-seed database
+#   ./start_sam.sh            # Start all services with SAM local API
+#   ./start_sam.sh --build    # Force rebuild of SAM serverless artifacts
+#   ./start_sam.sh --seed     # Force re-seed database with clinical demo data
 # ==============================================================================
 
 set -e
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKEND_DIR="$ROOT_DIR/backend/between-sessions-backend"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+BACKEND_DIR="$ROOT_DIR/backend"
 BACKEND_SRC="$BACKEND_DIR/src"
+INFRA_DIR="$ROOT_DIR/infrastructure"
+FRONTEND_DIR="$ROOT_DIR/frontend"
 DYNAMO_DIR="$BACKEND_DIR/.dynamodb-local"
 if [ ! -f "$DYNAMO_DIR/DynamoDBLocal.jar" ] && [ -f "/tmp/dynamodb-local/DynamoDBLocal.jar" ]; then
   DYNAMO_DIR="/tmp/dynamodb-local"
@@ -23,18 +29,20 @@ fi
 DYNAMO_PORT=8000
 API_PORT=3000
 FRONTEND_PORT=5173
-FRONTEND_DIR="$ROOT_DIR/frontend"
+
+# Ensure user local bin is in PATH (common location for SAM CLI & user tools)
+export PATH="$HOME/.local/bin:$PATH"
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════════════╗"
-echo "║             ✦ BETWEEN SESSIONS — EXPRESS DEV RUNNER ✦                ║"
+echo "║             ✦ BETWEEN SESSIONS — AWS SAM SERVERLESS ✦                ║"
 echo "║          Bridging the 167 Hours Between Clinical Therapy             ║"
-echo "║             Organic Strategic Editorial Behavioral Stack             ║"
+echo "║      Native AWS Serverless Application Model (SAM) Architecture      ║"
 echo "╚══════════════════════════════════════════════════════════════════════╝"
 echo ""
 
-# ── 1. Check Prerequisites ───────────────────────────────────────────────────
-echo "▶ Checking system dependencies..."
+# ── 1. Check System Prerequisites ────────────────────────────────────────────
+echo "▶ Checking system dependencies & container runtime..."
 
 if ! command -v node >/dev/null 2>&1; then
   echo "❌ Node.js is required but not found in PATH."
@@ -48,9 +56,33 @@ if ! command -v npm >/dev/null 2>&1; then
 fi
 echo "  ✓ npm $(npm -v)"
 
+if ! command -v sam >/dev/null 2>&1; then
+  echo "❌ AWS SAM CLI is required but not found in PATH."
+  echo "    Install SAM CLI: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html"
+  exit 1
+fi
+echo "  ✓ $(sam --version)"
+
 if ! command -v java >/dev/null 2>&1; then
   echo "⚠️  Java JDK 11+ not found. Required for DynamoDB Local."
   echo "    Please install OpenJDK (e.g. sudo dnf install java-latest-openjdk or sudo apt install default-jre)."
+fi
+
+# Ensure rootless Podman socket is active for SAM container invocations
+PODMAN_SOCK="/run/user/$(id -u)/podman/podman.sock"
+if [ -S "$PODMAN_SOCK" ] || command -v systemctl >/dev/null 2>&1; then
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl --user start podman.socket 2>/dev/null || true
+  fi
+  if [ -S "$PODMAN_SOCK" ]; then
+    export DOCKER_HOST="unix://$PODMAN_SOCK"
+    echo "  ✓ Container Runtime: Podman rootless socket ($DOCKER_HOST)"
+  fi
+fi
+
+if [ -z "$DOCKER_HOST" ] && [ -S "/var/run/docker.sock" ]; then
+  export DOCKER_HOST="unix:///var/run/docker.sock"
+  echo "  ✓ Container Runtime: Docker daemon ($DOCKER_HOST)"
 fi
 
 # ── 2. DynamoDB Local ────────────────────────────────────────────────────────
@@ -93,28 +125,52 @@ if [[ "$1" == "--seed" ]] || [[ "$2" == "--seed" ]] || [ "$DYNAMO_STARTED" = tru
   echo "✓ Seed completed."
 fi
 
-# ── 4. Express API Backend ───────────────────────────────────────────────────
+# ── 4. SAM Serverless Build ──────────────────────────────────────────────────
+NEED_BUILD=false
+if [ ! -d "$INFRA_DIR/.aws-sam/build" ] || [[ "$1" == "--build" ]] || [[ "$2" == "--build" ]]; then
+  NEED_BUILD=true
+fi
+
+if [ "$NEED_BUILD" = true ]; then
+  echo "▶ Building AWS SAM Serverless Functions..."
+  (cd "$INFRA_DIR" && sam build)
+  echo "✓ SAM build succeeded."
+fi
+
+# ── 5. AWS SAM Local API Gateway ─────────────────────────────────────────────
 if lsof -ti :$API_PORT >/dev/null 2>&1; then
   echo "ℹ  Stopping existing process on port $API_PORT..."
   kill $(lsof -ti :$API_PORT) 2>/dev/null || true
   sleep 1
 fi
 
-echo "▶ Starting Express API Dev Server on port $API_PORT..."
-(cd "$BACKEND_SRC" && node express-dev-server.js) &
+echo "▶ Starting AWS SAM Local API Server on port $API_PORT (warm containers enabled)..."
+(cd "$INFRA_DIR" && sam local start-api -p $API_PORT --host 0.0.0.0 --warm-containers LAZY --skip-pull-image) &
 API_PID=$!
 
-echo -n "   Waiting for API server on port $API_PORT"
-for i in $(seq 1 12); do
+echo -n "   Waiting for SAM Local API on port $API_PORT"
+SAM_READY=false
+for i in $(seq 1 25); do
   sleep 1
   if curl -s "http://localhost:$API_PORT/api/health" > /dev/null 2>&1; then
     echo " ✓"
+    SAM_READY=true
     break
   fi
   echo -n "."
 done
 
-# ── 5. Vite Frontend ─────────────────────────────────────────────────────────
+if [ "$SAM_READY" = false ]; then
+  echo ""
+  echo "⚠️  SAM Local API taking longer than expected or container runtime failed."
+  echo "    Attempting fallback to Express API server..."
+  if [ -n "$API_PID" ]; then kill $API_PID 2>/dev/null || true; fi
+  (cd "$BACKEND_SRC" && node express-dev-server.js) &
+  API_PID=$!
+  sleep 2
+fi
+
+# ── 6. Vite Frontend ─────────────────────────────────────────────────────────
 if lsof -ti :$FRONTEND_PORT >/dev/null 2>&1; then
   echo "ℹ  Stopping existing Vite dev server on port $FRONTEND_PORT..."
   kill $(lsof -ti :$FRONTEND_PORT) 2>/dev/null || true
@@ -125,15 +181,22 @@ echo "▶ Starting Vite Frontend on port $FRONTEND_PORT..."
 (cd "$FRONTEND_DIR" && npx vite --host 0.0.0.0 --port $FRONTEND_PORT) &
 FRONTEND_PID=$!
 
-# ── 6. Ready Banner ──────────────────────────────────────────────────────────
+# ── 7. Ready Banner ──────────────────────────────────────────────────────────
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  🌿 BETWEEN SESSIONS (EXPRESS DEV) IS NOW RUNNING"
+echo "  🌿 BETWEEN SESSIONS (AWS SAM SERVERLESS) IS NOW RUNNING"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  ✦ Web Application:        http://localhost:$FRONTEND_PORT"
-echo "  ✦ Express Backend API:    http://localhost:$API_PORT/api/v1"
+echo "  ✦ AWS SAM API Gateway:    http://localhost:$API_PORT/api/v1"
 echo "  ✦ Health Check:           http://localhost:$API_PORT/api/health"
 echo "  ✦ DynamoDB Local:         http://localhost:$DYNAMO_PORT"
+echo ""
+echo "  ⚙️  Serverless Architecture (13 Packaged Lambda Functions):"
+echo "     • AuthFunction           • CheckinsFunction       • JournalFunction"
+echo "     • PracticeFunction       • DashboardFunction      • ProgressFunction"
+echo "     • AiSummaryFunction      • ConsentsFunction       • ConnectionsFunction"
+echo "     • PractitionerFunction   • ToolkitFunction        • ValuesFunction"
+echo "     • LearningFunction"
 echo ""
 echo "  👤 Individual Patient Login:"
 echo "     • Email:    priya@betweensessions.com  (or demo@betweensessions.com)"
@@ -157,9 +220,10 @@ echo ""
 
 cleanup() {
   echo ""
-  echo "🛑 Stopping Between Sessions Express dev services..."
+  echo "🛑 Stopping Between Sessions SAM services..."
   if [ -n "$FRONTEND_PID" ]; then kill $FRONTEND_PID 2>/dev/null || true; fi
   if [ -n "$API_PID" ]; then kill $API_PID 2>/dev/null || true; fi
+  kill $(lsof -ti :$API_PORT) 2>/dev/null || true
   if [ "$DYNAMO_STARTED" = true ] && [ -n "$DYNAMO_PID" ]; then
     kill $DYNAMO_PID 2>/dev/null || true
   fi
