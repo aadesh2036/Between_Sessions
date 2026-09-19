@@ -1,9 +1,10 @@
-# More information about the configuration file can be found here:
-# # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html
+# Between Sessions — SAM Configuration File
+# https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html
 version = 0.1
 
 [default.global.parameters]
-stack_name = "between-sessions-backend"
+stack_name = "between-sessions-production"
+region = "ap-south-1"
 
 [default.build.parameters]
 cached = true
@@ -16,6 +17,8 @@ lint = true
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
+stack_name = "between-sessions-production"
+region = "ap-south-1"
 
 [default.package.parameters]
 resolve_s3 = true

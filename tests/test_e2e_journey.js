@@ -3,7 +3,7 @@
  * Comprehensive end-to-end integration test of the Between Sessions MVP
  */
 
-const BASE_URL = 'http://localhost:3000/api/v1';
+const BASE_URL = process.env.API_BASE || 'http://localhost:3000/api/v1';
 
 async function req(path, options = {}) {
   const url = `${BASE_URL}${path}`;

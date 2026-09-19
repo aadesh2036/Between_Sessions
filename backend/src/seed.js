@@ -24,15 +24,16 @@ const { DynamoDBClient, CreateTableCommand } = require('@aws-sdk/client-dynamodb
 const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
 const jwt = require('jsonwebtoken');
 
-const client = new DynamoDBClient({
-  endpoint: 'http://localhost:8000',
-  region: 'local',
-  credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' },
-});
+const ddbEndpoint = process.env.DYNAMODB_ENDPOINT;
+const client = new DynamoDBClient(
+  ddbEndpoint
+    ? { endpoint: ddbEndpoint, region: 'local', credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' } }
+    : (process.env.AWS_REGION ? { region: process.env.AWS_REGION } : { endpoint: 'http://localhost:8000', region: 'local', credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' } })
+);
 const docClient = DynamoDBDocumentClient.from(client);
 
-const TABLE_NAME = 'BetweenSessionsTable';
-const JWT_SECRET = 'between-sessions-secret-key-2026';
+const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
+const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 
 // ── Identities ────────────────────────────────────────────────────────────────
 const ALEX_EMAIL    = 'alex@betweensessions.com';

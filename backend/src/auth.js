@@ -7,16 +7,26 @@ const { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand } = requir
 const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
 
-const ddbEndpoint = process.env.DYNAMODB_ENDPOINT || "http://127.0.0.1:8000";
-const ddbClient = new DynamoDBClient({ endpoint: ddbEndpoint, region: "local", credentials: { accessKeyId: "dummy", secretAccessKey: "dummy" } });
+const ddbEndpoint = process.env.DYNAMODB_ENDPOINT;
+const ddbClient = new DynamoDBClient(
+  ddbEndpoint
+    ? { endpoint: ddbEndpoint, region: 'local', credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' } }
+    : {}
+);
 const docClient = DynamoDBDocumentClient.from(ddbClient);
 
+const appUrl = process.env.APP_URL || 'http://localhost:5173';
 const mailGenerator = new Mailgen({
   theme: 'default',
-  product: { name: 'Between Sessions', link: 'http://localhost:5173/' }
+  product: { name: 'Between Sessions', link: appUrl }
 });
 
 const sendVerificationEmail = async (email, verificationToken) => {
+  if (process.env.EMAIL_PROVIDER === 'mock') {
+    console.log(`📧 [Mock Email] Verification email generated for ${email} (delivery skipped in staging mode)`);
+    return;
+  }
+
   const transporter = nodemailer.createTransport({
     host: process.env.MAILTRAP_SMTP_HOST || "sandbox.smtp.mailtrap.io",
     port: process.env.MAILTRAP_SMTP_PORT || 2525,
@@ -38,7 +48,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
         button: {
           color: '#176B67',
           text: 'Verify Email',
-          link: `http://localhost:5173/login?verify=${verificationToken}`
+          link: `${appUrl}/login?verify=${verificationToken}`
         }
       }
     }
@@ -518,40 +528,44 @@ exports.handler = async (event) => {
           JWT_SECRET,
           { expiresIn: '1h' }
         );
-        const resetLink = `http://localhost:5173/login?reset=${resetToken}${isPractitioner ? '&mode=practitioner' : ''}`;
+        const resetLink = `${appUrl}/login?reset=${resetToken}${isPractitioner ? '&mode=practitioner' : ''}`;
 
-        try {
-          const transporter = nodemailer.createTransport({
-            host: process.env.MAILTRAP_SMTP_HOST || 'sandbox.smtp.mailtrap.io',
-            port: process.env.MAILTRAP_SMTP_PORT || 2525,
-            connectionTimeout: 5000,
-            greetingTimeout: 5000,
-            socketTimeout: 5000,
-            auth: {
-              user: process.env.MAILTRAP_SMTP_USER || '9a1e374c409f43',
-              pass: process.env.MAILTRAP_SMTP_PASS || '848727f20872a7',
-            },
-          });
-          const emailBody = {
-            body: {
-              name: account.name || email.split('@')[0],
-              intro: 'We received a request to reset your Between Sessions password.',
-              action: {
-                instructions: 'Click the button below to set a new password. This link expires in 1 hour.',
-                button: { color: '#176B67', text: 'Reset Password', link: resetLink },
+        if (process.env.EMAIL_PROVIDER === 'mock') {
+          console.log(`📧 [Mock Email] Password reset email generated for ${email} (delivery skipped in staging mode)`);
+        } else {
+          try {
+            const transporter = nodemailer.createTransport({
+              host: process.env.MAILTRAP_SMTP_HOST || 'sandbox.smtp.mailtrap.io',
+              port: process.env.MAILTRAP_SMTP_PORT || 2525,
+              connectionTimeout: 5000,
+              greetingTimeout: 5000,
+              socketTimeout: 5000,
+              auth: {
+                user: process.env.MAILTRAP_SMTP_USER || '9a1e374c409f43',
+                pass: process.env.MAILTRAP_SMTP_PASS || '848727f20872a7',
               },
-              outro: 'If you did not request this, you can safely ignore this email.',
-            },
-          };
-          await transporter.sendMail({
-            from: 'sanctuary@betweensessions.com',
-            to: email,
-            subject: 'Reset your Between Sessions password',
-            html: mailGenerator.generate(emailBody),
-          });
-          console.log(`📧 Password reset email dispatched via Mailtrap to ${email}`);
-        } catch (mailErr) {
-          console.error(`⚠️ Password reset email sending warning for ${email}:`, mailErr.message);
+            });
+            const emailBody = {
+              body: {
+                name: account.name || email.split('@')[0],
+                intro: 'We received a request to reset your Between Sessions password.',
+                action: {
+                  instructions: 'Click the button below to set a new password. This link expires in 1 hour.',
+                  button: { color: '#176B67', text: 'Reset Password', link: resetLink },
+                },
+                outro: 'If you did not request this, you can safely ignore this email.',
+              },
+            };
+            await transporter.sendMail({
+              from: 'sanctuary@betweensessions.com',
+              to: email,
+              subject: 'Reset your Between Sessions password',
+              html: mailGenerator.generate(emailBody),
+            });
+            console.log(`📧 Password reset email dispatched via Mailtrap to ${email}`);
+          } catch (mailErr) {
+            console.error(`⚠️ Password reset email sending warning for ${email}:`, mailErr.message);
+          }
         }
       }
 

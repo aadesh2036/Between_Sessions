@@ -4,9 +4,9 @@
  */
 
 const jwt = require('jsonwebtoken');
-const API_BASE = 'http://localhost:3000/api/v1';
-const HEALTH_URL = 'http://localhost:3000/api/health';
-const JWT_SECRET = 'between-sessions-secret-key-2026';
+const API_BASE = process.env.API_BASE || 'http://localhost:3000/api/v1';
+const HEALTH_URL = process.env.HEALTH_URL || (API_BASE.endsWith('/api/v1') ? API_BASE.replace(/\/api\/v1$/, '/api/health') : `${API_BASE}/health`);
+const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 
 async function req(url, options = {}) {
   const res = await fetch(url, {

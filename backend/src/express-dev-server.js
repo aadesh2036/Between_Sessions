@@ -8,6 +8,9 @@
  * with { httpMethod, path, headers, pathParameters, queryStringParameters, body }.
  */
 
+process.env.DYNAMODB_ENDPOINT = process.env.DYNAMODB_ENDPOINT || 'http://127.0.0.1:8000';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
+process.env.TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
 process.env.MAILTRAP_SMTP_HOST = 'sandbox.smtp.mailtrap.io';
 process.env.MAILTRAP_SMTP_PORT = '2525';
 process.env.MAILTRAP_SMTP_USER = '9a1e374c409f43';

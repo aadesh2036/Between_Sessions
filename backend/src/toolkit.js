@@ -16,12 +16,12 @@ const {
 const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
 
-const ddbEndpoint = process.env.DYNAMODB_ENDPOINT || 'http://127.0.0.1:8000';
-const ddbClient = new DynamoDBClient({
-  endpoint: ddbEndpoint,
-  region: 'local',
-  credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' },
-});
+const ddbEndpoint = process.env.DYNAMODB_ENDPOINT;
+const ddbClient = new DynamoDBClient(
+  ddbEndpoint
+    ? { endpoint: ddbEndpoint, region: 'local', credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' } }
+    : {}
+);
 const docClient = DynamoDBDocumentClient.from(ddbClient);
 
 const CORS_HEADERS = {

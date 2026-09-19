@@ -1,5 +1,9 @@
 {
-  "AuthFunction": {
-    "DYNAMODB_ENDPOINT": "http://172.28.91.55:8000"
+  "Parameters": {
+    "TABLE_NAME": "BetweenSessionsTable",
+    "DYNAMODB_ENDPOINT": "http://host.containers.internal:8000",
+    "JWT_SECRET": "between-sessions-secret-key-2026",
+    "AI_PROVIDER": "mock",
+    "EMAIL_PROVIDER": "mock"
   }
 }

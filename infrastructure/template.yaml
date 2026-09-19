@@ -4,6 +4,27 @@ Description: >
   between-sessions-backend
   Serverless backend for Between Sessions — single-table DynamoDB, JWT auth, Cedar policies.
 
+Parameters:
+  JwtSecret:
+    Type: String
+    NoEcho: true
+    Description: "Cryptographic secret key for signing and verifying production JWT authentication tokens."
+    MinLength: 32
+  AiProvider:
+    Type: String
+    Default: "mock"
+    Description: "AI provider selection for clinician decision support (mock for first deployment)"
+    AllowedValues:
+      - "mock"
+      - "huggingface"
+  EmailProvider:
+    Type: String
+    Default: "mock"
+    Description: "Email delivery provider mode (mock for non-blocking staging deployment)"
+    AllowedValues:
+      - "mock"
+      - "mailtrap"
+
 Globals:
   Function:
     Timeout: 20
@@ -13,15 +34,10 @@ Globals:
       - x86_64
     Environment:
       Variables:
-        TABLE_NAME: "BetweenSessionsTable"
-        DYNAMODB_ENDPOINT: "http://host.containers.internal:8000"
-        JWT_SECRET: "between-sessions-secret-key-2026"
-        MAILTRAP_SMTP_HOST: "sandbox.smtp.mailtrap.io"
-        MAILTRAP_SMTP_PORT: "2525"
-        MAILTRAP_SMTP_USER: "9a1e374c409f43"
-        MAILTRAP_SMTP_PASS: "848727f20872a7"
-        AI_PROVIDER: "huggingface"
-        HF_MODEL: "Qwen/Qwen2.5-7B-Instruct"
+        TABLE_NAME: !Ref MainTable
+        JWT_SECRET: !Ref JwtSecret
+        AI_PROVIDER: !Ref AiProvider
+        EMAIL_PROVIDER: !Ref EmailProvider
   Api:
     Cors:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
@@ -448,9 +464,12 @@ Resources:
             Method: post
 
 Outputs:
+  ApiBaseUrl:
+    Description: "API Gateway Base URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
   ApiEndpoint:
-    Description: "API Gateway endpoint URL"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/api/v1/"
+    Description: "API Gateway v1 endpoint URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api/v1"
   MainTableName:
     Description: "DynamoDB table name"
     Value: !Ref MainTable

@@ -41,3 +41,5 @@ yarn-error.log*
 .agents
 LANDING_PAGE_&_DESIGN_SYS
 stitch.config.json
+*.secret
+.prod_jwt_secret
