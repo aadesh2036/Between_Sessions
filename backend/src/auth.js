@@ -83,6 +83,7 @@ exports.handler = async (event) => {
       const userId = `usr_${Math.random().toString(36).substr(2, 9)}`;
       const verificationToken = jwt.sign({ email, userId, purpose: 'verify' }, JWT_SECRET, { expiresIn: '24h' });
       const now = new Date().toISOString();
+      const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
       const userItem = {
         PK: `USER#${email}`,
@@ -92,6 +93,7 @@ exports.handler = async (event) => {
         password,
         name: name.trim(),
         isVerified: false,
+        verificationExpiresAt,
         onboardingComplete: false,
         createdAt: now,
       };
@@ -122,14 +124,22 @@ exports.handler = async (event) => {
       if (!user || user.password !== password) return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid email or password.' }) };
 
       if (user.isVerified === false) {
-        return {
-          statusCode: 403,
-          headers: CORS_HEADERS,
-          body: JSON.stringify({
-            error: 'Email not verified. Please check your inbox or request a new verification link.',
-            needsVerification: true
-          })
-        };
+        // Verification grace period: allow access during the 24-hour verification token lifetime
+        const expiresAt = user.verificationExpiresAt
+          ? new Date(user.verificationExpiresAt).getTime()
+          : (user.createdAt ? new Date(user.createdAt).getTime() + 24 * 60 * 60 * 1000 : 0);
+        const isExpired = Date.now() > expiresAt;
+
+        if (isExpired) {
+          return {
+            statusCode: 403,
+            headers: CORS_HEADERS,
+            body: JSON.stringify({
+              error: 'Email not verified. Verification period expired. Please request a new verification link.',
+              needsVerification: true
+            })
+          };
+        }
       }
       
       const token = jwt.sign({ userId: user.id, email }, JWT_SECRET, { expiresIn: '7d' });
@@ -208,6 +218,16 @@ exports.handler = async (event) => {
       }
 
       const verificationToken = jwt.sign({ email, userId: userRes.Item.id, purpose: 'verify' }, JWT_SECRET, { expiresIn: '24h' });
+      const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      try {
+        await docClient.send(new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: { PK: `USER#${email}`, SK: 'PROFILE' },
+          UpdateExpression: 'SET verificationExpiresAt = :exp',
+          ExpressionAttributeValues: { ':exp': newExpiresAt },
+        }));
+      } catch {}
+
       await sendVerificationEmail(email, verificationToken);
       return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ message: 'Verification email resent. Please check your inbox.' }) };
     }

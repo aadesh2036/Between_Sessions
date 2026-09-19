@@ -190,8 +190,8 @@ async function run() {
   });
   assert(dupReg.status === 409, 'Rejects duplicate registration for existing email with 409 Conflict');
 
-  // 14. New User Registration & Unverified Login Blocking
-  console.log('\nTest 14: New User Registration & Verification Enforcement');
+  // 14. New User Registration & Verification Grace Period
+  console.log('\nTest 14: New User Registration & Verification Grace Period');
   const testNewEmail = `user_${Date.now()}@betweensessions.com`;
   const regRes = await req(`${API_BASE}/auth/register`, {
     method: 'POST',
@@ -200,13 +200,14 @@ async function run() {
   assert(regRes.status === 201, 'Creates new user account and returns 201 Created');
   assert(regRes.data?.message?.includes('verify'), 'Returns instruction to verify email');
 
-  // Attempt login before verifying email -> should return 403 with needsVerification
+  // Attempt login within grace period before verifying email -> should succeed with isVerified: false
   const unverifiedLogin = await req(`${API_BASE}/auth/login`, {
     method: 'POST',
     body: JSON.stringify({ email: testNewEmail, password: 'StrongPassword123!' }),
   });
-  assert(unverifiedLogin.status === 403, 'Blocks unverified user from logging in with 403 Forbidden');
-  assert(unverifiedLogin.data?.needsVerification === true, 'Returns needsVerification flag to trigger resend UI');
+  assert(unverifiedLogin.status === 200, 'Permits unverified user login within 24h grace period');
+  assert(unverifiedLogin.data?.user?.isVerified === false, 'User object reports isVerified: false during grace period');
+  assert(Boolean(unverifiedLogin.data?.token), 'Returns session token during grace period');
 
   // 15. Resend Verification Email & Token Verification
   console.log('\nTest 15: Resend Verification & Email Token Consumption');
