@@ -1,5 +1,10 @@
 # Between Sessions — Frontend PRD
 
+> [!NOTE]
+> **HISTORICAL SPECIFICATION / ARCHIVED PRD**
+> This document is preserved for UX requirements provenance. The active, production frontend implementation is located in `frontend/` and follows the `Organic Strategic Editorial` design tokens in `frontend/src/index.css`.
+> For active feature matrix and routing, see [FEATURES.md](../../FEATURES.md) and [README.md](../../README.md).
+
 ## 1. Frontend Goal
 
 Build a calm, privacy-conscious React application that makes the **complete continuity story** obvious in one session:

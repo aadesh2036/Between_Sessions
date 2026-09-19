@@ -1,6 +1,6 @@
 # Between Sessions
 
-> **Bridging the Clinical Gap in OCD Exposure & Response Prevention (ERP)**
+> **Bridging the Clinical Gap in OCD Exposure & Response Prevention (ERP)**  
 > An ethical, clinician-aligned behavioral practice companion and care-continuity system.
 
 ---
@@ -13,6 +13,7 @@ Between Sessions provides:
 1. **Sanctuary for Patients:** Grounded micro-interventions (*Pause & Choose*), daily SUDS (Subjective Units of Distress Scale 0–10) logging, structured behavioral entries, and longitudinal progress tracking.
 2. **Granular Privacy & Data Sovereign Consent:** Patients own 100% of their data and choose specifically which categories (`checkins`, `journal_structured`, `practice_logs`, `ai_summary`) are visible to their clinician.
 3. **Care Continuity for Clinicians:** Verified practitioners review objective longitudinal logs through an **AWS Cedar WASM** policy engine and author *Curated Structured Practice* recommendations directly into the patient's portal.
+4. **Clinical AI / RAG Practice Overview:** A secondary, evidence-grounded AI engine synthesizes patient logs into a 4-part clinical synthesis (`FACT`, `INFERENCE`, `KNOWLEDGE`, `CLINICAL PROBE`) grounded in peer-reviewed ERP literature.
 
 ---
 
@@ -21,10 +22,50 @@ Between Sessions provides:
 | Directive | Architectural Implementation |
 |---|---|
 | **Anti-Gamification** | Strictly prohibits streaks, levels, confetti, and health scores. Progress is framed solely through objective longitudinal descriptions (e.g. *"Check-ins (7d)"*, *"Practice sessions: 6"*). |
-| **Secondary AI Posture** | AI never diagnoses, prescribes, or acts as a therapist. Weekly summaries are strictly grounded in user logs and labeled: *"Synthesized from your logs — not medical advice"*. |
-| **Emergency Safety Net** | Persistent **Tele-MANAS** anchors (`14416` / `1800-891-4416` free, 24/7) remain permanently visible and accessible on all views. |
+| **Secondary AI Posture** | AI never diagnoses, prescribes, or acts as a therapist. Summaries are synthesized strictly for qualified clinicians and labeled: *"Synthesized from patient logs — not medical advice"*. |
+| **Emergency Safety Net** | Persistent **Tele-MANAS** anchors (`14416` / `1800-891-4416` free, 24/7) remain permanently visible and accessible on all views and screen sizes. |
 | **Cryptographic Policy Authorization** | Clinicians cannot access patient summaries without an **ACTIVE** connection and explicit **`practice_logs`** patient consent evaluated via AWS Cedar WASM. |
 | **Synthetic Practitioner Validation** | Demo practitioner credentials adhere to strict synthetic formatting (`MCI-YYYY-XX-NNNN`) and are explicitly labeled *"Demo credential — not a real government ID"*. |
+
+---
+
+## 🧠 Clinical AI / RAG Synthesis Pipeline
+
+Between Sessions integrates a dedicated Retrieval-Augmented Generation (RAG) pipeline designed exclusively for licensed clinicians reviewing between-session behavioral telemetry:
+
+```
+ Patient Telemetry (Consented)          Clinical Knowledge Base
+ ┌───────────────────────────┐          ┌───────────────────────────┐
+ │ • Check-in Logs (SUDS)    │          │ • ERP Protocol Chunks     │
+ │ • ERP Practice Trials     │          │ • ACT Defusion Strategies │
+ │ • Habit Delay Durations   │          │ • Peer-Reviewed Citations │
+ └─────────────┬─────────────┘          └─────────────┬─────────────┘
+               │                                      │
+               └──────────────────┬───────────────────┘
+                                  ▼
+                     ┌────────────────────────┐
+                     │ Context Builder & Rank │
+                     └────────────┬───────────┘
+                                  ▼
+                     ┌────────────────────────┐
+                     │ Qwen 2.5 7B Instruct   │
+                     │ (Hugging Face API with │
+                     │ Clinical Fallback)     │
+                     └────────────┬───────────┘
+                                  ▼
+      ┌────────────────────────────────────────────────────────┐
+      │             Structured Clinical Synthesis              │
+      ├────────────────────────────────────────────────────────┤
+      │ [FACT]           Observed practice data & evidence     │
+      │ [INFERENCE]      Behavioral patterns & trend analysis  │
+      │ [KNOWLEDGE]      Grounded literature chunk citations   │
+      │ [CLINICAL PROBE] Inquiry prompts for next live session │
+      └────────────────────────────────────────────────────────┘
+```
+
+- **Open-Weights AI Engine**: Powered by `Qwen/Qwen2.5-7B-Instruct` via the Hugging Face Serverless Inference API.
+- **Deterministic Clinical Fallback**: In offline or zero-credential environments, automatically falls back to an internal deterministic generator, ensuring 100% demo reliability.
+- **Cedar Enforcement**: If the patient revokes consent for `practice_logs`, the AI summary endpoint immediately returns `403 CONSENT_REQUIRED`.
 
 ---
 
@@ -86,30 +127,50 @@ Open **`http://localhost:5173`** in your browser.
 All three verification suites run against either SAM Local API or Express on port 3000:
 * **AI & Clinical RAG Integration Suite (23 / 23 checks passed):**
   ```bash
-  cd backend/between-sessions-backend
-  node test_ai_rag.js
+  node backend/test_ai_rag.js
   ```
 * **Backend & Security E2E Suite (25 / 25 checks passed):**
   ```bash
-  cd backend/between-sessions-backend
-  node test_backend_e2e.js
+  node backend/test_backend_e2e.js
   ```
 * **Full Care Journey E2E Suite (35 / 35 checks passed):**
   ```bash
-  cd backend/between-sessions-backend
-  node test_e2e_journey.js
+  node backend/test_e2e_journey.js
   ```
 * **Total Automated Test Verification:** **83 / 83 passing checks** with zero regressions.
 
 ---
 
-### 3. Master Documentation
-* [`AI_SETUP.md`](AI_SETUP.md) — Where to add `HF_TOKEN`, model selection, and zero-credential fallback
-* [`AI_ARCHITECTURE.md`](AI_ARCHITECTURE.md) — Clinician AI decision support architecture & Cedar boundaries
-* [`RAG.md`](RAG.md) — Curated clinical knowledge base, scoring algorithm, and hybrid architecture
-* [`FEATURES.md`](FEATURES.md) — Complete features guide for Individuals and Practitioners
-* [`AWS_STACK.md`](AWS_STACK.md) — AWS SAM CLI specification, Lambda inventory, and DynamoDB schema
+### 3. Repository Documentation Directory
 
+```
+Between_Sessions/
+├── README.md                   # Master Documentation Hub (This File)
+├── AI_SETUP.md                 # Hugging Face API key, Qwen 2.5 7B, and fallback guide
+├── AI_ARCHITECTURE.md          # RAG architecture, evidence citations, Cedar boundaries
+├── RAG.md                      # Clinical knowledge chunks, scoring algorithm, and prompt schema
+├── FEATURES.md                 # Complete feature matrix for Individuals and Practitioners
+├── AWS_STACK.md                # AWS SAM CLI specification, Lambda inventory, DynamoDB schema
+├── DATA_MODELS.md              # Single-Table DynamoDB schema and entity definitions
+├── DEMO_CREDENTIALS.md         # Quick reference demo accounts and test login IDs
+├── DEMO_PRACTITIONER_IDS.md    # Pre-seeded certified practitioner registry IDs
+├── TILL_NOW.md                 # Development milestone log & implementation history
+├── docs/
+│   ├── prds/                   # Recreated UX & Backend requirements specifications
+│   │   ├── MVP_RECREATED.md
+│   │   ├── PRD_BACKEND_RECREATED.md
+│   │   └── PRD_FRONTEND_RECREATED.md
+│   └── reports/                # Audit and quality assurance reports
+│       └── PROJECT_AUDIT.md
+├── backend/
+│   └── between-sessions-backend/
+│       ├── template.yaml       # AWS SAM Serverless specification (13 Lambdas)
+│       ├── src/                # Lambda handler domain services & Cedar engine
+│       └── README.md           # Backend serverless documentation
+└── frontend/
+    ├── src/                    # React 18 client application
+    └── README.md               # Frontend UI & design system documentation
+```
 
 ---
 
@@ -118,7 +179,7 @@ All three verification suites run against either SAM Local API or Express on por
 In Obsessive-Compulsive Disorder (OCD) and Exposure and Response Prevention (ERP), habit extinction occurs when a person tolerates distress without performing a neutralizing ritual. 
 
 Between Sessions features an interactive **Delayed Ritual Timer**:
-* **Access Points:** Directly within the ERP practice logging modal (`/app/practice` → *Record Exposure* → *Delay Compulsion*) and via the *Acute Urge Delay Protocol* launcher.
+* **Access Points:** Directly within the ERP practice logging modal (`/practice` → *Record Exposure* → *Delay Compulsion*) and via the *Acute Urge Delay Protocol* launcher.
 * **Clinical Delay Presets:** `5m`, `10m`, `15m`, `20m`, `30m`, or custom minutes.
 * **Active Controls:** Play / Pause / Reset, plus a **+1 Min** quick extension to gradually expand tolerance.
 * **Web Audio Synthetic Chime:** Plays a gentle, calming harmonic bell (528 Hz / 660 Hz) upon timer completion with zero external network dependencies.
@@ -153,22 +214,27 @@ Practitioners can self-register at `/practitioner/login` using any synthetic ID 
 ## 🏛️ System Architecture & API Endpoints
 
 ### Frontend (`frontend/`)
-* **Framework:** React 19, React Router v7, Tailwind CSS v4 `@theme`.
+* **Framework:** React 18, React Router v7, Tailwind CSS v4 `@theme`.
 * **Key Routes:**
   * `/` — Editorial Landing Page with 3D stacked feature peel.
-  * `/onboarding` — 6-step values, patterns, and granular consent intake.
-  * `/app` — Patient Dashboard with Pause & Choose, anti-gamified stats, and Clinical Recommendations card.
-  * `/app/practice` — Longitudinal SUDS and ERP history timeline.
-  * `/app/clinician` — Clinician Connect, Verified Directory, granular consent switches, and Cedar WASM live policy evaluator.
+  * `/dashboard` — Patient Dashboard with Pause & Choose, anti-gamified stats, and Clinical Recommendations card.
+  * `/practice` — Longitudinal SUDS and ERP history timeline with Habit Delay timer.
+  * `/toolkit` — Somatic regulators: 90s Urge Surfing wave, Vagus Sigh pacing, Box breathing.
+  * `/learn` — Psychoeducational ACT modules and Reassurance Trap deconstructors.
+  * `/care` — Clinician Connect, Verified Directory, granular consent switches, and Cedar WASM live policy evaluator.
   * `/practitioner/login` — Dual Sign-In and Practitioner Self-Registration portal.
-  * `/practitioner` — Clinician Dashboard for patient review, pending requests, and recommendation authoring.
+  * `/practitioner` — Clinician Dashboard for patient review, pending requests, AI overview, and recommendation authoring.
+  * `/settings` — Profile management, session tokens, and 24/7 crisis access.
 
 ### Backend (`backend/between-sessions-backend/src/`)
 * **`auth.js`** — Patient and Practitioner authentication and self-registration.
+* **`checkins.js`** — 0–10 calibrated SUDS check-in records.
+* **`practice.js`** — ERP trial logging and Habit Delay recording.
 * **`dashboard.js`** — Objective longitudinal metrics (`checkinCountThisWeek`, `activeDaysThisWeek`, `avgSudsThisWeek`).
 * **`consents.js`** — Patient granular consent management with real-time sync to active connections.
 * **`connections.js`** — Connection lifecycle, patient recommendations, and Cedar authorization evaluation endpoint.
 * **`practitioner.js`** — Clinician patient queries, request processing, recommendation authoring, and Cedar WASM policy gating.
+* **`aiSummary.js`** — Clinician RAG synthesis handler with Qwen 2.5 7B and deterministic fallback.
 * **`express-dev-server.js`** — Unified Express dev server bridging Lambda handlers.
 
 ---
@@ -201,7 +267,7 @@ Between Sessions is fully architected for native AWS Serverless deployment via *
 * **SAM CLI Version:** `v1.166.2+`
 * **Runtime:** Node.js 22 (`nodejs22.x` on AWS Lambda, x86_64)
 * **Storage:** Amazon DynamoDB Single-Table (`BetweenSessionsTable` on Pay-Per-Request billing) with Server-Side Encryption
-* **API Gateway:** HTTP / REST API with stage routing to 10 decoupled serverless Lambda functions
+* **API Gateway:** HTTP / REST API with stage routing to 13 decoupled serverless Lambda functions
 * **Configuration:** Pre-configured in `backend/between-sessions-backend/template.yaml` and `samconfig.toml`
 
 ### Validate & Build with SAM CLI
@@ -223,12 +289,3 @@ sam deploy --guided
 # Subsequent automated continuous deployment
 sam deploy
 ```
-
-### Local Development vs Cloud Deployment
-| Feature | Local Hackathon Dev (`./start.sh`) | AWS Cloud Production (`sam deploy`) |
-|---|---|---|
-| **API Server** | Express dev server (`port 3000`) | AWS API Gateway HTTP/REST API |
-| **Compute** | Direct Node.js handler calls | 10 Decoupled AWS Lambda functions |
-| **Database** | DynamoDB Local in-memory (`port 8000`) | Amazon DynamoDB Single-Table (On-Demand) |
-| **Access Control** | Local Cedar WASM evaluation | AWS Cedar WASM + AWS IAM execution roles |
-| **Frontend** | Vite Dev Server (`port 5173`) | AWS S3 + CloudFront / Vercel edge distribution |

@@ -1,5 +1,10 @@
 # Between Sessions — Backend PRD
 
+> [!NOTE]
+> **HISTORICAL SPECIFICATION / ARCHIVED PRD**
+> This document is preserved for architectural provenance. The active, production-shape implementation uses **JWT DynamoDB Auth** (in place of Cognito) and **HuggingFace / Qwen 2.5 7B open-weight RAG** with deterministic clinical fallback (in place of Bedrock/Strands).
+> For current architecture and implementation details, see [README.md](../../README.md), [AI_ARCHITECTURE.md](../../AI_ARCHITECTURE.md), and [AWS_STACK.md](../../AWS_STACK.md).
+
 ## 1. Backend Goal
 
 Build the smallest production-shaped AWS backend that supports the complete MVP story:

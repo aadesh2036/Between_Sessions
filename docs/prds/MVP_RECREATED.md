@@ -1,5 +1,10 @@
 # Between Sessions — MVP
 
+> [!NOTE]
+> **HISTORICAL MVP SCOPE SPECIFICATION**
+> This document captures the initial hackathon contract. The full, implemented MVP is complete with AI/RAG clinical synthesis and AWS SAM serverless deployment.
+> See [README.md](../../README.md) for current capabilities and quick-start instructions.
+
 > **Hackathon MVP contract:** build one complete, privacy-conscious continuity story:  
 > **learn → log → practice → see progress → AI summarizes → user chooses what to share → verified practitioner reviews → practitioner gives a next step/referral.**
 >
