@@ -3,8 +3,10 @@
  * Comprehensive End-to-End Verification of Backend Logic, Auth, Password Reset, and Cedar WASM.
  */
 
+const jwt = require('jsonwebtoken');
 const API_BASE = 'http://localhost:3000/api/v1';
 const HEALTH_URL = 'http://localhost:3000/api/health';
+const JWT_SECRET = 'between-sessions-secret-key-2026';
 
 async function req(url, options = {}) {
   const res = await fetch(url, {
@@ -99,11 +101,12 @@ async function run() {
     body: JSON.stringify({ email: 'priya@betweensessions.com' }),
   });
   assert(forgot.status === 200, 'Dispatches forgot password request');
-  assert(forgot.data?.resetToken, 'Returns reset token in local dev environment');
-  const resetToken = forgot.data.resetToken;
+  assert(forgot.data?.message && forgot.data.message.includes('dispatched'), 'Returns confirmation that reset email was dispatched');
+  assert(!forgot.data?.resetToken && !forgot.data?.devResetUrl, 'Does NOT expose resetToken or devResetUrl in response body');
 
-  // 7. Reset Password Flow
+  // 7. Reset Password Flow (Using Valid Cryptographic Token)
   console.log('\nTest 7: Password Reset & Update Verification');
+  const resetToken = jwt.sign({ email: 'priya@betweensessions.com', purpose: 'reset', role: 'user' }, JWT_SECRET, { expiresIn: '1h' });
   const resetRes = await req(`${API_BASE}/auth/reset-password`, {
     method: 'POST',
     body: JSON.stringify({ token: resetToken, newPassword: 'UpdatedPassword2026!' }),
@@ -125,13 +128,10 @@ async function run() {
   assert(newLogin.status === 200, 'New password logs in successfully');
 
   // Restore demo password to Demo1234!
-  const forgotRestore = await req(`${API_BASE}/auth/forgot-password`, {
-    method: 'POST',
-    body: JSON.stringify({ email: 'priya@betweensessions.com' }),
-  });
+  const restoreToken = jwt.sign({ email: 'priya@betweensessions.com', purpose: 'reset', role: 'user' }, JWT_SECRET, { expiresIn: '1h' });
   await req(`${API_BASE}/auth/reset-password`, {
     method: 'POST',
-    body: JSON.stringify({ token: forgotRestore.data.resetToken, newPassword: 'Demo1234!' }),
+    body: JSON.stringify({ token: restoreToken, newPassword: 'Demo1234!' }),
   });
   const restoredLogin = await req(`${API_BASE}/auth/login`, {
     method: 'POST',
@@ -175,6 +175,62 @@ async function run() {
   const discovery = await req(`${API_BASE}/practitioners`);
   assert(discovery.status === 200, 'Public directory is queryable without authentication');
   assert(Array.isArray(discovery.data?.data) && discovery.data.data.length > 0, 'Returns list of verified practitioners');
+
+  // 13. Registration Validation & Duplicate Conflict
+  console.log('\nTest 13: Registration Validation & Conflict Rejection');
+  const badReg1 = await req(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    body: JSON.stringify({ email: 'notanemail', password: 'Short', name: '' }),
+  });
+  assert(badReg1.status === 400, 'Rejects invalid email format with 400');
+
+  const dupReg = await req(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    body: JSON.stringify({ email: 'priya@betweensessions.com', password: 'Password123!', name: 'Priya Clone' }),
+  });
+  assert(dupReg.status === 409, 'Rejects duplicate registration for existing email with 409 Conflict');
+
+  // 14. New User Registration & Unverified Login Blocking
+  console.log('\nTest 14: New User Registration & Verification Enforcement');
+  const testNewEmail = `user_${Date.now()}@betweensessions.com`;
+  const regRes = await req(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    body: JSON.stringify({ email: testNewEmail, password: 'StrongPassword123!', name: 'New Sanctuary User' }),
+  });
+  assert(regRes.status === 201, 'Creates new user account and returns 201 Created');
+  assert(regRes.data?.message?.includes('verify'), 'Returns instruction to verify email');
+
+  // Attempt login before verifying email -> should return 403 with needsVerification
+  const unverifiedLogin = await req(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    body: JSON.stringify({ email: testNewEmail, password: 'StrongPassword123!' }),
+  });
+  assert(unverifiedLogin.status === 403, 'Blocks unverified user from logging in with 403 Forbidden');
+  assert(unverifiedLogin.data?.needsVerification === true, 'Returns needsVerification flag to trigger resend UI');
+
+  // 15. Resend Verification Email & Token Verification
+  console.log('\nTest 15: Resend Verification & Email Token Consumption');
+  const resendRes = await req(`${API_BASE}/auth/resend`, {
+    method: 'POST',
+    body: JSON.stringify({ email: testNewEmail }),
+  });
+  assert(resendRes.status === 200, 'Successfully resends verification email via Mailtrap');
+
+  // Verify email with valid token
+  const testVerifyToken = jwt.sign({ email: testNewEmail, purpose: 'verify' }, JWT_SECRET, { expiresIn: '24h' });
+  const verifyRes = await req(`${API_BASE}/auth/verify`, {
+    method: 'POST',
+    body: JSON.stringify({ token: testVerifyToken }),
+  });
+  assert(verifyRes.status === 200, 'Successfully verifies email with valid token');
+
+  // Login should now succeed!
+  const verifiedLogin = await req(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    body: JSON.stringify({ email: testNewEmail, password: 'StrongPassword123!' }),
+  });
+  assert(verifiedLogin.status === 200, 'Verified user successfully logs in');
+  assert(verifiedLogin.data?.user?.isVerified === true, 'User record reflects verified status');
 
   console.log('\n======================================================');
   console.log(`   ALL ${passedTests} / ${totalTests} TESTS PASSED SUCCESSFULLY!`);

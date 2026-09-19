@@ -26,7 +26,6 @@ export default function LoginPage({ practitionerMode = false }) {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotMessage, setForgotMessage] = useState('');
   const [forgotError, setForgotError] = useState('');
-  const [devResetUrl, setDevResetUrl] = useState('');
 
   const [resetToken, setResetToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -196,7 +195,6 @@ export default function LoginPage({ practitionerMode = false }) {
     e.preventDefault();
     setForgotError('');
     setForgotMessage('');
-    setDevResetUrl('');
 
     const targetEmail = (forgotEmail || email).trim();
     if (!targetEmail) {
@@ -208,9 +206,6 @@ export default function LoginPage({ practitionerMode = false }) {
     try {
       const res = await authApi.forgotPassword(targetEmail);
       setForgotMessage(res.message || 'If that email address is registered, a password reset link has been dispatched.');
-      if (res.devResetUrl) {
-        setDevResetUrl(res.devResetUrl);
-      }
     } catch (err) {
       setForgotError(err.message || 'Could not send reset email. Please try again.');
     } finally {
@@ -1267,7 +1262,6 @@ export default function LoginPage({ practitionerMode = false }) {
                   setShowForgotModal(false);
                   setForgotError('');
                   setForgotMessage('');
-                  setDevResetUrl('');
                 }}
                 className="w-7 h-7 rounded-full bg-brand-canvas hover:bg-brand-border/50 flex items-center justify-center text-brand-ink/60 hover:text-brand-ink transition-colors"
               >
@@ -1280,7 +1274,7 @@ export default function LoginPage({ practitionerMode = false }) {
                 Reset your password
               </h3>
               <p className="text-xs text-brand-ink/65 mt-1">
-                Enter your registered email address. We'll generate a secure password reset link for you.
+                Enter your registered email address. We'll send a secure password reset link to your email inbox.
               </p>
             </div>
 
@@ -1290,25 +1284,6 @@ export default function LoginPage({ practitionerMode = false }) {
                   <span className="material-symbols-outlined text-sm mt-0.5">check_circle</span>
                   <span>{forgotMessage}</span>
                 </div>
-                {devResetUrl && (
-                  <div className="pt-2 border-t border-brand-teal/20">
-                    <p className="text-[11px] text-brand-ink/70 mb-1.5">Dev Mode Shortcut:</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const token = new URL(devResetUrl).searchParams.get('reset');
-                        if (token) {
-                          setResetToken(token);
-                          setShowForgotModal(false);
-                        }
-                      }}
-                      className="w-full py-2 px-3 rounded-lg bg-brand-teal text-white text-xs font-bold hover:bg-brand-tealDark transition-colors flex items-center justify-center gap-1.5"
-                    >
-                      <span className="material-symbols-outlined text-xs">open_in_new</span>
-                      Open Reset Form Immediately
-                    </button>
-                  </div>
-                )}
               </div>
             )}
 

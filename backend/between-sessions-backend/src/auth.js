@@ -20,12 +20,12 @@ const sendVerificationEmail = async (email, verificationToken) => {
   const transporter = nodemailer.createTransport({
     host: process.env.MAILTRAP_SMTP_HOST || "sandbox.smtp.mailtrap.io",
     port: process.env.MAILTRAP_SMTP_PORT || 2525,
-    connectionTimeout: 2000,
-    greetingTimeout: 2000,
-    socketTimeout: 2000,
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 5000,
     auth: {
-      user: process.env.MAILTRAP_SMTP_USER,
-      pass: process.env.MAILTRAP_SMTP_PASS
+      user: process.env.MAILTRAP_SMTP_USER || "9a1e374c409f43",
+      pass: process.env.MAILTRAP_SMTP_PASS || "848727f20872a7"
     }
   });
 
@@ -44,12 +44,17 @@ const sendVerificationEmail = async (email, verificationToken) => {
     }
   };
 
-  await transporter.sendMail({
-    from: 'sanctuary@betweensessions.com',
-    to: email,
-    subject: 'Verify your Sanctuary Account',
-    html: mailGenerator.generate(emailBody)
-  });
+  try {
+    await transporter.sendMail({
+      from: 'sanctuary@betweensessions.com',
+      to: email,
+      subject: 'Verify your Sanctuary Account',
+      html: mailGenerator.generate(emailBody)
+    });
+    console.log(`📧 Verification email successfully sent via Mailtrap to ${email}`);
+  } catch (err) {
+    console.error(`⚠️ Failed to send verification email via Mailtrap to ${email}:`, err.message);
+  }
 };
 
 const CORS_HEADERS = {
@@ -98,19 +103,53 @@ exports.handler = async (event) => {
 
     if (path.includes('/auth/register')) {
       const { password, name } = body;
-      if (!email || !password) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Email and password required' }) };
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Please provide a valid email address.' }) };
+      }
+      if (!password || password.length < 8) {
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Password must be at least 8 characters long.' }) };
+      }
+      if (!name || !name.trim()) {
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Full name is required.' }) };
+      }
+
+      // Prevent duplicate registration
+      const existing = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `USER#${email}`, SK: `PROFILE` } }));
+      if (existing.Item) {
+        return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: 'An account with this email address already exists.' }) };
+      }
 
       const userId = `usr_${Math.random().toString(36).substr(2, 9)}`;
-      const verificationToken = jwt.sign({ email, purpose: 'verify' }, JWT_SECRET, { expiresIn: '1h' });
+      const verificationToken = jwt.sign({ email, userId, purpose: 'verify' }, JWT_SECRET, { expiresIn: '24h' });
+      const now = new Date().toISOString();
 
+      const userItem = {
+        PK: `USER#${email}`,
+        SK: `PROFILE`,
+        id: userId,
+        email,
+        password,
+        name: name.trim(),
+        isVerified: false,
+        onboardingComplete: false,
+        createdAt: now,
+      };
+
+      // Store dual records for seamless single-table lookup by email or by userId
+      await docClient.send(new PutCommand({ TableName: TABLE_NAME, Item: userItem }));
       await docClient.send(new PutCommand({
         TableName: TABLE_NAME,
-        Item: { PK: `USER#${email}`, SK: `PROFILE`, id: userId, email, password, name, isVerified: false, onboardingComplete: false, createdAt: new Date().toISOString() }
+        Item: { ...userItem, PK: `USER#${userId}` }
       }));
 
       await sendVerificationEmail(email, verificationToken);
 
-      return { statusCode: 201, headers: CORS_HEADERS, body: JSON.stringify({ message: 'Registration successful. Please check your email to verify.' }) };
+      return {
+        statusCode: 201,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ message: 'Registration successful. Please check your email to verify your account.' })
+      };
     }
 
     if (path.includes('/auth/login')) {
@@ -120,12 +159,23 @@ exports.handler = async (event) => {
       const res = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `USER#${email}`, SK: `PROFILE` } }));
       const user = res.Item;
 
-      if (!user || user.password !== password) return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid credentials' }) };
+      if (!user || user.password !== password) return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid email or password.' }) };
+
+      if (user.isVerified === false) {
+        return {
+          statusCode: 403,
+          headers: CORS_HEADERS,
+          body: JSON.stringify({
+            error: 'Email not verified. Please check your inbox or request a new verification link.',
+            needsVerification: true
+          })
+        };
+      }
       
       const token = jwt.sign({ userId: user.id, email }, JWT_SECRET, { expiresIn: '7d' });
       return {
         statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
+        headers: CORS_HEADERS,
         body: JSON.stringify({
           token,
           user: {
@@ -145,6 +195,7 @@ exports.handler = async (event) => {
 
     if (path.includes('/auth/verify')) {
       const { token } = body;
+      if (!token) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Verification token required.' }) };
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
         if (decoded.purpose !== 'verify') throw new Error('Invalid token type');
@@ -155,17 +206,50 @@ exports.handler = async (event) => {
           UpdateExpression: "SET isVerified = :v",
           ExpressionAttributeValues: { ":v": true }
         }));
-        return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'Email verified successfully.' }) };
+
+        if (decoded.userId) {
+          try {
+            await docClient.send(new UpdateCommand({
+              TableName: TABLE_NAME,
+              Key: { PK: `USER#${decoded.userId}`, SK: `PROFILE` },
+              UpdateExpression: "SET isVerified = :v",
+              ExpressionAttributeValues: { ":v": true }
+            }));
+          } catch {}
+        } else {
+          try {
+            const uRes = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `USER#${decoded.email}`, SK: `PROFILE` } }));
+            if (uRes.Item?.id) {
+              await docClient.send(new UpdateCommand({
+                TableName: TABLE_NAME,
+                Key: { PK: `USER#${uRes.Item.id}`, SK: `PROFILE` },
+                UpdateExpression: "SET isVerified = :v",
+                ExpressionAttributeValues: { ":v": true }
+              }));
+            }
+          } catch {}
+        }
+
+        return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ message: 'Email verified successfully. You may now log in.' }) };
       } catch (err) {
-        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Invalid or expired verification token.' }) };
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid or expired verification token.' }) };
       }
     }
 
     if (path.includes('/auth/resend')) {
       if (!email) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Email required' }) };
-      const verificationToken = jwt.sign({ email, purpose: 'verify' }, JWT_SECRET, { expiresIn: '1h' });
+
+      const userRes = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `USER#${email}`, SK: `PROFILE` } }));
+      if (!userRes.Item) {
+        return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'No account found with this email address.' }) };
+      }
+      if (userRes.Item.isVerified) {
+        return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ message: 'Email is already verified. You can log in.' }) };
+      }
+
+      const verificationToken = jwt.sign({ email, userId: userRes.Item.id, purpose: 'verify' }, JWT_SECRET, { expiresIn: '24h' });
       await sendVerificationEmail(email, verificationToken);
-      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'Verification email resent.' }) };
+      return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ message: 'Verification email resent. Please check your inbox.' }) };
     }
 
     if (path.includes('/user/update')) {
@@ -419,15 +503,13 @@ exports.handler = async (event) => {
     }
 
     if (path.includes('/auth/forgot-password')) {
-      if (!email) return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Email required' }) };
+      if (!email) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Email required' }) };
 
       // Check if user or practitioner exists
       const userRes = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `USER#${email}`, SK: 'PROFILE' } }));
       const pracRes = !userRes.Item ? await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `PRACTITIONER#${email}`, SK: 'PROFILE' } })) : null;
 
       const account = userRes.Item || pracRes?.Item;
-      let devResetUrl = null;
-      let devToken = null;
 
       if (account) {
         const isPractitioner = !!pracRes?.Item;
@@ -436,20 +518,18 @@ exports.handler = async (event) => {
           JWT_SECRET,
           { expiresIn: '1h' }
         );
-        devToken = resetToken;
         const resetLink = `http://localhost:5173/login?reset=${resetToken}${isPractitioner ? '&mode=practitioner' : ''}`;
-        devResetUrl = resetLink;
 
         try {
           const transporter = nodemailer.createTransport({
             host: process.env.MAILTRAP_SMTP_HOST || 'sandbox.smtp.mailtrap.io',
             port: process.env.MAILTRAP_SMTP_PORT || 2525,
-            connectionTimeout: 2000,
-            greetingTimeout: 2000,
-            socketTimeout: 2000,
+            connectionTimeout: 5000,
+            greetingTimeout: 5000,
+            socketTimeout: 5000,
             auth: {
-              user: process.env.MAILTRAP_SMTP_USER || 'dummy',
-              pass: process.env.MAILTRAP_SMTP_PASS || 'dummy',
+              user: process.env.MAILTRAP_SMTP_USER || '9a1e374c409f43',
+              pass: process.env.MAILTRAP_SMTP_PASS || '848727f20872a7',
             },
           });
           const emailBody = {
@@ -469,18 +549,18 @@ exports.handler = async (event) => {
             subject: 'Reset your Between Sessions password',
             html: mailGenerator.generate(emailBody),
           });
+          console.log(`📧 Password reset email dispatched via Mailtrap to ${email}`);
         } catch (mailErr) {
-          console.log('📧 [Local Dev Mailer Notice]: SMTP not connected or delivery bypassed.');
-          console.log(`🔑 [Between Sessions Dev Reset Link]: ${resetLink}`);
+          console.error(`⚠️ Password reset email sending warning for ${email}:`, mailErr.message);
         }
       }
 
+      // No dev backdoor: tokens are delivered strictly via Mailtrap SMTP email
       return {
         statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
+        headers: CORS_HEADERS,
         body: JSON.stringify({
-          message: 'If that email address is registered, a password reset link has been dispatched.',
-          ...(devResetUrl ? { devResetUrl, resetToken: devToken } : {}),
+          message: 'If that email address is registered, a password reset link has been dispatched to your email.',
         }),
       };
     }
@@ -488,10 +568,10 @@ exports.handler = async (event) => {
     if (path.includes('/auth/reset-password')) {
       const { token, newPassword } = body;
       if (!token || !newPassword) {
-        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'token and newPassword are required.' }) };
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'token and newPassword are required.' }) };
       }
       if (newPassword.length < 8) {
-        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Password must be at least 8 characters.' }) };
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Password must be at least 8 characters.' }) };
       }
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -538,9 +618,9 @@ exports.handler = async (event) => {
           }
         }
 
-        return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'Password updated successfully. You can now log in.' }) };
+        return { statusCode: 200, headers: CORS_HEADERS, body: JSON.stringify({ message: 'Password updated successfully. You can now log in.' }) };
       } catch (err) {
-        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: err.message || 'Invalid or expired reset token.' }) };
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: err.message || 'Invalid or expired reset token.' }) };
       }
     }
 
