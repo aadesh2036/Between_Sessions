@@ -50,6 +50,8 @@ Globals:
         EMAIL_PROVIDER: !Ref EmailProvider
         SES_FROM_EMAIL: !Ref SesFromEmail
         ALLOWED_ORIGIN: !Ref FrontendOrigin
+        APP_BASE_URL: !Ref FrontendOrigin
+        APP_URL: !Ref FrontendOrigin
   Api:
     Cors:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
