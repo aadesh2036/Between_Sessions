@@ -27,6 +27,7 @@ const {
   QueryCommand,
   UpdateCommand,
 } = require('@aws-sdk/lib-dynamodb');
+const { runClinicianRagPipeline } = require('./ragPipeline');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
@@ -404,7 +405,7 @@ exports.handler = async (event) => {
           ? docClient.send(new QueryCommand({
               TableName: TABLE_NAME,
               KeyConditionExpression: 'PK = :pk AND begins_with(SK, :prefix)',
-              ExpressionAttributeValues: { ':pk': pk, ':prefix': 'AI#WEEK#' },
+              ExpressionAttributeValues: { ':pk': pk, ':prefix': 'AI#' },
               ScanIndexForward: false, Limit: 1,
             })).then(r => r.Items || [])
           : Promise.resolve([]),
@@ -525,6 +526,33 @@ exports.handler = async (event) => {
         statusCode: 201,
         headers: CORS_HEADERS,
         body: JSON.stringify({ message: 'Recommendation saved.', data: item }),
+      };
+    }
+
+    // ── POST /practitioner/patients/:userId/ai-summary ────────────────────────
+    if (method === 'POST' && path.includes('/patients/') && path.includes('/ai-summary')) {
+      const decoded = requirePractitionerAuth(event);
+      const userId = event.pathParameters?.userId;
+      if (!userId) return apiError(400, 'VALIDATION_ERROR', 'userId required.');
+
+      let days = 30;
+      if (event.body) {
+        try {
+          const parsed = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
+          if (parsed.days && Number(parsed.days) > 0) days = Number(parsed.days);
+        } catch { /* use default days */ }
+      }
+
+      const result = await runClinicianRagPipeline({
+        practitionerId: decoded.practitionerId,
+        patientId: userId,
+        days,
+      });
+
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ message: 'Clinician AI synthesis generated.', data: result }),
       };
     }
 

@@ -152,6 +152,7 @@ app.get('/api/v1/practitioner/patients',                                    brid
 app.get('/api/v1/practitioner/patients/:userId/summary',                    bridge(practitionerHandler));
 app.get('/api/v1/practitioner/patients/:userId/consent',                    bridge(practitionerHandler));
 app.post('/api/v1/practitioner/patients/:userId/recommendations',           bridge(practitionerHandler));
+app.post('/api/v1/practitioner/patients/:userId/ai-summary',                 bridge(practitionerHandler));
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));

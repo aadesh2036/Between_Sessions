@@ -20,6 +20,8 @@ Globals:
         MAILTRAP_SMTP_PORT: "2525"
         MAILTRAP_SMTP_USER: "9a1e374c409f43"
         MAILTRAP_SMTP_PASS: "848727f20872a7"
+        AI_PROVIDER: "huggingface"
+        HF_MODEL: "Qwen/Qwen2.5-7B-Instruct"
   Api:
     Cors:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
@@ -365,6 +367,11 @@ Resources:
           Type: Api
           Properties:
             Path: /api/v1/practitioner/patients/{userId}/recommendations
+            Method: post
+        GeneratePatientAiSummary:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioner/patients/{userId}/ai-summary
             Method: post
 
   # ── Toolkit (Grounding, Breathing, Pause&Choose, Reassurance, Focus) ─────────
