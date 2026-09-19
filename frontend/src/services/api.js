@@ -316,5 +316,12 @@ export const practitionerApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
+
+  /** Generate an AI decision-support synthesis for a patient */
+  generatePatientAiSummary: (userId, days = 30) =>
+    pracFetch(`/practitioner/patients/${userId}/ai-summary`, {
+      method: 'POST',
+      body: JSON.stringify({ days }),
+    }),
 };
 

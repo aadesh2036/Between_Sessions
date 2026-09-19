@@ -247,6 +247,22 @@ function PatientView({ patient, onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showRecForm, setShowRecForm] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
+  const [aiError, setAiError] = useState('');
+
+  const handleGenerateAiSummary = async () => {
+    setAiLoading(true);
+    setAiError('');
+    try {
+      const res = await practitionerApi.generatePatientAiSummary(patient.userId, 30);
+      setAiResult(res.data);
+    } catch (err) {
+      setAiError(err.message || 'Failed to generate AI synthesis.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const loadSummary = useCallback(async () => {
     setLoading(true);
@@ -508,29 +524,224 @@ function PatientView({ patient, onBack }) {
             )}
           </section>
 
-          {/* AI Summary */}
-          <section className="bg-brand-lavenderSoft rounded-3xl p-6 sm:p-8 border border-brand-lavender/20 shadow-sm">
-            <div className="flex items-center gap-2 text-brand-lavender mb-4">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
-                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <span className="text-xs font-bold uppercase tracking-widest">AI Weekly Summary</span>
-            </div>
-            {summary.aiSummary ? (
-              <div>
-                <p className="text-brand-ink/80 text-sm leading-relaxed mb-3">
-                  {summary.aiSummary.summary ?? summary.aiSummary}
-                </p>
-                <p className="text-[10px] text-brand-ink/40 italic">
-                  Synthesized from patient logs — not medical advice. Review all data
-                  independently before clinical decision-making.
-                </p>
+          {/* AI Practice Overview (RAG Decision Support) */}
+          <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border/60 shadow-card-lift">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-brand-border/40">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-brand-lavenderSoft flex items-center justify-center text-brand-lavender border border-brand-lavender/20 shrink-0">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
+                    <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-editorial text-xl sm:text-2xl font-medium text-brand-ink">
+                      AI Practice Overview
+                    </h3>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-brand-softerTeal text-brand-teal font-semibold border border-brand-teal/20">
+                      RAG Grounded
+                    </span>
+                  </div>
+                  <p className="text-xs text-brand-ink/50 mt-0.5">
+                    Objective telemetry synthesis & evidence-based ERP literature grounding
+                  </p>
+                </div>
               </div>
-            ) : (
-              <p className="text-brand-ink/50 text-sm">
-                No AI summary available for this patient this week.
-              </p>
+
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={handleGenerateAiSummary}
+                  disabled={aiLoading}
+                  className="px-4 py-2 rounded-full bg-brand-teal text-white text-xs font-bold hover:bg-brand-tealDark transition-all shadow-sm disabled:opacity-60 flex items-center gap-2"
+                >
+                  {aiLoading ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Synthesizing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <span>{(aiResult || summary.aiSummary) ? 'Refresh Synthesis' : 'Generate Synthesis'}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Error banner */}
+            {aiError && (
+              <div className="mb-6 p-4 rounded-2xl bg-brand-coralSoft border border-brand-coral/20 text-brand-coral text-xs flex items-center gap-2">
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                  <line x1="12" y1="8" x2="12" y2="12" strokeWidth="2" strokeLinecap="round"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                <span>{aiError}</span>
+              </div>
             )}
+
+            {/* Loading state with signature BetweenLoading animation */}
+            {aiLoading && (
+              <div className="py-8">
+                <BetweenLoading
+                  size="md"
+                  label="Synthesizing patient practice telemetry..."
+                  sublabel="Cedar WASM verifying practice_logs consent · Retrieving evidence-based ERP literature"
+                />
+              </div>
+            )}
+
+            {/* Empty state before first synthesis */}
+            {!aiLoading && !aiResult && !summary.aiSummary && (
+              <div className="py-8 text-center bg-brand-canvas/50 rounded-2xl border border-brand-border/40 p-6 space-y-3">
+                <div className="text-brand-ink/60 max-w-md mx-auto text-xs leading-relaxed">
+                  No AI synthesis generated yet for this patient. Click <strong className="text-brand-ink font-semibold">Generate Synthesis</strong> to produce an objective clinical overview combining between-sessions check-ins, practice logs, and curated ERP literature under AWS Cedar policy.
+                </div>
+              </div>
+            )}
+
+            {/* Active synthesis content */}
+            {!aiLoading && (aiResult || summary.aiSummary) && (() => {
+              const active = aiResult?.synthesis || summary.aiSummary?.synthesis || (typeof summary.aiSummary === 'object' ? summary.aiSummary : { summary: summary.aiSummary });
+              const knowledge = aiResult?.knowledgeRetrieved || summary.aiSummary?.knowledgeChunksUsed || [];
+              const modelName = aiResult?.model || summary.aiSummary?.model || 'Open-Weight LLM';
+              const providerName = aiResult?.provider || summary.aiSummary?.provider || 'Hugging Face Inference';
+
+              return (
+                <div className="space-y-6">
+                  {/* Synthesis Narrative */}
+                  <div className="bg-brand-canvas/60 rounded-2xl p-5 border border-brand-border/40">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-brand-teal px-2 py-0.5 rounded-full bg-brand-softerTeal border border-brand-teal/20">
+                        Longitudinal Synthesis
+                      </span>
+                      <span className="text-[10px] font-mono text-brand-ink/50">
+                        Model: {modelName} · {providerName}
+                      </span>
+                    </div>
+                    <p className="text-brand-ink/90 text-sm leading-relaxed font-sans">
+                      {active.summary || active.text || 'Practice telemetry recorded in the authorized reporting window.'}
+                    </p>
+                  </div>
+
+                  {/* Practice Observations (FACTS) */}
+                  {active.practice_observations?.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
+                          Practice Observations
+                        </span>
+                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-brand-softSuccess text-clinical-success uppercase border border-clinical-success/20">
+                          FACT
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {active.practice_observations.map((obs, i) => (
+                          <div key={i} className="p-4 rounded-xl bg-white border border-brand-border/60 shadow-xs space-y-2">
+                            <p className="text-xs text-brand-ink/80 leading-relaxed font-sans">
+                              {obs.observation || obs}
+                            </p>
+                            {obs.evidence?.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1 pt-1 border-t border-brand-border/30">
+                                <span className="text-[9px] text-brand-ink/40 uppercase font-mono">Evidence:</span>
+                                {obs.evidence.map((ev, ei) => (
+                                  <span key={ei} className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-brand-softerTeal text-brand-teal">
+                                    {ev}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Patterns (INFERENCES) */}
+                  {active.patterns?.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
+                          Observed Behavioral Patterns
+                        </span>
+                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-brand-amberSoft text-brand-amber uppercase border border-brand-amber/20">
+                          INFERENCE
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {active.patterns.map((pat, i) => (
+                          <div key={i} className="p-3.5 rounded-xl bg-brand-amberSoft/30 border border-brand-amber/20 text-xs text-brand-ink/80 leading-relaxed">
+                            {pat.pattern || pat}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Retrieved Clinical Knowledge (KNOWLEDGE) */}
+                  {(knowledge.length > 0 || active.clinical_context?.length > 0) && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
+                          Retrieved Clinical Knowledge (ERP Grounding)
+                        </span>
+                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-brand-lavenderSoft text-brand-lavender uppercase border border-brand-lavender/20">
+                          KNOWLEDGE
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {(knowledge.length > 0 ? knowledge : active.clinical_context).map((item, i) => (
+                          <div key={i} className="p-4 rounded-xl bg-brand-lavenderSoft/20 border border-brand-lavender/20 space-y-1.5">
+                            <div className="font-editorial text-sm font-semibold text-brand-ink">
+                              {item.title || item.point || 'Clinical Principle'}
+                            </div>
+                            <div className="text-[11px] text-brand-ink/60 font-sans italic">
+                              {item.citation || item.source || 'Peer-reviewed clinical reference'}
+                            </div>
+                            {item.chunkId && (
+                              <span className="inline-block font-mono text-[9px] px-1.5 py-0.5 rounded bg-brand-lavenderSoft text-brand-lavender">
+                                {item.chunkId}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Session Inquiry Recommendations */}
+                  {active.questions_for_practitioner?.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-brand-ink">
+                          Session Prep Considerations
+                        </span>
+                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-brand-softerTeal text-brand-teal uppercase border border-brand-teal/20">
+                          CLINICAL PROBE
+                        </span>
+                      </div>
+                      <ul className="space-y-2">
+                        {active.questions_for_practitioner.map((q, i) => (
+                          <li key={i} className="flex items-start gap-2 text-xs text-brand-ink/80 p-3 rounded-xl bg-brand-canvas/60 border border-brand-border/40">
+                            <span className="text-brand-teal font-bold">•</span>
+                            <span>{q}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Clinical Safety Disclaimer */}
+                  <div className="p-4 rounded-xl bg-brand-canvas border border-brand-border/40 text-[11px] text-brand-ink/50 leading-relaxed italic">
+                    AI-generated clinical decision support for licensed practitioners — not a medical diagnosis, treatment directive, or patient reassurance. Synthesized strictly from authorized DynamoDB logs and curated ERP literature under AWS Cedar policy. The practitioner retains sole clinical responsibility.
+                  </div>
+                </div>
+              );
+            })()}
           </section>
 
           {/* Recommendations */}
