@@ -1,9 +1,9 @@
 # TILL_NOW.md — Project State & Architectural Audit
 
-> **Current Status**: Full End-to-End MVP Complete, Hardened & Verified (UI, Mobile, Backend, Cedar WASM, DynamoDB Local, Security & Clinical Boundaries). Native AWS SAM Local Serverless stack operational. 100% Ready for Gemini AI Integration.
+> **Current Status**: Full End-to-End MVP + Clinician AI/RAG Decision Support Complete, Hardened & Verified (UI, Mobile, Backend, Cedar WASM, DynamoDB Local, Curated Clinical RAG, Open-Weight LLM Integration via Hugging Face with Offline Fallback). Native AWS SAM Local Serverless stack operational.
 > **Date**: 2026-09-19
-> **Branch**: `mvp_fixes`
-> **Passing Test Suites**: 60 / 60 automated checks passed (25/25 `test_backend_e2e.js` + 35/35 `test_e2e_journey.js` on native AWS SAM Local API)
+> **Branch**: `AI_integration`
+> **Passing Test Suites**: **83 / 83 automated checks passed** (23/23 `test_ai_rag.js` + 25/25 `test_backend_e2e.js` + 35/35 `test_e2e_journey.js` on native AWS SAM Local API)
 
 ---
 
@@ -187,18 +187,48 @@ The application adheres strictly to:
 
 ---
 
-## 🚀 Readiness for Gemini AI Integration
+## 🤖 Completed Clinician AI & RAG Subsystem
 
-The core foundation is now hardened, bug-free, and production-ready. We are fully primed to integrate the **Google Gemini API**:
+The clinician-facing AI & RAG decision support system has been fully implemented, integrated, and verified:
 
-### Planned AI Features:
-1. **Grounded Weekly Continuity Synthesis (`POST /api/v1/ai/weekly-summary`)**:
-   - Utilize `gemini-2.5-flash` with structured outputs to generate qualitative weekly summaries.
-   - Strictly grounded in the user's logged check-ins, ERP practice trials, and journal entries.
-   - Include auditable source citations (e.g. `[Check-in #14, Practice #06]`).
-   - Anti-diagnostic posture label: *"Synthesized from your logs — not medical advice"*.
-2. **Cognitive Defusion Prompt Assistant (in Learn & Toolkit)**:
-   - Interactive defusion reframing assistance based on user-entered intrusive thoughts.
-   - Anti-reassurance guardrails: detects reassurance-seeking loops and redirects to mindful acceptance without ritual validation.
-3. **Practitioner Session Prep Digest**:
-   - Generates an objective, concise summary for the clinician highlighting peak diurnal urge spikes, response delay improvements, and values friction areas.
+### 1. Curated Clinical Knowledge Base (`clinicalKnowledge.js`)
+- Curated evidence-based literature chunks covering:
+  * Inhibitory Learning (Craske et al. 2014)
+  * Response Prevention & Ritual Neutralization Traps (Abramowitz 2006)
+  * Reassurance Cycles as Compulsive Maneuvers (Salkovskis 1999)
+  * SUDS Distress Curve Calibration (Wolpe 1969)
+  * ACT Defusion & Life Outside OCD (Hayes et al. 2011)
+  * Somatic Grounding vs. Covert Avoidance (Twohig et al. 2015)
+  * Egodystonic Obsessions & Appraisals (Rachman 1997)
+- Weighted semantic retrieval algorithm with tag scoring, category boosting, and academic citations.
+
+### 2. Multi-Provider LLM Abstraction (`llmProvider.js`)
+- Connects to open-weight models (`Qwen/Qwen2.5-7B-Instruct` default, `Llama-3.1-8B-Instruct`) via Hugging Face Serverless Router (`https://router.huggingface.co/hf-inference/v1/chat/completions`).
+- Zero-credential automatic fallback to deterministic `MockLLMProvider` (`mock-clinical-v1`).
+- Robust output normalizer with markdown code fence stripping and JSON error recovery.
+
+### 3. Clinician RAG Pipeline (`ragPipeline.js`)
+- Enforces AWS Cedar WASM authorization check (`ReadPatientSummary` with `practice_logs` consent).
+- Strictly isolates practitioners (Practitioner B blocked from Practitioner A's patient with 403).
+- Constructs structured telemetry context from DynamoDB records with concrete evidence SK mappings.
+- Enforces strict epistemological separation: `[FACT]`, `[INFERENCE]`, and `[KNOWLEDGE]`.
+- Persists auditable synthesis records in DynamoDB (`AI#SYNTHESIS#<practitionerId>#<timestamp>`).
+
+### 4. Practitioner UI Integration (`PractitionerDashboardPage.jsx`)
+- Replaces basic placeholder with rich, calm **AI Practice Overview** component.
+- "Generate Synthesis" / "Refresh Synthesis" action with signature `BetweenLoading` animation.
+- Displays factual observations with telemetry evidence tags, behavioral patterns, clinical literature citations, and session inquiry questions for the clinician.
+- Explicit non-diagnostic disclaimer and clinical authority notice.
+
+---
+
+## 📚 Master Documentation Index
+
+| Document | Purpose |
+|---|---|
+| [`AI_SETUP.md`](file:///run/media/aadesh/New%20Volume%20D/Between_Sessions/AI_SETUP.md) | Where to add `HF_TOKEN`, model selection, and zero-credential fallback guide |
+| [`AI_ARCHITECTURE.md`](file:///run/media/aadesh/New%20Volume%20D/Between_Sessions/AI_ARCHITECTURE.md) | End-to-end data flow, Cedar security boundaries, and FACT vs INFERENCE separation |
+| [`RAG.md`](file:///run/media/aadesh/New%20Volume%20D/Between_Sessions/RAG.md) | Curated clinical knowledge base, scoring algorithm, and hybrid architecture |
+| [`FEATURES.md`](file:///run/media/aadesh/New%20Volume%20D/Between_Sessions/FEATURES.md) | Comprehensive feature catalog for Individuals and Practitioners |
+| [`AWS_STACK.md`](file:///run/media/aadesh/New%20Volume%20D/Between_Sessions/AWS_STACK.md) | AWS SAM CLI serverless stack, Lambda inventory, and single-table DynamoDB |
+

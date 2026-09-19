@@ -83,7 +83,12 @@ Open **`http://localhost:5173`** in your browser.
 ---
 
 ### 2. Run Automated Verification Suites
-Both verification suites run against either SAM Local API or Express on port 3000:
+All three verification suites run against either SAM Local API or Express on port 3000:
+* **AI & Clinical RAG Integration Suite (23 / 23 checks passed):**
+  ```bash
+  cd backend/between-sessions-backend
+  node test_ai_rag.js
+  ```
 * **Backend & Security E2E Suite (25 / 25 checks passed):**
   ```bash
   cd backend/between-sessions-backend
@@ -94,6 +99,17 @@ Both verification suites run against either SAM Local API or Express on port 300
   cd backend/between-sessions-backend
   node test_e2e_journey.js
   ```
+* **Total Automated Test Verification:** **83 / 83 passing checks** with zero regressions.
+
+---
+
+### 3. Master Documentation
+* [`AI_SETUP.md`](AI_SETUP.md) — Where to add `HF_TOKEN`, model selection, and zero-credential fallback
+* [`AI_ARCHITECTURE.md`](AI_ARCHITECTURE.md) — Clinician AI decision support architecture & Cedar boundaries
+* [`RAG.md`](RAG.md) — Curated clinical knowledge base, scoring algorithm, and hybrid architecture
+* [`FEATURES.md`](FEATURES.md) — Complete features guide for Individuals and Practitioners
+* [`AWS_STACK.md`](AWS_STACK.md) — AWS SAM CLI specification, Lambda inventory, and DynamoDB schema
+
 
 ---
 
