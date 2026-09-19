@@ -29,14 +29,19 @@ Parameters:
     Type: String
     Default: "sanctuary@betweensessions.com"
     Description: "Verified sender email address configured in Amazon SES"
+  FrontendOrigin:
+    Type: String
+    Default: "https://main.d22m0ipcsise4e.amplifyapp.com"
+    Description: "Allowed CORS frontend origin (Amplify production domain)"
 
 Globals:
   Function:
-    Timeout: 20
-    MemorySize: 256
     Runtime: nodejs22.x
+    Timeout: 30
+    MemorySize: 256
     Architectures:
       - x86_64
+    Tracing: Active
     Environment:
       Variables:
         TABLE_NAME: !Ref MainTable
@@ -44,11 +49,17 @@ Globals:
         AI_PROVIDER: !Ref AiProvider
         EMAIL_PROVIDER: !Ref EmailProvider
         SES_FROM_EMAIL: !Ref SesFromEmail
+        ALLOWED_ORIGIN: !Ref FrontendOrigin
   Api:
     Cors:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-      AllowOrigin: "'*'"
+      AllowOrigin: !Sub "'${FrontendOrigin}'"
+    MethodSettings:
+      - ResourcePath: "/*"
+        HttpMethod: "*"
+        ThrottlingRateLimit: 50
+        ThrottlingBurstLimit: 100
 
 Resources:
 

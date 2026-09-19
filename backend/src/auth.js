@@ -22,12 +22,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
   await defaultEmailService.sendVerificationEmail(email, name, verificationToken, appUrl);
 };
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-  'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-  'Content-Type': 'application/json',
-};
+const { CORS_HEADERS } = require('./corsHeaders');
 
 exports.handler = async (event) => {
   try {
@@ -222,23 +217,23 @@ exports.handler = async (event) => {
       const authHeader = event.headers?.authorization || event.headers?.Authorization || '';
       const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
       if (!bearerToken) {
-        return { statusCode: 401, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'UNAUTHORIZED', message: 'Missing bearer token.' }) };
+        return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'UNAUTHORIZED', message: 'Missing bearer token.' }) };
       }
       let decoded;
       try {
         decoded = jwt.verify(bearerToken, JWT_SECRET);
       } catch {
-        return { statusCode: 401, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'UNAUTHORIZED', message: 'Invalid or expired token.' }) };
+        return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'UNAUTHORIZED', message: 'Invalid or expired token.' }) };
       }
 
       // Only allow users to update their own profile
       if (decoded.email && email && decoded.email !== email) {
-        return { statusCode: 403, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'FORBIDDEN', message: 'You may only update your own profile.' }) };
+        return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify({ error: 'FORBIDDEN', message: 'You may only update your own profile.' }) };
       }
 
       const targetEmail = decoded.email || email;
       if (!targetEmail) {
-        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'VALIDATION_ERROR', message: 'Email is required.' }) };
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'VALIDATION_ERROR', message: 'Email is required.' }) };
       }
 
       const { name, password, onboardingComplete, values, focusPatterns, supportStatus, goal, preferences } = body;
@@ -298,13 +293,13 @@ exports.handler = async (event) => {
     if (path.includes('/auth/practitioner-register')) {
       const { password, name, govCertId, credentials, specialisation, languages, remoteAvailable } = body;
       if (!email || !password || !name) {
-        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'Email, password, and name are required.' } }) };
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'Email, password, and name are required.' } }) };
       }
       if (password.length < 8) {
-        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'Password must be at least 8 characters.' } }) };
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'Password must be at least 8 characters.' } }) };
       }
       if (!govCertId || !govCertId.trim()) {
-        return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'Practitioner ID is required.' } }) };
+        return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'Practitioner ID is required.' } }) };
       }
 
       const certIdTrimmed = govCertId.trim().toUpperCase();
@@ -313,7 +308,7 @@ exports.handler = async (event) => {
       if (!syntheticRegex.test(certIdTrimmed) && !allowedStatic.includes(certIdTrimmed)) {
         return {
           statusCode: 400,
-          headers: { 'Access-Control-Allow-Origin': '*' },
+          headers: CORS_HEADERS,
           body: JSON.stringify({
             error: {
               code: 'INVALID_PRACTITIONER_ID',
@@ -325,7 +320,7 @@ exports.handler = async (event) => {
 
       const existing = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `PRACTITIONER#${email}`, SK: 'PROFILE' } }));
       if (existing.Item) {
-        return { statusCode: 409, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: { code: 'CONFLICT', message: 'Practitioner already registered with this email.' } }) };
+        return { statusCode: 409, headers: CORS_HEADERS, body: JSON.stringify({ error: { code: 'CONFLICT', message: 'Practitioner already registered with this email.' } }) };
       }
 
       const pracId = certIdTrimmed;
@@ -395,7 +390,7 @@ exports.handler = async (event) => {
 
       return {
         statusCode: 201,
-        headers: { 'Access-Control-Allow-Origin': '*' },
+        headers: CORS_HEADERS,
         body: JSON.stringify({
           message: 'Practitioner registration successful. Demo credentials verified.',
           token,
@@ -416,28 +411,28 @@ exports.handler = async (event) => {
     if (path.includes('/auth/practitioner-login')) {
       const { password } = body;
       const govCertId = body.practitionerId || body.govCertId;
-      if (!email || !password) return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Email and password required' }) };
+      if (!email || !password) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Email and password required' }) };
 
       // Practitioners are keyed by email under PK = PRACTITIONER#email
       const res = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `PRACTITIONER#${email}`, SK: `PROFILE` } }));
       const prac = res.Item;
 
       if (!prac || prac.password !== password) {
-        return { statusCode: 401, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Invalid credentials' }) };
+        return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid credentials' }) };
       }
 
       if (govCertId !== undefined && govCertId !== null && govCertId !== '') {
         if (prac.govCertId && prac.govCertId.toUpperCase() !== govCertId.trim().toUpperCase()) {
           return {
             statusCode: 401,
-            headers: { 'Access-Control-Allow-Origin': '*' },
+            headers: CORS_HEADERS,
             body: JSON.stringify({ error: 'Practitioner ID does not match our records. Please check your government certification number.' })
           };
         }
       } else if (!govCertId || govCertId.trim() === '') {
         return {
           statusCode: 400,
-          headers: { 'Access-Control-Allow-Origin': '*' },
+          headers: CORS_HEADERS,
           body: JSON.stringify({ error: 'Practitioner ID (government certification number) is required.' })
         };
       }
@@ -450,7 +445,7 @@ exports.handler = async (event) => {
       );
       return {
         statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
+        headers: CORS_HEADERS,
         body: JSON.stringify({
           token,
           practitioner: {
@@ -560,6 +555,6 @@ exports.handler = async (event) => {
 
   } catch (err) {
     console.error(err);
-    return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Internal server error', details: err.message }) };
+    return { statusCode: 500, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Internal server error', details: err.message }) };
   }
 };

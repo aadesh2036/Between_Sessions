@@ -23,10 +23,7 @@ const ddbClient = new DynamoDBClient(
 );
 const docClient = DynamoDBDocumentClient.from(ddbClient);
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Content-Type': 'application/json',
-};
+const { CORS_HEADERS } = require('./corsHeaders');
 
 function requireAuth(event) {
   const authHeader =
