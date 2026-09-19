@@ -20,10 +20,15 @@ Parameters:
   EmailProvider:
     Type: String
     Default: "mock"
-    Description: "Email delivery provider mode (mock for non-blocking staging deployment)"
+    Description: "Email delivery provider mode (mock for staging, ses for Amazon SES, mailtrap for sandbox)"
     AllowedValues:
       - "mock"
+      - "ses"
       - "mailtrap"
+  SesFromEmail:
+    Type: String
+    Default: "sanctuary@betweensessions.com"
+    Description: "Verified sender email address configured in Amazon SES"
 
 Globals:
   Function:
@@ -38,6 +43,7 @@ Globals:
         JWT_SECRET: !Ref JwtSecret
         AI_PROVIDER: !Ref AiProvider
         EMAIL_PROVIDER: !Ref EmailProvider
+        SES_FROM_EMAIL: !Ref SesFromEmail
   Api:
     Cors:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
@@ -74,6 +80,12 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MainTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ses:SendEmail
+                - ses:SendRawEmail
+              Resource: "*"
       Events:
         Root:
           Type: Api

@@ -21,19 +21,23 @@ echo "  🌿 BETWEEN SESSIONS — RUNNING AUTOMATED TEST SUITES"
 echo "========================================================"
 echo ""
 
-echo "▶ [1/3] Running Backend & Security E2E Suite..."
+echo "▶ [1/4] Running Email Delivery & Provider Abstraction Suite..."
+node "$ROOT_DIR/tests/test_email_service.js"
+
+echo ""
+echo "▶ [2/4] Running Backend & Security E2E Suite..."
 node "$ROOT_DIR/tests/test_backend_e2e.js"
 
 echo ""
-echo "▶ [2/3] Running Clinical AI & RAG Pipeline Suite..."
+echo "▶ [3/4] Running Clinical AI & RAG Pipeline Suite..."
 node "$ROOT_DIR/tests/test_ai_rag.js"
 
 echo ""
-echo "▶ [3/3] Running Comprehensive Journey Suite..."
+echo "▶ [4/4] Running Comprehensive Journey Suite..."
 node "$ROOT_DIR/tests/test_e2e_journey.js"
 
 echo ""
 echo "========================================================"
-echo "  ✓ ALL 3 TEST SUITES PASSED SUCCESSFULLY!"
+echo "  ✓ ALL 4 TEST SUITES PASSED SUCCESSFULLY!"
 echo "========================================================"
 echo ""

@@ -11,6 +11,7 @@
     "build:frontend": "npm run build --prefix frontend",
     "build:sam": "cd infrastructure && sam build",
     "test": "./scripts/run_tests.sh",
+    "test:email": "NODE_PATH=backend/src/node_modules node tests/test_email_service.js",
     "test:backend": "NODE_PATH=backend/src/node_modules node tests/test_backend_e2e.js",
     "test:ai": "NODE_PATH=backend/src/node_modules node tests/test_ai_rag.js",
     "test:e2e": "NODE_PATH=backend/src/node_modules node tests/test_e2e_journey.js",
