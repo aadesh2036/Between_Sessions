@@ -15,14 +15,16 @@ export default function LandingPage() {
     <Logo className="sm:gap-2.5" />
 
     {/* Desktop Navigation Links */}
-    <div className="hidden lg:flex items-center gap-7 text-xs font-semibold text-brand-ink/80 tracking-normal">
+    <div className="hidden lg:flex items-center gap-6 text-xs font-semibold text-brand-ink/80 tracking-normal">
+      <a className="hover:text-brand-teal transition-colors" href="#pillars">5 Pillars</a>
       <a className="hover:text-brand-teal transition-colors" href="#architecture">Continuity Layers</a>
       <a className="hover:text-brand-teal transition-colors" href="#safety-boundary">Clinical Safety</a>
+      <Link className="hover:text-brand-teal transition-colors" to="/practitioner/login">For Clinicians</Link>
     </div>
 
     {/* Action Buttons & Mobile Hamburger */}
     <div className="flex items-center gap-2 sm:gap-2.5">
-      <Link className="text-xs font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-brand-ink hover:bg-brand-sand transition-all hidden md:inline-block" to="/login">
+      <Link className="text-xs font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-brand-ink hover:bg-brand-canvas transition-all hidden md:inline-block" to="/login">
         Login
       </Link>
       <Link className="text-xs font-semibold px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-brand-teal text-white hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center gap-1.5" to="/login">
@@ -34,7 +36,7 @@ export default function LandingPage() {
       {/* Mobile Menu Toggle Button */}
       <button 
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden p-1.5 text-brand-ink rounded-full hover:bg-brand-sand transition-colors"
+        className="lg:hidden p-1.5 text-brand-ink rounded-full hover:bg-brand-canvas transition-colors"
         aria-label="Toggle navigation menu"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -50,28 +52,46 @@ export default function LandingPage() {
 
   {/* Mobile Menu Dropdown Card */}
   {mobileMenuOpen && (
-    <div className="lg:hidden mt-2 w-full max-w-5xl bg-white/95 backdrop-blur-2xl rounded-2xl p-4 shadow-xl border border-brand-border space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="lg:hidden mt-2 w-full max-w-5xl bg-white/95 backdrop-blur-2xl rounded-2xl p-4 shadow-xl border border-brand-border space-y-3 animate-tab-switch">
       <div className="flex flex-col space-y-1">
         <a 
           onClick={() => setMobileMenuOpen(false)}
-          className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" 
-          href="#architecture"
+          className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-canvas transition-colors" 
+          href="#pillars"
         >
-          Continuity Layers
+          Platform Pillars (5 Core Areas)
         </a>
-        <Link className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" to="/login" onClick={() => setMobileMenuOpen(false)}>For Individuals</Link>
-<Link className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" to="/practitioner/login" onClick={() => setMobileMenuOpen(false)}>For Practitioners</Link>
         <a 
           onClick={() => setMobileMenuOpen(false)}
-          className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-sand transition-colors" 
+          className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-canvas transition-colors" 
+          href="#architecture"
+        >
+          Continuity Layers (3D Architecture)
+        </a>
+        <a 
+          onClick={() => setMobileMenuOpen(false)}
+          className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-canvas transition-colors" 
           href="#safety-boundary"
         >
-          Clinical Safety & Boundaries
+          Clinical Safety &amp; Boundaries
         </a>
+        <Link className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-canvas transition-colors" to="/login" onClick={() => setMobileMenuOpen(false)}>
+          Individual Portal
+        </Link>
+        <Link className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-canvas transition-colors" to="/practitioner/login" onClick={() => setMobileMenuOpen(false)}>
+          Clinician Portal
+        </Link>
+        <Link className="px-3 py-2 text-sm font-semibold text-brand-ink rounded-lg hover:bg-brand-canvas transition-colors" to="/terms" onClick={() => setMobileMenuOpen(false)}>
+          Terms &amp; Clinical Governance
+        </Link>
       </div>
       <div className="pt-2 border-t border-brand-border flex items-center justify-between gap-3">
-        <Link className="text-xs font-semibold px-4 py-2 rounded-full text-brand-ink bg-brand-sand flex-1 text-center" to="/login" onClick={() => setMobileMenuOpen(false)}>For You</Link>
-        <a className="text-xs font-semibold px-4 py-2 rounded-full bg-brand-teal text-white flex-1 text-center" href="tel:14416" onClick={() => setMobileMenuOpen(false)}>Tele-MANAS: 14416</a>
+        <Link className="text-xs font-semibold px-4 py-2 rounded-full text-brand-ink bg-brand-canvas flex-1 text-center border border-brand-border" to="/login" onClick={() => setMobileMenuOpen(false)}>
+          Enter App
+        </Link>
+        <a className="text-xs font-semibold px-4 py-2 rounded-full bg-brand-coral text-white flex-1 text-center" href="tel:14416" onClick={() => setMobileMenuOpen(false)}>
+          Tele-MANAS: 14416
+        </a>
       </div>
     </div>
   )}
@@ -234,9 +254,6 @@ export default function LandingPage() {
 </g>
 </g>
 </svg></div>{/* STITCH_SVG_END:ANIMATION_15 */}
-<p className="text-xs text-brand-ink/65 text-center mt-3 font-medium">
-        Meet <span className="font-bold text-brand-teal">Pip</span>: Your steady companion for grounding and mindful choices.
-      </p>
 </div>
 </div>
 </section>
@@ -266,52 +283,180 @@ export default function LandingPage() {
 </section>
 {/* END: MarqueePartners */}
 
-{/* BEGIN: 3D Stacked Feature Cards (Vertical Peel-Off on Scroll) */}
-<StackedFeatureCards />
-{/* END: 3D Stacked Feature Cards */}
+      {/* BEGIN: 5 Pillars of Care Section */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto" id="pillars">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-softerTeal text-brand-teal text-xs font-semibold uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+            Five Continuity Pillars
+          </div>
+          <h2 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-normal text-brand-ink tracking-tight mt-4">
+            Clinically engineered for the moments between appointments
+          </h2>
+          <p className="text-sm sm:text-base text-brand-ink/75 mt-3 leading-relaxed">
+            Between Sessions transforms evidence-based clinical protocols into five cohesive, shame-free operational pillars — keeping you grounded in daily life and connected to your clinician.
+          </p>
+        </div>
 
-{/* BEGIN: Dual Callout Banners (Solid Cards, Diffuse Drop Shadows) */}
-<section className="py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto" id="trial">
-<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-{/* Personal Callout Card */}
-<div className="bg-white rounded-[32px] p-8 sm:p-10 flex flex-col justify-between space-y-6 soft-card">
-<div className="space-y-4">
-<span className="text-xs font-mono tracking-widest text-brand-coral uppercase font-bold">For You As A Person</span>
-<h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink">Take control of your quiet hours.</h3>
-<p className="text-xs sm:text-sm text-brand-ink/75 leading-relaxed">
-          No clinical pressure, no rigid checklists. Just you, Pip, and micro-tools engineered to dissolve repetitive thinking loops step by step.
-        </p>
-</div>
-<div>
-<Link className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-brand-ink text-white text-xs font-bold hover:bg-brand-teal transition-colors shadow-sm" to="/login">
-                  <span>Enter Individual Sanctuary</span>
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                </Link>
-<p className="text-[10px] text-center text-brand-ink/50 font-mono mt-2">Available for iOS, Android &amp; Web</p>
-</div>
-</div>
-{/* Practitioner Callout Card */}
-<div id="practitioners" className="bg-brand-ink text-white rounded-[32px] p-8 sm:p-10 flex flex-col justify-between space-y-6 soft-card">
-<div className="space-y-4">
-<span className="text-xs font-mono tracking-widest text-brand-coral uppercase font-bold">For Medical Practitioners</span>
-<h3 className="font-editorial text-2xl sm:text-3xl text-white">Bring the 167 hours into your clinic.</h3>
-<p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-          Sync your practice on Between Sessions. Eliminate appointment recollection amnesia with the clinician continuity terminal.
-        </p>
-</div>
-<div className="space-y-2">
-<div className="flex flex-col sm:flex-row gap-2">
-<input className="px-4 py-3 rounded-full text-xs text-brand-ink bg-white w-full focus:outline-none focus:ring-2 focus:ring-brand-teal border-none" placeholder="practitioner@clinic.org" type="email" />
-<Link to="/login" className="px-5 py-3 rounded-full bg-brand-teal text-white text-xs font-bold hover:bg-brand-coral transition-colors shadow-md whitespace-nowrap flex items-center justify-center">
-            Request Sandbox
-          </Link>
-</div>
-<p className="text-[10px] text-gray-400 font-mono">Granular consent • Client-side privacy controls</p>
-</div>
-</div>
-</div>
-</section>
-{/* END: Dual Callout Banners */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Pillar 1: Sanctuary (Home) */}
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-brand-border soft-card flex flex-col justify-between hover:border-brand-teal/40 transition-all">
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-brand-softerTeal text-brand-teal flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-brand-teal font-bold block">Pillar 01 • Daily Orientation</span>
+              <h3 className="font-editorial text-2xl text-brand-ink">Sanctuary &amp; Grounding</h3>
+              <p className="text-xs sm:text-sm text-brand-ink/70 leading-relaxed">
+                A calm, non-judgmental space to orient your mindset. Features real-time 0–10 calibrated SUDS check-ins and organic kinetic shapes that soothe somatic hyperarousal upon launch.
+              </p>
+            </div>
+            <div className="pt-5 mt-5 border-t border-brand-border flex flex-wrap gap-1.5">
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-softerTeal text-brand-teal font-medium">0–10 SUDS</span>
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-canvas text-brand-ink/70 font-medium">Kinetic Pacing</span>
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-canvas text-brand-ink/70 font-medium">Anti-Shame</span>
+            </div>
+          </div>
+
+          {/* Pillar 2: Practice (ERP) */}
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-brand-border soft-card flex flex-col justify-between hover:border-brand-coral/40 transition-all">
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-brand-coralSoft text-brand-coral flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-brand-coral font-bold block">Pillar 02 • ERP Protocols</span>
+              <h3 className="font-editorial text-2xl text-brand-ink">Structured Practice</h3>
+              <p className="text-xs sm:text-sm text-brand-ink/70 leading-relaxed">
+                Step-by-step Exposure and Response Prevention (ERP) trials. Real-time Habit Reversal Delay timers help you decouple compulsive rituals from obsessive alarm spikes without self-blame.
+              </p>
+            </div>
+            <div className="pt-5 mt-5 border-t border-brand-border flex flex-wrap gap-1.5">
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-coralSoft text-brand-coral font-medium">Habit Delay</span>
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-canvas text-brand-ink/70 font-medium">Trial Logs</span>
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-canvas text-brand-ink/70 font-medium">Response Prevention</span>
+            </div>
+          </div>
+
+          {/* Pillar 3: Toolkit (Somatic) */}
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-brand-border soft-card flex flex-col justify-between hover:border-brand-lavender/40 transition-all">
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-brand-lavenderSoft text-brand-lavender flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-brand-lavender font-bold block">Pillar 03 • Somatic Calming</span>
+              <h3 className="font-editorial text-2xl text-brand-ink">Somatic Toolkit</h3>
+              <p className="text-xs sm:text-sm text-brand-ink/70 leading-relaxed">
+                Tactile biofeedback regulators for acute distress peaks. Includes the 90-second Urge Surfing wave, physiological vagus sigh pacing, and box breathing down-regulators.
+              </p>
+            </div>
+            <div className="pt-5 mt-5 border-t border-brand-border flex flex-wrap gap-1.5">
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-lavenderSoft text-brand-lavender font-medium">90s Urge Surf</span>
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-canvas text-brand-ink/70 font-medium">Vagus Sigh</span>
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-canvas text-brand-ink/70 font-medium">Sensory Lock</span>
+            </div>
+          </div>
+
+          {/* Pillar 4: Learn (Psychoeducation) */}
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-brand-border soft-card flex flex-col justify-between hover:border-brand-amber/40 transition-all">
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-brand-amberSoft text-brand-amber flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-brand-amber font-bold block">Pillar 04 • Psychoeducation</span>
+              <h3 className="font-editorial text-2xl text-brand-ink">Evidence &amp; Defusion</h3>
+              <p className="text-xs sm:text-sm text-brand-ink/70 leading-relaxed">
+                Deconstruct obsessive loops with Acceptance &amp; Commitment (ACT) frameworks. Master the dynamics of the Reassurance Trap and understand how safety behaviors perpetuate anxiety.
+              </p>
+            </div>
+            <div className="pt-5 mt-5 border-t border-brand-border flex flex-wrap gap-1.5">
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-amberSoft text-brand-amber font-medium">Reassurance Trap</span>
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-canvas text-brand-ink/70 font-medium">ACT Defusion</span>
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-canvas text-brand-ink/70 font-medium">Values Anchor</span>
+            </div>
+          </div>
+
+          {/* Pillar 5: Care (Consent & Clinician Bridge) */}
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-brand-border soft-card flex flex-col justify-between md:col-span-2 lg:col-span-2 hover:border-brand-teal/40 transition-all">
+            <div className="space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-brand-softerTeal text-brand-teal flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-brand-teal font-bold block">Pillar 05 • Clinical Governance</span>
+              <h3 className="font-editorial text-2xl text-brand-ink">Consent-Governed Clinical Bridge</h3>
+              <p className="text-xs sm:text-sm text-brand-ink/70 leading-relaxed">
+                Connect directly with your verified therapist via Cedar WASM cryptographic consent policies. Share calibrated SUDS diurnal splines and exposure trial durations while retaining absolute rights to revoke access at any second.
+              </p>
+            </div>
+            <div className="pt-5 mt-5 border-t border-brand-border flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap gap-1.5">
+                <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-softerTeal text-brand-teal font-medium">Cedar WASM Engine</span>
+                <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-canvas text-brand-ink/70 font-medium">Instant Revocation</span>
+                <span className="text-[10px] px-2.5 py-1 rounded-full bg-brand-canvas text-brand-ink/70 font-medium">Zero Recall Bias</span>
+              </div>
+              <Link to="/practitioner/login" className="text-xs font-semibold text-brand-teal hover:underline flex items-center gap-1">
+                <span>Practitioner Access</span>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* END: 5 Pillars of Care Section */}
+
+      {/* BEGIN: 3D Stacked Feature Cards (Vertical Peel-Off on Scroll) */}
+      <StackedFeatureCards />
+      {/* END: 3D Stacked Feature Cards */}
+
+      {/* BEGIN: Dual Callout Banners (Solid Cards, Diffuse Drop Shadows) */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto" id="trial">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Personal Callout Card */}
+          <div className="bg-white rounded-[32px] p-8 sm:p-10 flex flex-col justify-between space-y-6 soft-card">
+            <div className="space-y-4">
+              <span className="text-xs font-mono tracking-widest text-brand-coral uppercase font-bold">For You As A Person</span>
+              <h3 className="font-editorial text-2xl sm:text-3xl text-brand-ink">Take control of your quiet hours.</h3>
+              <p className="text-xs sm:text-sm text-brand-ink/75 leading-relaxed">
+                No clinical pressure, no rigid checklists. Just you, Pip, and micro-tools engineered to dissolve repetitive thinking loops step by step.
+              </p>
+            </div>
+            <div>
+              <Link className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-brand-ink text-white text-xs font-bold hover:bg-brand-teal transition-colors shadow-sm" to="/login">
+                <span>Enter Individual Sanctuary</span>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </Link>
+              <p className="text-[10px] text-center text-brand-ink/50 font-mono mt-2">Available for iOS, Android &amp; Web</p>
+            </div>
+          </div>
+          {/* Practitioner Callout Card */}
+          <div id="practitioners" className="bg-brand-ink text-white rounded-[32px] p-8 sm:p-10 flex flex-col justify-between space-y-6 soft-card">
+            <div className="space-y-4">
+              <span className="text-xs font-mono tracking-widest text-brand-coral uppercase font-bold">For Medical Practitioners</span>
+              <h3 className="font-editorial text-2xl sm:text-3xl text-white">Bring the 167 hours into your clinic.</h3>
+              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                Sync your practice on Between Sessions. Eliminate appointment recollection amnesia with the clinician continuity terminal.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <Link to="/practitioner/login" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-brand-teal text-white text-xs font-bold hover:bg-white hover:text-brand-ink transition-all shadow-md">
+                <span>Access Clinician Portal</span>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </Link>
+              <p className="text-[10px] text-gray-400 font-mono text-center">Granular consent • Client-side privacy controls • Cedar WASM evaluated</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* END: Dual Callout Banners */}
 
       {/* BEGIN: Safety & Clinical Boundaries Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto" id="safety-boundary">
@@ -350,26 +495,91 @@ export default function LandingPage() {
       </section>
       {/* END: Safety & Clinical Boundaries Section */}
 
-      {/* BEGIN: Footer */}
-<footer className="py-12 px-4 sm:px-6 lg:px-8 bg-white/50">
-<div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-brand-ink/60">
-<div className="flex items-center gap-3">
-<div className="w-6 h-6 rounded-full bg-brand-teal text-white flex items-center justify-center font-bold text-[10px]">
-        BS
-      </div>
-<span className="font-semibold text-brand-ink">Between Sessions Health Inc.</span>
-<span>© 2026 All rights reserved.</span>
-</div>
-<div className="flex flex-wrap items-center gap-6 font-medium text-brand-ink/80">
-<Link className="hover:text-brand-teal transition-colors" to="/login">For Individuals</Link>
-<Link className="hover:text-brand-teal transition-colors" to="/practitioner/login">For Practitioners</Link>
-<a className="hover:text-brand-teal transition-colors" href="#architecture">Continuity Layers</a>
-<a className="hover:text-brand-teal transition-colors" href="#safety-boundary">Clinical Boundaries</a>
-<a className="hover:text-brand-teal transition-colors" href="tel:14416">Tele-MANAS (14416)</a>
-</div>
-</div>
-</footer>
-{/* END: Footer */}
+      {/* BEGIN: Comprehensive 4-Column Footer */}
+      <footer className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-t border-brand-border">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10">
+            
+            {/* Col 1 & 2: Brand & Clinical Manifesto */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-brand-teal text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-sm">
+                  BS
+                </div>
+                <span className="font-editorial text-xl font-bold text-brand-ink">Between Sessions</span>
+              </div>
+              <p className="text-xs text-brand-ink/70 leading-relaxed max-w-sm">
+                The evidence-based continuity companion bridging the 167 hours between therapeutic appointments. Designed for ERP, habit reversal, somatic down-regulation, and patient-sovereign cryptographic consent.
+              </p>
+              <div className="pt-2 flex items-center gap-3 text-xs text-brand-ink/60">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-canvas border border-brand-border text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  Cedar WASM Verified
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-canvas border border-brand-border text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+                  Anti-Gamification
+                </span>
+              </div>
+            </div>
+
+            {/* Col 3: Continuity Architecture */}
+            <div className="space-y-3">
+              <p className="text-xs font-mono uppercase tracking-widest text-brand-ink/50 font-bold">5 Pillars</p>
+              <ul className="space-y-2 text-xs text-brand-ink/75 font-medium">
+                <li><a href="#pillars" className="hover:text-brand-teal transition-colors">Sanctuary (Home)</a></li>
+                <li><a href="#pillars" className="hover:text-brand-teal transition-colors">ERP Practice &amp; Trials</a></li>
+                <li><a href="#pillars" className="hover:text-brand-teal transition-colors">Somatic Calming Toolkit</a></li>
+                <li><a href="#pillars" className="hover:text-brand-teal transition-colors">Psychoeducation &amp; ACT</a></li>
+                <li><a href="#pillars" className="hover:text-brand-teal transition-colors">Clinical Continuity</a></li>
+              </ul>
+            </div>
+
+            {/* Col 4: Portals & Governance */}
+            <div className="space-y-3">
+              <p className="text-xs font-mono uppercase tracking-widest text-brand-ink/50 font-bold">Portals &amp; Privacy</p>
+              <ul className="space-y-2 text-xs text-brand-ink/75 font-medium">
+                <li><Link to="/login" className="hover:text-brand-teal transition-colors">Individual Sanctuary</Link></li>
+                <li><Link to="/practitioner/login" className="hover:text-brand-teal transition-colors">Clinician Terminal</Link></li>
+                <li><Link to="/terms" className="hover:text-brand-teal transition-colors">Terms of Service</Link></li>
+                <li><Link to="/privacy" className="hover:text-brand-teal transition-colors">Clinical Privacy &amp; Consent</Link></li>
+                <li><a href="#safety-boundary" className="hover:text-brand-teal transition-colors">Clinical Boundaries</a></li>
+              </ul>
+            </div>
+
+            {/* Col 5: 24/7 Immediate Crisis Helplines */}
+            <div className="space-y-3">
+              <p className="text-xs font-mono uppercase tracking-widest text-brand-coral font-bold">24/7 Crisis Access</p>
+              <div className="p-3.5 bg-brand-coralSoft rounded-2xl border border-brand-coral/20 space-y-2">
+                <p className="text-[11px] font-bold text-brand-ink">Tele-MANAS Helpline</p>
+                <p className="text-[10px] text-brand-ink/70 leading-snug">National tele-mental health support, available in 20+ languages.</p>
+                <div className="pt-1">
+                  <a href="tel:14416" className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 rounded-full bg-brand-coral text-white font-bold text-[11px] hover:bg-brand-coral/90 transition-colors shadow-sm">
+                    <span>Call 14416</span>
+                  </a>
+                </div>
+              </div>
+              <p className="text-[10px] text-brand-ink/50 leading-tight">
+                Alternate toll-free: <span className="font-mono font-bold text-brand-ink/70">1800-891-4416</span>
+              </p>
+            </div>
+
+          </div>
+
+          {/* Bottom Hairline & Legal Copyright */}
+          <div className="pt-6 border-t border-brand-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-brand-ink/60">
+            <p>© 2026 Between Sessions Health Inc. All rights reserved.</p>
+            <div className="flex items-center gap-6">
+              <Link to="/terms" className="hover:text-brand-teal transition-colors">Terms of Service</Link>
+              <span className="text-brand-border">•</span>
+              <Link to="/privacy" className="hover:text-brand-teal transition-colors">Clinical Privacy</Link>
+              <span className="text-brand-border">•</span>
+              <a href="#safety-boundary" className="hover:text-brand-teal transition-colors">Clinical Disclaimer</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+      {/* END: Comprehensive 4-Column Footer */}
 
     </div>
   );

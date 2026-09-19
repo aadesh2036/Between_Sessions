@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import DashboardShell from '../components/DashboardShell';
+import BetweenLoading from '../components/BetweenLoading';
 import { connectionsApi, consentsApi, practitionersApi, recommendationsApi } from '../services/api';
 
 const DATA_CATEGORIES = [
@@ -240,7 +241,15 @@ export default function CarePage() {
         </header>
 
         {/* ── Connected Clinician Overview (if connected) ─────────────────── */}
-        {activeConnection ? (
+        {loading ? (
+          <div className="py-24 flex items-center justify-center bg-brand-paper rounded-3xl border border-brand-border/60 shadow-card-lift">
+            <BetweenLoading
+              size="lg"
+              label="Synchronizing care team & cryptographic consent policies..."
+              sublabel="Holding the space between sessions"
+            />
+          </div>
+        ) : activeConnection ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
             {/* Clinician Card & Recommendations (Col 1-7) */}
@@ -391,7 +400,12 @@ export default function CarePage() {
                           : 'bg-brand-coralSoft text-brand-coral'
                       }`}
                     >
-                      {cedarLoading ? 'EVALUATING...' : cedarEval?.allowed ? 'ALLOW' : 'DENY'}
+                      {cedarLoading ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <BetweenLoading size="xs" inline />
+                          <span>EVALUATING...</span>
+                        </span>
+                      ) : cedarEval?.allowed ? 'ALLOW' : 'DENY'}
                     </span>
                   </div>
                   <p className="text-[10px] text-brand-ink/50 leading-relaxed font-mono">

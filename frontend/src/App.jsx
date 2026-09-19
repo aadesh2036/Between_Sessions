@@ -12,6 +12,7 @@ import LearnPage from './pages/LearnPage';
 import CarePage from './pages/CarePage';
 import SettingsPage from './pages/SettingsPage';
 import PractitionerDashboardPage from './pages/PractitionerDashboardPage';
+import TermsPage from './pages/TermsPage';
 
 function App() {
   return (
@@ -21,6 +22,8 @@ function App() {
           {/* Public */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/terms" element={<TermsPage defaultTab="terms" />} />
+          <Route path="/privacy" element={<TermsPage defaultTab="privacy" />} />
 
           {/* Practitioner auth + protected dashboard */}
           <Route path="/practitioner/login" element={<LoginPage practitionerMode />} />

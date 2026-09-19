@@ -6,19 +6,25 @@ Description: >
 
 Globals:
   Function:
-    Timeout: 10
+    Timeout: 20
     MemorySize: 256
-    Runtime: nodejs20.x
+    Runtime: nodejs22.x
     Architectures:
       - x86_64
     Environment:
       Variables:
-        TABLE_NAME: !Ref MainTable
+        TABLE_NAME: "BetweenSessionsTable"
+        DYNAMODB_ENDPOINT: "http://host.containers.internal:8000"
         JWT_SECRET: "between-sessions-secret-key-2026"
         MAILTRAP_SMTP_HOST: "sandbox.smtp.mailtrap.io"
         MAILTRAP_SMTP_PORT: "2525"
         MAILTRAP_SMTP_USER: "9a1e374c409f43"
         MAILTRAP_SMTP_PASS: "848727f20872a7"
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
 
 Resources:
 
@@ -51,6 +57,21 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref MainTable
       Events:
+        Root:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+        ApiV1Root:
+          Type: Api
+          Properties:
+            Path: /api/v1
+            Method: get
+        HealthCheck:
+          Type: Api
+          Properties:
+            Path: /api/health
+            Method: get
         Register:
           Type: Api
           Properties:
@@ -86,6 +107,21 @@ Resources:
           Properties:
             Path: /api/v1/user/update
             Method: put
+        UpdateUserPost:
+          Type: Api
+          Properties:
+            Path: /api/v1/user/update
+            Method: post
+        PractitionerLogin:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/practitioner-login
+            Method: post
+        PractitionerRegister:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/practitioner-register
+            Method: post
 
   # ── Checkins ─────────────────────────────────────────────────────────────────
   CheckinsFunction:
@@ -144,6 +180,16 @@ Resources:
           Properties:
             Path: /api/v1/practice
             Method: post
+        GetPractice:
+          Type: Api
+          Properties:
+            Path: /api/v1/practice
+            Method: get
+        GetPracticePlans:
+          Type: Api
+          Properties:
+            Path: /api/v1/practice/plans
+            Method: get
 
   # ── Dashboard ────────────────────────────────────────────────────────────────
   DashboardFunction:
@@ -249,6 +295,16 @@ Resources:
           Properties:
             Path: /api/v1/connections/{id}
             Method: delete
+        CedarEval:
+          Type: Api
+          Properties:
+            Path: /api/v1/connections/cedar-eval
+            Method: get
+        GetRecommendations:
+          Type: Api
+          Properties:
+            Path: /api/v1/recommendations
+            Method: get
 
   # ── Practitioner (Cedar auth demo) ───────────────────────────────────────────
   PractitionerFunction:
@@ -265,6 +321,124 @@ Resources:
           Properties:
             Path: /api/v1/practitioner/patients/{userId}/summary
             Method: get
+        GetPatients:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioner/patients
+            Method: get
+        GetPractitioners:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioners
+            Method: get
+        GetPractitionerMe:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioner/me
+            Method: get
+        UpdatePractitionerMe:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioner/me
+            Method: put
+        GetRequests:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioner/requests
+            Method: get
+        AcceptRequest:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioner/requests/{userId}/accept
+            Method: post
+        DeclineRequest:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioner/requests/{userId}/decline
+            Method: post
+        GetPatientConsent:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioner/patients/{userId}/consent
+            Method: get
+        CreateRecommendation:
+          Type: Api
+          Properties:
+            Path: /api/v1/practitioner/patients/{userId}/recommendations
+            Method: post
+
+  # ── Toolkit (Grounding, Breathing, Pause&Choose, Reassurance, Focus) ─────────
+  ToolkitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: toolkit.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        CreateInteraction:
+          Type: Api
+          Properties:
+            Path: /api/v1/toolkit/interactions
+            Method: post
+        GetInteractions:
+          Type: Api
+          Properties:
+            Path: /api/v1/toolkit/interactions
+            Method: get
+
+  # ── Values & Life Outside OCD ────────────────────────────────────────────────
+  ValuesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: values.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        GetValues:
+          Type: Api
+          Properties:
+            Path: /api/v1/values
+            Method: get
+        GetValuesActions:
+          Type: Api
+          Properties:
+            Path: /api/v1/values/actions
+            Method: get
+        CreateValuesAction:
+          Type: Api
+          Properties:
+            Path: /api/v1/values/actions
+            Method: post
+
+  # ── Learning (Curated Educational Sanctuary) ─────────────────────────────────
+  LearningFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: learning.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        GetModules:
+          Type: Api
+          Properties:
+            Path: /api/v1/learn/modules
+            Method: get
+        GetLearnProgress:
+          Type: Api
+          Properties:
+            Path: /api/v1/learn/progress
+            Method: get
+        UpdateLearnProgress:
+          Type: Api
+          Properties:
+            Path: /api/v1/learn/progress
+            Method: post
 
 Outputs:
   ApiEndpoint:

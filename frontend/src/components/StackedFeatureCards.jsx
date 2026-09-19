@@ -170,8 +170,8 @@ export default function StackedFeatureCards() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-xs font-sans font-bold tracking-wide text-emerald-300 bg-emerald-950/40 px-3 py-2 rounded border border-emerald-500/30">
-                  <span>Practice Consistency</span>
-                  <span>14 Days Active ✓</span>
+                  <span>Longitudinal Record</span>
+                  <span>14 Completed Practice Trials ✓</span>
                 </div>
               </div>
 

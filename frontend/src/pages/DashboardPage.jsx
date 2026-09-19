@@ -5,6 +5,7 @@ import DashboardShell from '../components/DashboardShell';
 import CheckinModal from '../components/CheckinModal';
 import LogPracticeModal from '../components/LogPracticeModal';
 import DoubtGroundingAnimation from '../components/DoubtGroundingAnimation';
+import BetweenLoading from '../components/BetweenLoading';
 import {
   dashboardApi,
   practiceApi,
@@ -222,7 +223,16 @@ export default function DashboardPage() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* INTERLOCKED BENTO GRID WITH ROW & COL SPANS                        */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {loading && !stats ? (
+          <div className="py-24 flex items-center justify-center bg-brand-paper rounded-3xl border border-brand-border/60 shadow-card-lift">
+            <BetweenLoading
+              size="lg"
+              label="Synchronizing your daily sanctuary..."
+              sublabel="Holding space for the 167 hours between sessions"
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
           {/* ── Bento Card 1: Today's Gentle Focus (Cols 1-8, Rows 1-2) ─────── */}
           <div className="lg:col-span-8 lg:row-span-2 bg-brand-amberSoft border border-brand-amber/30 rounded-3xl p-6 sm:p-8 shadow-card-lift relative overflow-hidden flex flex-col justify-between">
@@ -590,6 +600,7 @@ export default function DashboardPage() {
           </div>
 
         </div>
+        )}
 
       </div>
     </DashboardShell>

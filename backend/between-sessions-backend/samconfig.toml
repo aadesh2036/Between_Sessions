@@ -24,7 +24,11 @@ resolve_s3 = true
 watch = true
 
 [default.local_start_api.parameters]
-warm_containers = "EAGER"
+warm_containers = "LAZY"
+skip_pull_image = true
+port = 3000
+host = "0.0.0.0"
 
 [default.local_start_lambda.parameters]
-warm_containers = "EAGER"
+warm_containers = "LAZY"
+skip_pull_image = true

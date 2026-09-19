@@ -23,8 +23,9 @@ const { DynamoDBDocumentClient, PutCommand, QueryCommand } = require('@aws-sdk/l
 const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
 
+const ddbEndpoint = process.env.DYNAMODB_ENDPOINT || 'http://127.0.0.1:8000';
 const ddbClient = new DynamoDBClient({
-  endpoint: 'http://localhost:8000',
+  endpoint: ddbEndpoint,
   region: 'local',
   credentials: { accessKeyId: 'dummy', secretAccessKey: 'dummy' },
 });

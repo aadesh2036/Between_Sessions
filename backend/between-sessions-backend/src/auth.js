@@ -7,7 +7,8 @@ const { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand } = requir
 const JWT_SECRET = process.env.JWT_SECRET || 'between-sessions-secret-key-2026';
 const TABLE_NAME = process.env.TABLE_NAME || 'BetweenSessionsTable';
 
-const ddbClient = new DynamoDBClient({ endpoint: "http://localhost:8000", region: "local", credentials: { accessKeyId: "dummy", secretAccessKey: "dummy" } });
+const ddbEndpoint = process.env.DYNAMODB_ENDPOINT || "http://127.0.0.1:8000";
+const ddbClient = new DynamoDBClient({ endpoint: ddbEndpoint, region: "local", credentials: { accessKeyId: "dummy", secretAccessKey: "dummy" } });
 const docClient = DynamoDBDocumentClient.from(ddbClient);
 
 const mailGenerator = new Mailgen({
@@ -19,6 +20,9 @@ const sendVerificationEmail = async (email, verificationToken) => {
   const transporter = nodemailer.createTransport({
     host: process.env.MAILTRAP_SMTP_HOST || "sandbox.smtp.mailtrap.io",
     port: process.env.MAILTRAP_SMTP_PORT || 2525,
+    connectionTimeout: 2000,
+    greetingTimeout: 2000,
+    socketTimeout: 2000,
     auth: {
       user: process.env.MAILTRAP_SMTP_USER,
       pass: process.env.MAILTRAP_SMTP_PASS
@@ -48,15 +52,53 @@ const sendVerificationEmail = async (email, verificationToken) => {
   });
 };
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+  'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+  'Content-Type': 'application/json',
+};
+
 exports.handler = async (event) => {
   try {
-    const path = event.path;
+    const path = event.path || '/';
+    const method = event.httpMethod || event.requestContext?.http?.method || 'GET';
+
+    // Handle CORS preflight
+    if (method === 'OPTIONS') {
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ message: 'OK' }),
+      };
+    }
+
+    // Health & discovery roots
+    if (path === '/' || path === '/api' || path === '/api/v1' || path === '/api/health' || path === '/health') {
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({
+          status: 'ok',
+          service: 'Between Sessions SAM API',
+          version: '1.0.0',
+          endpoints: {
+            health: '/api/health',
+            v1: '/api/v1',
+            auth: '/api/v1/auth/login',
+            practitionerLogin: '/api/v1/auth/practitioner-login',
+          },
+          timestamp: new Date().toISOString(),
+        }),
+      };
+    }
+
     const body = JSON.parse(event.body || '{}');
     const email = body.email ? body.email.toLowerCase() : null;
 
     if (path.includes('/auth/register')) {
       const { password, name } = body;
-      if (!email || !password) return { statusCode: 400, body: JSON.stringify({ error: 'Email and password required' }) };
+      if (!email || !password) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Email and password required' }) };
 
       const userId = `usr_${Math.random().toString(36).substr(2, 9)}`;
       const verificationToken = jwt.sign({ email, purpose: 'verify' }, JWT_SECRET, { expiresIn: '1h' });
@@ -68,17 +110,17 @@ exports.handler = async (event) => {
 
       await sendVerificationEmail(email, verificationToken);
 
-      return { statusCode: 201, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'Registration successful. Please check your email to verify.' }) };
+      return { statusCode: 201, headers: CORS_HEADERS, body: JSON.stringify({ message: 'Registration successful. Please check your email to verify.' }) };
     }
 
     if (path.includes('/auth/login')) {
-      const { password, name } = body;
-      if (!email || !password) return { statusCode: 400, body: JSON.stringify({ error: 'Email and password required' }) };
+      const { password } = body;
+      if (!email || !password) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Email and password required' }) };
 
       const res = await docClient.send(new GetCommand({ TableName: TABLE_NAME, Key: { PK: `USER#${email}`, SK: `PROFILE` } }));
       const user = res.Item;
 
-      if (!user || user.password !== password) return { statusCode: 401, body: JSON.stringify({ error: 'Invalid credentials' }) };
+      if (!user || user.password !== password) return { statusCode: 401, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Invalid credentials' }) };
       
       const token = jwt.sign({ userId: user.id, email }, JWT_SECRET, { expiresIn: '7d' });
       return {
@@ -120,7 +162,7 @@ exports.handler = async (event) => {
     }
 
     if (path.includes('/auth/resend')) {
-      if (!email) return { statusCode: 400, body: JSON.stringify({ error: 'Email required' }) };
+      if (!email) return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Email required' }) };
       const verificationToken = jwt.sign({ email, purpose: 'verify' }, JWT_SECRET, { expiresIn: '1h' });
       await sendVerificationEmail(email, verificationToken);
       return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'Verification email resent.' }) };
@@ -388,6 +430,9 @@ exports.handler = async (event) => {
           const transporter = nodemailer.createTransport({
             host: process.env.MAILTRAP_SMTP_HOST || 'sandbox.smtp.mailtrap.io',
             port: process.env.MAILTRAP_SMTP_PORT || 2525,
+            connectionTimeout: 2000,
+            greetingTimeout: 2000,
+            socketTimeout: 2000,
             auth: {
               user: process.env.MAILTRAP_SMTP_USER || 'dummy',
               pass: process.env.MAILTRAP_SMTP_PASS || 'dummy',
@@ -485,7 +530,7 @@ exports.handler = async (event) => {
       }
     }
 
-    return { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };
+    return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: 'Not found' }) };
 
   } catch (err) {
     console.error(err);

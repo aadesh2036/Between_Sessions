@@ -117,6 +117,10 @@
   --shadow-soft: 0 8px 30px rgba(23, 50, 58, 0.06);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-brand-canvas);
@@ -493,6 +497,89 @@ body {
   animation: spacing-drift-dots 6.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
 }
 
+/* ==========================================================================
+   TIME-BETWEEN-SESSIONS SIGNATURE LOGO LOADER
+   Symbolises the continuous 167 hours unfolding between clinical sessions
+   ========================================================================== */
+
+@keyframes time-orbit-track {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes time-sweep-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes time-ambient-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.65;
+  }
+}
+
+@keyframes time-disc-breath {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.025);
+  }
+}
+
+@keyframes time-center-beat {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.22);
+    opacity: 1;
+  }
+}
+
+@keyframes time-sector-glow {
+  0%, 100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.anim-time-orbit-track {
+  animation: time-orbit-track 16s linear infinite;
+}
+
+.anim-time-sweep {
+  animation: time-sweep-spin 2.6s cubic-bezier(0.4, 0.05, 0.2, 0.95) infinite;
+}
+
+.anim-time-pulse {
+  animation: time-ambient-pulse 3.2s ease-in-out infinite;
+}
+
+.anim-time-disc {
+  animation: time-disc-breath 4s ease-in-out infinite;
+}
+
+.anim-time-center {
+  animation: time-center-beat 2.4s ease-in-out infinite;
+}
+
+.anim-time-sector {
+  animation: time-sector-glow 3.2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .anim-spacing-qm,
   .anim-spacing-qm-hook,
@@ -501,8 +588,15 @@ body {
   .anim-spacing-aura,
   .anim-spacing-pebble,
   .anim-spacing-arc,
-  .anim-spacing-drift {
+  .anim-spacing-drift,
+  .anim-time-orbit-track,
+  .anim-time-sweep,
+  .anim-time-pulse,
+  .anim-time-disc,
+  .anim-time-center,
+  .anim-time-sector {
     animation: none !important;
   }
 }
+
 

@@ -7,8 +7,10 @@ node_modules/
 dist/
 build/
 .dist/
+.aws-sam/
 
 # DynamoDB Local artifacts & temp data
+.dynamodb-local/
 dynamodb-local-metadata.json
 *.db
 

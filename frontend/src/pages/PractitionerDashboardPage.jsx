@@ -14,6 +14,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import MobileBottomNav from '../components/MobileBottomNav';
+import BetweenLoading from '../components/BetweenLoading';
 import { practitionerApi } from '../services/api';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -362,16 +363,14 @@ function PatientView({ patient, onBack }) {
         </div>
       )}
 
-      {/* ── Loading skeletons ────────────────────────────────────────────── */}
+      {/* ── Loading state with signature Between Sessions animation ────────── */}
       {loading && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
-          <Skeleton className="h-32" />
-          <Skeleton className="h-48" />
+        <div className="bg-brand-paper rounded-3xl border border-brand-border/60 p-12 shadow-card-lift">
+          <BetweenLoading
+            size="lg"
+            label="Evaluating cryptographic consent & retrieving continuity logs..."
+            sublabel="Cedar WASM engine verifying patient-authorized data scopes"
+          />
         </div>
       )}
 
@@ -1324,12 +1323,12 @@ export default function PractitionerDashboardPage() {
       </aside>
 
       {/* ── MAIN ──────────────────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0 relative">
-        {/* Ambient background blobs */}
-        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-brand-softerTeal blur-[120px] opacity-60 pointer-events-none z-0" />
-        <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full bg-brand-coralSoft blur-[140px] opacity-50 pointer-events-none z-0" />
+      <div className="flex-1 min-w-0 relative overflow-hidden">
+        {/* Ambient background blobs strictly contained within viewport bounds */}
+        <div className="absolute top-0 -left-[10%] w-[500px] h-[500px] rounded-full bg-brand-softerTeal blur-[120px] opacity-60 pointer-events-none z-0" />
+        <div className="absolute bottom-0 -right-[10%] w-[500px] h-[500px] rounded-full bg-brand-coralSoft blur-[140px] opacity-50 pointer-events-none z-0" />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 pb-28 md:pb-12 space-y-8">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 pb-24 md:pb-6 space-y-8">
 
           {/* ═══════════════════════════════════════════════════════════ */}
           {/* VIEW: patient detail                                        */}
@@ -1396,10 +1395,12 @@ export default function PractitionerDashboardPage() {
                 </div>
 
                 {loadingDash ? (
-                  <div className="space-y-3">
-                    {[...Array(2)].map((_, i) => (
-                      <Skeleton key={i} className="h-20" />
-                    ))}
+                  <div className="py-8">
+                    <BetweenLoading
+                      size="sm"
+                      label="Synchronizing connection requests..."
+                      sublabel="Holding the space between sessions"
+                    />
                   </div>
                 ) : requests.length === 0 ? (
                   <div className="py-12 text-center space-y-2">
@@ -1544,10 +1545,12 @@ export default function PractitionerDashboardPage() {
                 </div>
 
                 {loadingDash ? (
-                  <div className="space-y-3">
-                    {[...Array(2)].map((_, i) => (
-                      <Skeleton key={i} className="h-20" />
-                    ))}
+                  <div className="py-8">
+                    <BetweenLoading
+                      size="sm"
+                      label="Loading consented patient caseload..."
+                      sublabel="Checking cryptographic authorizations"
+                    />
                   </div>
                 ) : filteredPatients.length === 0 ? (
                   <div className="py-12 text-center space-y-2">
@@ -1827,10 +1830,11 @@ export default function PractitionerDashboardPage() {
                 </div>
 
                 {loadingDash ? (
-                  <div className="space-y-3">
-                    {[...Array(2)].map((_, i) => (
-                      <Skeleton key={i} className="h-20" />
-                    ))}
+                  <div className="py-8">
+                    <BetweenLoading
+                      size="sm"
+                      label="Loading active patient cohort..."
+                    />
                   </div>
                 ) : patients.length === 0 ? (
                   <p className="text-brand-ink/40 text-xs py-4">

@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { practitionerApi, authApi } from '../services/api';
 import Logo from '../components/Logo';
+import BetweenLoading from '../components/BetweenLoading';
 
 export default function LoginPage({ practitionerMode = false }) {
   const [isRegister, setIsRegister] = useState(false);
@@ -659,11 +660,18 @@ export default function LoginPage({ practitionerMode = false }) {
                     disabled={isLoading}
                     className="w-full py-3 rounded-full bg-brand-teal text-white font-bold text-xs hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-70"
                   >
-                    <span>{isLoading ? 'Verifying Credentials…' : 'Sign in as Practitioner'}</span>
-                    {!isLoading && (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <BetweenLoading size="xs" inline />
+                        <span>Verifying Credentials…</span>
+                      </span>
+                    ) : (
+                      <>
+                        <span>Sign in as Practitioner</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </>
                     )}
                   </button>
                 </form>
@@ -807,7 +815,14 @@ export default function LoginPage({ practitionerMode = false }) {
                     disabled={isLoading}
                     className="w-full py-2.5 rounded-full bg-brand-teal text-white font-bold text-xs hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-70"
                   >
-                    <span>{isLoading ? 'Registering Practitioner…' : 'Register Practitioner Account'}</span>
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <BetweenLoading size="xs" inline />
+                        <span>Registering Practitioner…</span>
+                      </span>
+                    ) : (
+                      <span>Register Practitioner Account</span>
+                    )}
                   </button>
                 </form>
 
@@ -1006,11 +1021,18 @@ export default function LoginPage({ practitionerMode = false }) {
                     disabled={isLoading}
                     className="w-full py-3 rounded-full bg-brand-teal text-white font-bold text-xs hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 mt-1 disabled:opacity-70"
                   >
-                    <span>{isLoading ? 'Signing in…' : 'Sign in'}</span>
-                    {!isLoading && (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <BetweenLoading size="xs" inline />
+                        <span>Signing in…</span>
+                      </span>
+                    ) : (
+                      <>
+                        <span>Sign in</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </>
                     )}
                   </button>
                 </form>
@@ -1119,11 +1141,18 @@ export default function LoginPage({ practitionerMode = false }) {
                     disabled={isLoading}
                     className="w-full py-3 rounded-full bg-brand-teal text-white font-bold text-xs hover:bg-brand-tealDark shadow-sm hover:shadow transition-all flex items-center justify-center gap-2 mt-1 disabled:opacity-70"
                   >
-                    <span>{isLoading ? 'Creating account…' : 'Create account'}</span>
-                    {!isLoading && (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <BetweenLoading size="xs" inline />
+                        <span>Creating account…</span>
+                      </span>
+                    ) : (
+                      <>
+                        <span>Create account</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </>
                     )}
                   </button>
                 </form>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import DashboardShell from '../components/DashboardShell';
 import LogPracticeModal from '../components/LogPracticeModal';
+import BetweenLoading from '../components/BetweenLoading';
 import { practiceApi } from '../services/api';
 
 const RESPONSE_TYPE_META = {
@@ -23,6 +24,8 @@ export default function PracticePage() {
   const [filter, setFilter] = useState('all');
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [initialModalStep, setInitialModalStep] = useState(1);
+  const [initialModalResponseType, setInitialModalResponseType] = useState('delay');
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -73,9 +76,13 @@ export default function PracticePage() {
         <LogPracticeModal
           userId={user?.id}
           initialPlan={selectedPlan}
+          initialStep={initialModalStep}
+          initialResponseType={initialModalResponseType}
           onClose={() => {
             setShowLogModal(false);
             setSelectedPlan(null);
+            setInitialModalStep(1);
+            setInitialModalResponseType('delay');
           }}
           onSaved={() => loadData()}
         />
@@ -98,20 +105,51 @@ export default function PracticePage() {
             </p>
           </div>
 
-          <button
-            onClick={() => {
-              setSelectedPlan(null);
-              setShowLogModal(true);
-            }}
-            className="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-brand-ink hover:bg-brand-coral text-white text-xs font-medium transition-colors shadow-xs flex items-center gap-2"
-          >
-            <span className="material-symbols-outlined text-[16px]">add_task</span>
-            <span>Record Exposure</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+            <button
+              onClick={() => {
+                setSelectedPlan({
+                  title: 'Delayed Ritual / Urge Delay Session',
+                  targetObsession: 'Acute Compulsive Urge',
+                  type: 'self-guided',
+                });
+                setInitialModalStep(2);
+                setInitialModalResponseType('delay');
+                setShowLogModal(true);
+              }}
+              className="px-3.5 py-2.5 rounded-xl bg-brand-amberSoft text-brand-amber hover:bg-brand-amber hover:text-white border border-brand-amber/30 text-xs font-semibold transition-all shadow-xs flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[17px]">timer</span>
+              <span>Delayed Ritual Timer</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setSelectedPlan(null);
+                setInitialModalStep(1);
+                setInitialModalResponseType('delay');
+                setShowLogModal(true);
+              }}
+              className="px-4 py-2.5 rounded-xl bg-brand-ink hover:bg-brand-coral text-white text-xs font-medium transition-colors shadow-xs flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[16px]">add_task</span>
+              <span>Record Exposure</span>
+            </button>
+          </div>
         </header>
 
         {/* ── Longitudinal Summary Banner (Anti-Gamified) ──────────────────── */}
-        <div className="p-6 rounded-3xl bg-brand-softerTeal border border-brand-teal/20 shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {loading ? (
+          <div className="py-24 flex items-center justify-center bg-brand-paper rounded-3xl border border-brand-border/60 shadow-card-lift">
+            <BetweenLoading
+              size="lg"
+              label="Loading ERP exposure practices & longitudinal trials..."
+              sublabel="Holding space for response prevention between sessions"
+            />
+          </div>
+        ) : (
+          <>
+            <div className="p-6 rounded-3xl bg-brand-softerTeal border border-brand-teal/20 shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <span className="text-[10px] uppercase font-bold tracking-widest text-brand-teal px-3 py-1 rounded-full bg-white/80 border border-brand-teal/20">
               Longitudinal Observation
@@ -143,6 +181,45 @@ export default function PracticePage() {
               <span className="font-bold text-brand-teal text-sm">{avgPost}</span>
             </div>
           </div>
+        </div>
+
+        {/* ── Acute Urge Delay Protocol Card ──────────────────────────────── */}
+        <div className="p-5 sm:p-6 rounded-3xl bg-brand-amberSoft/70 border border-brand-amber/40 shadow-card-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-brand-amber text-white flex items-center justify-center shrink-0 shadow-xs">
+              <span className="material-symbols-outlined text-[22px]">timer</span>
+            </div>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="font-editorial text-lg sm:text-xl text-brand-ink font-medium">
+                  Acute Urge Delay Protocol
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-brand-amber text-white">
+                  Response Prevention
+                </span>
+              </div>
+              <p className="text-xs text-brand-ink/75 max-w-2xl leading-relaxed">
+                Experiencing an intrusive spike or ritual urge right now? Don't fight the thought. Postpone ritual execution by 5 to 15 minutes and let your brain learn that discomfort crests and fades naturally.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              setSelectedPlan({
+                title: 'Delayed Ritual / Urge Delay Session',
+                targetObsession: 'Acute Intrusive Urge',
+                type: 'self-guided',
+              });
+              setInitialModalStep(2);
+              setInitialModalResponseType('delay');
+              setShowLogModal(true);
+            }}
+            className="px-4 py-2.5 rounded-xl bg-brand-amber hover:bg-amber-600 text-white text-xs font-semibold shrink-0 transition-colors shadow-xs flex items-center gap-2 self-start sm:self-auto"
+          >
+            <span className="material-symbols-outlined text-[18px]">play_circle</span>
+            <span>Launch Delay Timer</span>
+          </button>
         </div>
 
         {/* ── Active Practice Plans Grid ───────────────────────────────────── */}
@@ -313,6 +390,8 @@ export default function PracticePage() {
             </div>
           )}
         </div>
+        </>
+      )}
 
       </div>
     </DashboardShell>
