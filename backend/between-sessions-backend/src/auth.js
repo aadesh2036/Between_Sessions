@@ -196,11 +196,11 @@ exports.handler = async (event) => {
       const updateExpr = [];
       const exprVals = {};
       const exprNames = {};
-      // 'name' is a DynamoDB reserved keyword — must alias it
+      // 'name' and 'values' are DynamoDB reserved keywords — must alias them
       if (name) { updateExpr.push("#nm = :n"); exprVals[":n"] = name; exprNames["#nm"] = "name"; }
       if (password) { updateExpr.push("password = :p"); exprVals[":p"] = password; }
       if (onboardingComplete !== undefined) { updateExpr.push("onboardingComplete = :oc"); exprVals[":oc"] = onboardingComplete; }
-      if (values !== undefined) { updateExpr.push("values = :val"); exprVals[":val"] = values; }
+      if (values !== undefined) { updateExpr.push("#val = :val"); exprVals[":val"] = values; exprNames["#val"] = "values"; }
       if (focusPatterns !== undefined) { updateExpr.push("focusPatterns = :fp"); exprVals[":fp"] = focusPatterns; }
       if (supportStatus !== undefined) { updateExpr.push("supportStatus = :ss"); exprVals[":ss"] = supportStatus; }
       if (goal !== undefined) { updateExpr.push("goal = :gl"); exprVals[":gl"] = goal; }
@@ -229,7 +229,21 @@ exports.handler = async (event) => {
           }
         }
       }
-      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ message: 'User updated successfully.' }) };
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({
+          message: 'User updated successfully.',
+          user: {
+            email: targetEmail,
+            onboardingComplete: onboardingComplete !== undefined ? onboardingComplete : true,
+            values: values || [],
+            focusPatterns: focusPatterns || [],
+            supportStatus: supportStatus || null,
+            preferences: preferences || null,
+          }
+        })
+      };
     }
 
     if (path.includes('/auth/practitioner-register')) {

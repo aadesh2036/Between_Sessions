@@ -102,22 +102,41 @@ export const AuthProvider = ({ children }) => {
    * @param {object} updates  e.g. { name, password, onboardingComplete }
    */
   const updateUser = async (updates) => {
-    setIsLoading(true);
+    // Optimistically update local user state immediately so route guards and UI reflect changes
+    const { password: _p, ...safeUpdates } = updates;
+    const currentUser = user || (() => {
+      try { return JSON.parse(localStorage.getItem('bs_user')) || {}; } catch { return {}; }
+    })();
+    const updatedUser = { ...currentUser, ...safeUpdates };
+    localStorage.setItem('bs_user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+
     try {
       await authApi.updateUser(updates);
-      // Reflect non-sensitive changes in local state
-      const { password: _p, ...safeUpdates } = updates;
-      const updatedUser = { ...user, ...safeUpdates };
-      localStorage.setItem('bs_user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      console.warn('Backend user profile update warning (local state preserved):', err);
     }
   };
 
   const completeOnboarding = async (onboardingData = {}) => {
-    if (user) {
-      await updateUser({ onboardingComplete: true, ...onboardingData });
+    const { password: _p, ...safeUpdates } = onboardingData;
+    const currentUser = user || (() => {
+      try { return JSON.parse(localStorage.getItem('bs_user')) || {}; } catch { return {}; }
+    })();
+    const updatedUser = {
+      ...currentUser,
+      ...safeUpdates,
+      onboardingComplete: true,
+    };
+    // Ensure localStorage and React state are guaranteed updated synchronously
+    localStorage.setItem('bs_user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+
+    // Sync with backend API
+    try {
+      await authApi.updateUser({ onboardingComplete: true, ...onboardingData });
+    } catch (err) {
+      console.warn('Backend onboarding update failed to persist to server (local state retained):', err);
     }
   };
 

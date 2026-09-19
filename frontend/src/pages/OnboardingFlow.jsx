@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
@@ -6,8 +6,14 @@ import Logo from '../components/Logo';
 export default function OnboardingFlow() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { completeOnboarding } = useAuth();
+  const { user, completeOnboarding } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user?.onboardingComplete) {
+      navigate('/app', { replace: true });
+    }
+  }, [user?.onboardingComplete, navigate]);
 
   const [selections, setSelections] = useState({
     supportStatus: '',
