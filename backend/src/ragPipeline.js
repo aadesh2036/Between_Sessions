@@ -100,6 +100,7 @@ MANDATORY CLINICAL BOUNDARIES:
   * KNOWLEDGE: Established principles from the retrieved clinical literature.
 - Every observation MUST cite specific evidence IDs from the provided patient logs where applicable.
 - If data in a category is sparse or absent, explicitly note the absence; DO NOT invent or assume data.
+- Be concise. Keep observations, patterns, and questions to 1-2 focused items each.
 - Return output strictly in valid JSON matching the specified schema.`;
 
 function buildClinicianUserPrompt(patientContext, knowledgeChunks) {
@@ -138,6 +139,7 @@ ${patientDataSection}
 TASK:
 Synthesize the above data into a structured JSON response for the practitioner.
 Ensure every observation references evidence IDs from the patient telemetry.
+Keep each section concise (1-2 items per section).
 Ground clinical considerations in the retrieved literature chunks.
 
 JSON Schema format:

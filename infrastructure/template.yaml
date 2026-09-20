@@ -33,6 +33,15 @@ Parameters:
     Type: String
     Default: "https://main.d22m0ipcsise4e.amplifyapp.com"
     Description: "Allowed CORS frontend origin (Amplify production domain)"
+  HfApiKey:
+    Type: String
+    NoEcho: true
+    Default: ""
+    Description: "Hugging Face Inference API token for clinical AI decision support"
+  HfModel:
+    Type: String
+    Default: "meta-llama/Llama-3.1-8B-Instruct"
+    Description: "Hugging Face model repository identifier"
 
 Globals:
   Function:
@@ -52,6 +61,9 @@ Globals:
         ALLOWED_ORIGIN: !Ref FrontendOrigin
         APP_BASE_URL: !Ref FrontendOrigin
         APP_URL: !Ref FrontendOrigin
+        HF_TOKEN: !Ref HfApiKey
+        HF_API_KEY: !Ref HfApiKey
+        HF_MODEL: !Ref HfModel
   Api:
     Cors:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
@@ -355,6 +367,7 @@ Resources:
     Properties:
       CodeUri: ../backend/src/
       Handler: practitioner.handler
+      MemorySize: 512
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MainTable

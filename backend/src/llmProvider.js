@@ -9,9 +9,9 @@
  * Zero external credentials are required to boot the application or run tests.
  */
 
-const DEFAULT_HF_MODEL = process.env.HF_MODEL || 'Qwen/Qwen2.5-7B-Instruct';
-const HF_ROUTER_URL = 'https://router.huggingface.co/hf-inference/v1/chat/completions';
-const HF_LEGACY_BASE = 'https://api-inference.huggingface.co/models';
+const DEFAULT_HF_MODEL = process.env.HF_MODEL || 'meta-llama/Llama-3.1-8B-Instruct';
+const HF_ROUTER_URL = 'https://router.huggingface.co/v1/chat/completions';
+const HF_MODELS_BASE = 'https://router.huggingface.co/hf-inference/models';
 
 /**
  * Validate and normalize the structured output from the LLM
@@ -29,13 +29,27 @@ function validateAndNormalizeOutput(rawOutput, fallbackContext = {}) {
     try {
       parsed = JSON.parse(cleaned);
     } catch (e) {
-      // If parsing fails, try to extract first JSON object via regex
-      const match = cleaned.match(/\{[\s\S]*\}/);
-      if (match) {
-        try {
-          parsed = JSON.parse(match[0]);
-        } catch {
-          parsed = null;
+      // If parsing fails, try truncated JSON repair
+      for (let i = cleaned.length - 1; i > 20; i--) {
+        const sub = cleaned.slice(0, i);
+        let openBraces = 0, openBrackets = 0, inString = false;
+        for (let j = 0; j < sub.length; j++) {
+          if (sub[j] === '"' && sub[j - 1] !== '\\') inString = !inString;
+          if (!inString) {
+            if (sub[j] === '{') openBraces++;
+            else if (sub[j] === '}') openBraces--;
+            else if (sub[j] === '[') openBrackets++;
+            else if (sub[j] === ']') openBrackets--;
+          }
+        }
+        if (!inString && openBraces >= 0 && openBrackets >= 0) {
+          let candidate = sub.replace(/,\s*$/, '');
+          for (let b = 0; b < openBrackets; b++) candidate += ']';
+          for (let b = 0; b < openBraces; b++) candidate += '}';
+          try {
+            parsed = JSON.parse(candidate);
+            if (parsed && typeof parsed === 'object') break;
+          } catch {}
         }
       }
     }
@@ -243,6 +257,8 @@ class HuggingFaceProvider {
       { role: 'user', content: userPrompt },
     ];
 
+    let lastError = null;
+
     // 1. Try OpenAI-compatible chat completions endpoint on Hugging Face router
     try {
       const response = await fetch(HF_ROUTER_URL, {
@@ -255,7 +271,7 @@ class HuggingFaceProvider {
           model: this.modelName,
           messages,
           temperature: 0.1,
-          max_tokens: 1200,
+          max_tokens: 650,
           response_format: { type: 'json_object' },
         }),
       });
@@ -266,24 +282,33 @@ class HuggingFaceProvider {
         if (content) {
           const normalized = validateAndNormalizeOutput(content, {
             knowledgeChunks,
+            observations: (patientContext?.practice || []).map(p => ({
+              observation: `Patient completed ${p.exerciseId || 'exposure practice'} with pre-distress ${p.preDistress ?? 'N/A'} and post-distress ${p.postDistress ?? 'N/A'}.`,
+              evidence: [p.SK || 'PRACTICE-RECORDED']
+            })),
             defaultSummary: `Between-sessions synthesis for ${patientContext?.patientProfile?.name || 'Patient'}`,
           });
           return {
             success: true,
             provider: 'huggingface',
             model: this.modelName,
-            endpoint: 'chat-completions',
+            endpoint: 'router-chat-completions',
             output: normalized,
           };
         }
+      } else {
+        const errBody = await response.text();
+        lastError = `Router HTTP ${response.status}: ${errBody}`;
+        console.warn(`[HuggingFaceProvider] ${HF_ROUTER_URL} failed:`, lastError);
       }
     } catch (err) {
-      console.warn('[HuggingFaceProvider] Router chat completions call failed, trying standard endpoint:', err.message);
+      lastError = err.message;
+      console.warn(`[HuggingFaceProvider] ${HF_ROUTER_URL} call exception:`, err.message);
     }
 
-    // 2. Fallback to standard Hugging Face model endpoint
+    // 2. Fallback to standard Hugging Face model endpoint on router
     try {
-      const modelUrl = `${HF_LEGACY_BASE}/${this.modelName}`;
+      const modelUrl = `${HF_MODELS_BASE}/${this.modelName}`;
       const promptCombined = `<|system|>\n${systemPrompt}\n<|user|>\n${userPrompt}\n<|assistant|>\n`;
 
       const response = await fetch(modelUrl, {
@@ -314,16 +339,27 @@ class HuggingFaceProvider {
             success: true,
             provider: 'huggingface',
             model: this.modelName,
-            endpoint: 'legacy-models',
+            endpoint: 'models-endpoint',
             output: normalized,
           };
         }
+      } else {
+        const errBody = await response.text();
+        lastError = `Models HTTP ${response.status}: ${errBody}`;
+        console.warn(`[HuggingFaceProvider] ${modelUrl} failed:`, lastError);
       }
     } catch (err) {
-      console.warn('[HuggingFaceProvider] Legacy models endpoint call failed:', err.message);
+      lastError = err.message;
+      console.warn('[HuggingFaceProvider] Models endpoint call failed:', err.message);
     }
 
-    // 3. Graceful degradation to deterministic mock provider if Hugging Face is unreachable or rate-limited
+    // Strict Production Boundary: If Hugging Face is the selected provider, NEVER silently fall back to MockLLM
+    const configuredProvider = (process.env.AI_PROVIDER || '').toLowerCase();
+    if (configuredProvider === 'huggingface') {
+      throw new Error(`Hugging Face inference failed (${lastError || 'Unknown error'})`);
+    }
+
+    // Local / Offline fallback only when mock or unconfigured
     console.warn('[HuggingFaceProvider] Falling back gracefully to MockLLMProvider.');
     const fallbackResult = await this.mockFallback.generateStructured({
       systemPrompt,
@@ -341,7 +377,7 @@ class HuggingFaceProvider {
  */
 function getLLMProvider() {
   const providerType = (process.env.AI_PROVIDER || 'huggingface').toLowerCase();
-  const hfToken = process.env.HF_TOKEN || '';
+  const hfToken = process.env.HF_TOKEN || process.env.HF_API_KEY || '';
   const hfModel = process.env.HF_MODEL || DEFAULT_HF_MODEL;
 
   if (providerType === 'mock' || !hfToken) {
